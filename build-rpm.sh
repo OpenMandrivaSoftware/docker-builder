@@ -3,8 +3,8 @@ set -x
 
 MOCK_BIN=/usr/bin/mock-urpm
 MOCK_CONF_FOLDER=/etc/mock-urpm
-MOUNT_POINT=/rpmbuild
-OUTPUT_FOLDER=$MOUNT_POINT/output
+MOUNT_POINT=$HOME/$PACKAGE
+OUTPUT_FOLDER=${HOME}/output
 
 if [ -z "$MOCK_CONFIG" ]; then
         echo "MOCK_CONFIG is empty. Should bin one of: "
@@ -28,6 +28,7 @@ echo "      MOCK_CONFIG:    $MOCK_CONFIG"
 
 #Priority to SOURCE_RPM if both source and spec file env variable are set
 
+build_me() {
 if [ ! -z "$SOURCE_RPM" ]; then
         echo "      SOURCE_RPM:     $SOURCE_RPM"
         echo "========================================================================"
@@ -45,3 +46,24 @@ elif [ ! -z "$SPEC_FILE" ]; then
 fi
 
 echo "Build finished. Check results inside the mounted volume folder."
+}
+
+clone_repo() {
+
+git clone https://fedya@abf.io/openmandriva/${PACKAGE}.git $HOME/${PACKAGE}
+if [ $? -ne '0' ] ; then
+	echo '--> There are no such repository.'
+	exit 1
+fi
+
+pushd $HOME/${PACKAGE}
+abf_yml -p .
+popd
+
+ls -la $HOME
+
+# build package
+build_me
+}
+
+clone_repo

@@ -15,7 +15,8 @@ RUN ln -s /etc/mock-urpm/cooker-x86_64.cfg /etc/mock-urpm/default.cfg
 RUN chmod 755 /usr/bin/abf_yml.rb
 RUN ln -s /usr/bin/abf_yml.rb /usr/bin/abf_yml
 
-VOLUME ["/rpmbuild"]
+WORKDIR ["/home/omv"]
+VOLUME ["/home/omv/output"]
 
 ADD ./build-rpm.sh /build-rpm.sh
 RUN chmod +x /build-rpm.sh
