@@ -57,7 +57,7 @@ if [ $? -ne '0' ] ; then
 fi
 
 pushd $HOME/${PACKAGE}
-abf_yml -p .
+/bin/bash /download_sources.sh
 popd
 
 # build package
