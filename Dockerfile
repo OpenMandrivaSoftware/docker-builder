@@ -2,7 +2,7 @@ FROM openmandriva/cooker
 
 RUN urpmi.update -a \
  && urpmi --auto --auto-update --no-verify-rpm \
- && urpmi --no-suggests --no-verify-rpm mock-urpm git curl ruby sudo \
+ && urpmi --no-suggests --no-verify-rpm --auto mock-urpm git curl ruby sudo \
  && unlink /etc/localtime \
  && ln -s /usr/share/zoneinfo/Europe/Moscow /etc/localtime \
  && usermod -a -G mock-urpm omv \
