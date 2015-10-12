@@ -6,6 +6,11 @@ config_dir=/etc/mock-urpm/
 build_package=$HOME/$PACKAGE
 OUTPUT_FOLDER=${HOME}/output
 
+platform_arch="$PLATFORM_ARCH"
+platform_name="$PLATFORM_NAME"
+uname="$UNAME"
+email="$EMAIL"
+
 if [ ! -d "$OUTPUT_FOLDER" ]; then
         mkdir -p $OUTPUT_FOLDER
 else
@@ -16,6 +21,13 @@ generate_config() {
 # Change output format for mock-urpm
 sed '17c/format: %(message)s' $config_dir/logging.ini > ~/logging.ini
 mv -f ~/logging.ini $config_dir/logging.ini
+
+EXTRA_CFG_OPTIONS="$extra_cfg_options" \
+  UNAME=$uname \
+  EMAIL=$email \
+  PLATFORM_NAME=$platform_name \
+  PLATFORM_ARCH=$platform_arch \
+  /bin/bash "/config-generator.sh"
 }
 
 build_rpm() {
@@ -51,5 +63,6 @@ popd
 # build package
 }
 
+generate_config
 clone_repo
 build_rpm
