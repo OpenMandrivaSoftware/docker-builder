@@ -16,8 +16,8 @@ for repository in $repo;
 	do echo '"'${repository}_release'"': '"'$server/$platform_name/repository/$platform_arch/$repository/release'"', >> $default_cfg;
 done
 if [ "$updates_enabled" == '1' ] ; then
-	for repository in $repo;do
-	echo "${repository}_updates": "$server/$platform_name/repository/$platform_arch/$repository/updates," >> $default_cfg;
+	for repository in $repo;
+	do echo '"'${repository}_updates'"': '"'$server/$platform_name/repository/$platform_arch/$repository/updates,'"' >> $default_cfg;
 done
 fi
 # close urpmi repos section
