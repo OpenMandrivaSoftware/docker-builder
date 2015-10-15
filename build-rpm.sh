@@ -11,6 +11,8 @@ platform_name="$PLATFORM_NAME"
 uname="$UNAME"
 email="$EMAIL"
 
+echo "mount tmpfs filesystem to builddir"
+sudo mount -a
 if [ ! -d "$OUTPUT_FOLDER" ]; then
         mkdir -p $OUTPUT_FOLDER
 else
