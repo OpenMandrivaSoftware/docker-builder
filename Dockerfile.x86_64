@@ -8,6 +8,7 @@ RUN urpmi --auto --auto-update --no-verify-rpm \
  && usermod -a -G mock-urpm omv \
  && chown -R omv:mock-urpm /etc/mock-urpm \
  && usermod -a -G wheel omv \
+ && echo "tmpfs /var/lib/mock-urpm/ tmpfs defaults,size=4096m,uid=$(id -u omv),gid=$(id -g omv),mode=0700 0 0" >> /etc/fstab \
  && rm -rf /var/cache/urpmi/rpms/*
 
 WORKDIR ["/home/omv"]

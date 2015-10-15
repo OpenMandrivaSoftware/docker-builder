@@ -31,7 +31,6 @@ EXTRA_CFG_OPTIONS="$extra_cfg_options" \
 }
 
 build_rpm() {
-
 echo '--> Build src.rpm'
 $MOCK_BIN -v --configdir=$config_dir --buildsrpm --spec=$build_package/${PACKAGE}.spec --sources=$build_package --no-cleanup-after --resultdir=$OUTPUT_FOLDER
 # Save exit code
