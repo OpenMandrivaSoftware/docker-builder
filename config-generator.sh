@@ -7,6 +7,7 @@ uname="$UNAME"
 email="$EMAIL"
 platform_arch="$PLATFORM_ARCH"
 platform_name="$PLATFORM_NAME"
+server="http://abf-downloads.rosalinux.ru"
 
 default_cfg=/etc/mock-urpm/default.cfg
 
@@ -54,6 +55,7 @@ config_opts['dist'] = 'cooker'  # only useful for --resultdir variable subst
 config_opts['macros']['%packager'] = '$uname <$email>'
 
 config_opts["urpmi_media"] = {
-"main_release": "http://abf-downloads.rosalinux.ru/$platform_name/repository/$platform_arch/main/release"
+"main_release": "$server/$platform_name/repository/$platform_arch/main/release",
+"main_release": "$server/$platform_name/repository/$platform_arch/main/updates"
 }
 EOF
