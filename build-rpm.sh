@@ -68,9 +68,9 @@ if [[ "$platform_arch" == "armv7hl" ]]; then
 if [ $cpu != "arm" ] ; then
 # this string responsible for "cannot execute binary file"
 # change path to qemu
-wget -O $HOME/qemu-arm --content-disposition http://file-store.rosalinux.ru/api/v1/file_stores/6a2070ba0764eade5d161c34b708975c30606123 --no-check-certificate &> /dev/null
-wget -O $HOME/qemu-arm-binfmt --content-disposition http://file-store.rosalinux.ru/api/v1/file_stores/b351026c6e3c7f5796320600651473b6547f46f8 --no-check-certificate &> /dev/null
-chmod +x $HOME/qemu-aarch64 $HOME/qemu-aarch64-binfmt
+wget -O $HOME/qemu-arm --content-disposition http://file-store.rosalinux.ru/api/v1/file_stores/96712ca87706e93356bf62b930530613c9c934d6 --no-check-certificate &> /dev/null
+wget -O $HOME/qemu-arm-binfmt --content-disposition http://file-store.rosalinux.ru/api/v1/file_stores/65efec31ef6a636ae9593fff56d812026fcad903 --no-check-certificate &> /dev/null
+chmod +x $HOME/qemu-arm $HOME/qemu-arm-binfmt
 # hack to copy qemu binary in non-existing path
 (while [ ! -e  /var/lib/mock-urpm/openmandriva-$platform_arch/root/usr/bin/ ]
  do sleep 1;done
