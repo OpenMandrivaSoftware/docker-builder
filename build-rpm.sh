@@ -32,7 +32,61 @@ EXTRA_CFG_OPTIONS="$extra_cfg_options" \
   /bin/bash "/config-generator.sh"
 }
 
+arm_platform_detector(){
+probe_cpu() {
+# probe cpu type
+cpu=`uname -m`
+case "$cpu" in
+   i386|i486|i586|i686|i86pc|BePC|x86_64)
+      cpu="i386"
+   ;;
+   armv[4-9]*)
+      cpu="arm"
+   ;;
+   aarch64)
+      cpu="aarch64"
+   ;;
+esac
+
+if [[ "$platform_arch" == "aarch64" ]]; then
+if [ $cpu != "aarch64" ] ; then
+# this string responsible for "cannot execute binary file"
+wget -O $HOME/qemu-aarch64 --content-disposition http://file-store.rosalinux.ru/api/v1/file_stores/6a2070ba0764eade5d161c34b708975c30606123 --no-check-certificate &> /dev/null
+wget -O $HOME/qemu-aarch64-binfmt --content-disposition http://file-store.rosalinux.ru/api/v1/file_stores/b351026c6e3c7f5796320600651473b6547f46f8 --no-check-certificate &> /dev/null
+chmod +x $HOME/qemu-aarch64 $HOME/qemu-aarch64-binfmt
+# hack to copy qemu binary in non-existing path
+(while [ ! -e  /var/lib/mock-urpm/openmandriva-$platform_arch/root/usr/bin/ ]
+ do sleep 1;done
+ sudo cp $HOME/qemu-* /var/lib/mock-urpm/openmandriva-$platform_arch/root/usr/bin/) &
+ subshellpid=$!
+fi
+# remove me in future
+sudo sh -c "echo '$platform_arch-mandriva-linux-gnueabi' > /etc/rpm/platform"
+fi
+
+if [[ "$platform_arch" == "armv7hl" ]]; then
+if [ $cpu != "arm" ] ; then
+# this string responsible for "cannot execute binary file"
+# change path to qemu
+wget -O $HOME/qemu-arm --content-disposition http://file-store.rosalinux.ru/api/v1/file_stores/6a2070ba0764eade5d161c34b708975c30606123 --no-check-certificate &> /dev/null
+wget -O $HOME/qemu-arm-binfmt --content-disposition http://file-store.rosalinux.ru/api/v1/file_stores/b351026c6e3c7f5796320600651473b6547f46f8 --no-check-certificate &> /dev/null
+chmod +x $HOME/qemu-aarch64 $HOME/qemu-aarch64-binfmt
+# hack to copy qemu binary in non-existing path
+(while [ ! -e  /var/lib/mock-urpm/openmandriva-$platform_arch/root/usr/bin/ ]
+ do sleep 1;done
+ sudo cp $HOME/qemu-* /var/lib/mock-urpm/openmandriva-$platform_arch/root/usr/bin/) &
+ subshellpid=$!
+fi
+# remove me in future
+sudo sh -c "echo '$platform_arch-mandriva-linux-gnueabi' > /etc/rpm/platform"
+fi
+
+}
+probe_cpu
+}
+
 build_rpm() {
+arm_platform_detector
 echo '--> Build src.rpm'
 $MOCK_BIN -v --configdir=$config_dir --buildsrpm --spec=$build_package/${PACKAGE}.spec --sources=$build_package --no-cleanup-after --resultdir=$OUTPUT_FOLDER
 # Save exit code
