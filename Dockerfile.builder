@@ -10,7 +10,6 @@ RUN urpmi --auto --auto-update --no-verify-rpm \
  && sed -i -e "s/Defaults    requiretty.*/ #Defaults    requiretty/g" /etc/sudoers \
  && echo "%mock-urpm ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers \
  && usermod -a -G wheel omv \
- && echo "tmpfs /var/lib/mock-urpm/ tmpfs defaults,size=4096m,uid=$(id -u omv),gid=$(id -g omv),mode=0700 0 0" >> /etc/fstab \
  && rm -rf /var/cache/urpmi/rpms/*
 
 WORKDIR ["/home/omv"]
@@ -22,5 +21,3 @@ ADD ./download_sources.sh /download_sources.sh
 
 USER omv
 ENV HOME /home/omv
-
-CMD ["/build-rpm.sh"]
