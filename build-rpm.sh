@@ -113,7 +113,7 @@ if [ $? -ne '0' ] ; then
 	exit 1
 fi
 # checkout specific commit hash if defined
-if [[ -z "$commit_hash" ]]
+if [[ ! -z "$commit_hash" ]] ; then
 git checkout $commit_hash
 if [ $? -ne '0' ] ; then
 	echo '--> There are no such commit hash.'
