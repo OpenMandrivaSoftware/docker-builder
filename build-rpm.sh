@@ -115,12 +115,11 @@ fi
 # checkout specific commit hash if defined
 if [[ -z "$commit_hash" ]]
 git checkout $commit_hash
-fi
-
 if [ $? -ne '0' ] ; then
 	echo '--> There are no such commit hash.'
 	echo '--> $commit_hash'
 	exit 1
+fi
 fi
 
 pushd $HOME/${PACKAGE}
