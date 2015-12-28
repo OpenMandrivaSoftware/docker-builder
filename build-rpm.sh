@@ -10,6 +10,8 @@ platform_arch="$PLATFORM_ARCH"
 platform_name="$PLATFORM_NAME"
 uname="$UNAME"
 email="$EMAIL"
+git_repo="$GIT_REPO"
+commit_hash="$COMMIT_HASH"
 
 echo "mount tmpfs filesystem to builddir"
 sudo mount -a
@@ -105,9 +107,19 @@ $MOCK_BIN -v --configdir=$config_dir --rebuild $OUTPUT_FOLDER/${PACKAGE}-*.src.r
 
 clone_repo() {
 
-git clone https://fedya@abf.io/openmandriva/${PACKAGE}.git $HOME/${PACKAGE}
+git clone $git_repo $HOME/${PACKAGE}
 if [ $? -ne '0' ] ; then
 	echo '--> There are no such repository.'
+	exit 1
+fi
+# checkout specific commit hash if defined
+if [[ -z "$commit_hash" ]]
+git checkout $commit_hash
+fi
+
+if [ $? -ne '0' ] ; then
+	echo '--> There are no such commit hash.'
+	echo '--> $commit_hash'
 	exit 1
 fi
 
