@@ -34,6 +34,45 @@ EXTRA_CFG_OPTIONS="$extra_cfg_options" \
   /bin/bash "/config-generator.sh"
 }
 
+container_data() {
+# Generate data for container
+c_data=$OUTPUT_FOLDER/container_data.json
+project_name=`echo ${git_repo} | sed s%.*/%% | sed s/.git$//`
+echo '[' > ${c_data}
+for rpm in ${OUTPUT_FOLDER}/*.rpm; do
+  nevr=(`rpm -qp --queryformat "%{NAME} %{EPOCH} %{VERSION} %{RELEASE}" ${rpm}`)
+  name=${nevr[0]}
+  if [ "${name}" != '' ] ; then
+    fullname=`basename $rpm`
+    epoch=${nevr[1]}
+    version=${nevr[2]}
+    release=${nevr[3]}
+
+    dep_list=""
+    [[ ! "${fullname}" =~ ".*src.rpm$" ]] && dep_list=`sudo chroot ${chroot_path} urpmq --whatrequires ${name} | sort -u | xargs sudo chroot ${chroot_path} urpmq --sourcerpm | cut -d\  -f2 | rev | cut -f3- -d- | rev | sort -u | grep -v "^${project_name}$" | xargs echo`
+
+    sha1=`sha1sum ${rpm} | awk '{ print $1 }'`
+
+    echo "--> dep_list for '${name}':"
+    echo ${dep_list}
+
+    echo '{' >> ${c_data}
+    echo "\"dependent_packages\":\"${dep_list}\","    >> ${c_data}
+    echo "\"fullname\":\"${fullname}\","              >> ${c_data}
+    echo "\"sha1\":\"${sha1}\","                      >> ${c_data}
+    echo "\"name\":\"${name}\","                      >> ${c_data}
+    echo "\"epoch\":\"${epoch}\","                    >> ${c_data}
+    echo "\"version\":\"${version}\","                >> ${c_data}
+    echo "\"release\":\"${release}\""                 >> ${c_data}
+    echo '},' >> ${c_data}
+  fi
+done
+# Add '{}'' because ',' before
+echo '{}' >> ${c_data}
+echo ']' >> ${c_data}
+
+}
+
 arm_platform_detector(){
 probe_cpu() {
 # probe cpu type
