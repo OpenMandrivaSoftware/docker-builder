@@ -1,7 +1,7 @@
 FROM openmandriva/cooker
 
 RUN urpmi --auto --auto-update --no-verify-rpm \
- && urpmi --no-suggests --no-verify-rpm --auto mock-urpm git curl sudo ruby \
+ && urpmi --no-suggests --no-verify-rpm --auto mock-urpm git curl sudo ruby ruby-devel \
  && rm -f /etc/localtime \
  && ln -s /usr/share/zoneinfo/Europe/Moscow /etc/localtime \
  && adduser omv \
