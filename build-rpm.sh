@@ -142,6 +142,26 @@ if [ $rc != 0 ] ; then
 fi
 
 $MOCK_BIN -v --configdir=$config_dir --rebuild $OUTPUT_FOLDER/${PACKAGE}-*.src.rpm --no-cleanup-after --no-clean --resultdir=$OUTPUT_FOLDER
+
+# Extract rpmlint logs into separate file
+echo "--> Grepping rpmlint logs from $OUTPUT_FOLDER//build.log to $OUTPUT_FOLDER//rpmlint.log"
+sed -n "/Executing \"\/usr\/bin\/rpmlint/,/packages and.*specfiles checked/p" $OUTPUT_FOLDER/build.log > $OUTPUT_FOLDER/rpmlint.log
+
+}
+
+find_spec() {
+# Check count of *.spec files (should be one)
+x=`ls -1 | grep '.spec$' | wc -l | sed 's/^ *//' | sed 's/ *$//'`
+spec_name=`ls -1 | grep '.spec$'`
+if [ $x -eq '0' ] ; then
+    echo '--> There are no spec files in repository.'
+    exit 1
+else
+  if [ $x -ne '1' ] ; then
+    echo '--> There are more than one spec file in repository.'
+    exit 1
+  fi
+fi
 }
 
 clone_repo() {
@@ -168,23 +188,31 @@ done
 # checkout specific commit hash if defined
 if [[ ! -z "$commit_hash" ]] ; then
 pushd $HOME/${PACKAGE}
+git submodule update --init
+git remote rm origin
 git checkout $commit_hash
-if [ $? -ne '0' ] ; then
-	echo '--> There are no such commit hash.'
-	echo '--> $commit_hash'
-	exit 1
-fi
 popd
 fi
 
 pushd $HOME/${PACKAGE}
 # download sources from .abf.yml
 /bin/bash /download_sources.sh
+# count number of specs (should be 1)
+find_spec
 popd
 
 # build package
 }
 
+cleanup() {
+echo "cleanup"
+sudo rm -fv /etc/rpm/platform
+sudo rm -fv /etc/mock-urpm/default.cfg
+rm -rfv $HOME/${PACKAGE}
+rm -rfv $HOME/output/
+}
+
 generate_config
 clone_repo
 build_rpm
+cleanup
