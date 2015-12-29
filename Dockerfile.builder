@@ -1,4 +1,6 @@
 FROM openmandriva/cooker
+#FROM openmandriva/cooker-aarch64
+#FROM openmandriva/cooker-armv7hl
 ENV RUBY=ruby-2.2.3
 
 RUN urpmi --auto --auto-update --no-verify-rpm \
