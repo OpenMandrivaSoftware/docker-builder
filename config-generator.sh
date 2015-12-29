@@ -8,18 +8,19 @@ email="$EMAIL"
 platform_arch="$PLATFORM_ARCH"
 platform_name="$PLATFORM_NAME"
 server="http://abf-downloads.rosalinux.ru"
-repo="$REPO"
+repo_url="$REPO_URL"
+repo_names="$REPO_NAMES"
 
 default_cfg=/etc/mock-urpm/default.cfg
 gen_included_repos() {
-for repository in $repo;
-	do echo '"'${repository}_release'"': '"'$server/$platform_name/repository/$platform_arch/$repository/release'"', >> $default_cfg;
+
+names_arr=($repo_name)
+urls_arr=($repo_url)
+
+for (( i=0; i<${#names_arr[@]}; i++ ));
+do
+	echo '"'${names_arr[i]}'"': '"'${urls_arr[i]}'"', >> $default_cfg
 done
-if [ "$updates_enabled" == '1' ] ; then
-	for repository in $repo;
-	do echo '"'${repository}_updates'"': '"'$server/$platform_name/repository/$platform_arch/$repository/updates,'"' >> $default_cfg;
-done
-fi
 # close urpmi repos section
 echo '}' >> $default_cfg
 }
