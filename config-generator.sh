@@ -6,8 +6,6 @@ extra_cfg_urpm_options="$EXTRA_CFG_URPM_OPTIONS"
 uname="$UNAME"
 email="$EMAIL"
 platform_arch="$PLATFORM_ARCH"
-platform_name="$PLATFORM_NAME"
-server="http://abf-downloads.rosalinux.ru"
 repo_url="$REPO_URL"
 repo_names="$REPO_NAMES"
 
