@@ -12,7 +12,7 @@ repo_names="$REPO_NAMES"
 default_cfg=/etc/mock-urpm/default.cfg
 gen_included_repos() {
 
-names_arr=($repo_name)
+names_arr=($repo_names)
 urls_arr=($repo_url)
 
 for (( i=0; i<${#names_arr[@]}; i++ ));
