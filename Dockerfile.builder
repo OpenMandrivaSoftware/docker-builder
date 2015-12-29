@@ -10,10 +10,18 @@ RUN urpmi --auto --auto-update --no-verify-rpm \
  && sed -i -e "s/Defaults    requiretty.*/ #Defaults    requiretty/g" /etc/sudoers \
  && echo "%mock-urpm ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers \
  && usermod -a -G wheel omv \
+ && curl -L get.rvm.io | bash -s stable \
+ && source /home/omv/.rvm/scripts/rvm \
+ && rvm install ruby-2.2.3 \
+ && rvm gemset create abf-worker \
+ && rvm use ruby-2.2.3@abf-worker --default \
  && rm -rf /var/cache/urpmi/rpms/*
 
+## put me in RUN if you have more than 16gb of RAM
+# && echo "tmpfs /var/lib/mock-urpm/ tmpfs defaults,size=4096m,uid=$(id -u omv),gid=$(id -g omv),mode=0700 0 0" >> /etc/fstab \
+#
+
 WORKDIR ["/home/omv"]
-VOLUME ["/home/omv/output"]
 
 ADD ./build-rpm.sh /build-rpm.sh
 ADD ./config-generator.sh /config-generator.sh
