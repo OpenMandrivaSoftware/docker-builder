@@ -146,11 +146,25 @@ $MOCK_BIN -v --configdir=$config_dir --rebuild $OUTPUT_FOLDER/${PACKAGE}-*.src.r
 
 clone_repo() {
 
-git clone $git_repo $HOME/${PACKAGE}
-if [ $? -ne '0' ] ; then
-	echo '--> There are no such repository.'
-	exit 1
-fi
+MAX_RETRIES=5
+WAIT_TIME=10
+try_reclone=true
+retry=0
+while $try_reclone
+do
+	rm -rf $HOME/${PACKAGE}
+	git clone $git_repo $HOME/${PACKAGE}
+	rc=$?
+	try_reclone=false
+	if [[ $rc != 0 && $retry < $MAX_RETRIES ]] ; then
+	  try_reclone=true
+	  (( retry=$retry+1 ))
+	  echo "--> Something wrong with git repository, next try (${retry} from ${MAX_RETRIES})..."
+	  echo "--> Delay ${WAIT_TIME} sec..."
+	  sleep $WAIT_TIME
+	fi
+done
+
 # checkout specific commit hash if defined
 if [[ ! -z "$commit_hash" ]] ; then
 pushd $HOME/${PACKAGE}
@@ -164,6 +178,7 @@ popd
 fi
 
 pushd $HOME/${PACKAGE}
+# download sources from .abf.yml
 /bin/bash /download_sources.sh
 popd
 
