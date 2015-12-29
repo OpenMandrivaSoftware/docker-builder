@@ -212,7 +212,7 @@ rm -rfv $HOME/${PACKAGE}
 rm -rfv $HOME/output/
 }
 
+cleanup
 generate_config
 clone_repo
 build_rpm
-cleanup
