@@ -216,3 +216,4 @@ cleanup
 generate_config
 clone_repo
 build_rpm
+container_data
