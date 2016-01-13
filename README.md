@@ -1,19 +1,15 @@
-# docker-mock-urpm
-Build RPMs using the Mock-Urpm Project (for any platform)
+## Quickstart
 
-docker run -i -t -e REPO="main contrib" -e PACKAGE=unzip -e UNAME=fedya -e EMAIL=alexander@openmandriva.org -e PLATFORM_NAME=cooker -e PLATFORM_ARCH=x86_64 -v /home/omv/output/:/home/omv/output/ --privileged=true openmandriva/builder
+Create builder image:
 
-OR
+```bash
+docker build --tag=openmandriva/builder --file $HOME/docker-builder/Dockerfile.builder .
 
-docker run -i -t -e REPO="main" -e PACKAGE=unzip -e UNAME=fedya -e EMAIL=alexander@openmandriva.org -e PLATFORM_NAME=cooker -e PLATFORM_ARCH=aarch64 -v /home/omv/output/:/home/omv/output/ --privileged=true openmandriva/builder-aarch64
-
-OR
-
-docker run -i -t -e PACKAGE=unzip -e UNAME=fedya -e EMAIL=alexander@openmandriva.org -e PLATFORM_NAME=cooker -e PLATFORM_ARCH=armv7hl -v /home/omv/output/:/home/omv/output/ --privileged=true openmandriva/builder-armv7hl
-
-# generate container
-
-docker build --tag=openmandriva/builder --file $HOME/docker-builder/Dockerfile.x86_64 .
-
-# remove stopped containers
+## Remove stopped containers
+```bash
 docker rm -v $(docker ps -a -q -f status=exited)
+
+## Run abf builder
+```bash
+docker run -ti --rm --privileged=true -e BUILD_TOKEN="your_token" -e BUILD_ARCH="x86_64 armv7hl i586 aarch64" -e BUILD_PLATFORM="cooker" openmandriva/builder
+

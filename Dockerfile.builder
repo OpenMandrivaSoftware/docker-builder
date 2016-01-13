@@ -38,3 +38,6 @@ ADD ./download_sources.sh /download_sources.sh
 
 USER omv
 ENV HOME /home/omv
+
+COPY entrypoint.sh /sbin/entrypoint.sh
+ENTRYPOINT ["/sbin/entrypoint.sh"]
