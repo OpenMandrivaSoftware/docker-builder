@@ -6,11 +6,14 @@ echo export BUILD_PLATFORM="$BUILD_PLATFORM"
 }
 
 prepare_and_run() {
+source /etc/profile
 echo "prepare ABF builder environment"
 echo "git clone docker-worker code"
 cd
 git clone https://github.com/OpenMandrivaSoftware/docker-worker.git
 pushd docker-worker
+export PATH="${PATH}:/usr/local/rvm/bin"
+which rvm
 gem install bundler
 bundle install
 ENV=production CURRENT_PATH=$PWD bundle exec rake abf_worker:start
