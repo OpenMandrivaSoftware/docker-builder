@@ -40,4 +40,4 @@ USER omv
 ENV HOME /home/omv
 
 COPY entrypoint.sh /sbin/entrypoint.sh
-#ENTRYPOINT ["/sbin/entrypoint.sh"]
+ENTRYPOINT ["/sbin/entrypoint.sh"]
