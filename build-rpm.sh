@@ -208,6 +208,7 @@ cleanup() {
 echo "cleanup"
 sudo rm -fv /etc/rpm/platform
 sudo rm -fv /etc/mock-urpm/default.cfg
+sudo rm -rf /var/lib/mock-urpm/
 rm -rfv $HOME/${PACKAGE}
 rm -rfv $HOME/output/
 }
