@@ -32,9 +32,9 @@ RUN urpmi --auto --auto-update --no-verify-rpm \
 
 WORKDIR ["/home/omv"]
 
-ADD ./build-rpm.sh /build-rpm.sh
-ADD ./config-generator.sh /config-generator.sh
-ADD ./download_sources.sh /download_sources.sh
+ADD ./build-rpm.sh /mdv/build-rpm.sh
+ADD ./config-generator.sh /mdv/config-generator.sh
+ADD ./download_sources.sh /mdv/download_sources.sh
 
 USER omv
 ENV HOME /home/omv
