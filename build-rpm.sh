@@ -31,7 +31,7 @@ EXTRA_CFG_OPTIONS="$extra_cfg_options" \
   EMAIL=$email \
   PLATFORM_NAME=$platform_name \
   PLATFORM_ARCH=$platform_arch \
-  /bin/bash "/config-generator.sh"
+  /bin/bash "/mdv/config-generator.sh"
 }
 
 container_data() {
@@ -196,7 +196,7 @@ fi
 
 pushd $HOME/${PACKAGE}
 # download sources from .abf.yml
-/bin/bash /download_sources.sh
+/bin/bash /mdv/download_sources.sh
 # count number of specs (should be 1)
 find_spec
 popd
