@@ -14,7 +14,7 @@ git_repo="$GIT_REPO"
 commit_hash="$COMMIT_HASH"
 
 echo "mount tmpfs filesystem to builddir"
-sudo mount -a
+mount -a
 if [ ! -d "$OUTPUT_FOLDER" ]; then
         mkdir -p $OUTPUT_FOLDER
 else
@@ -98,11 +98,11 @@ chmod +x $HOME/qemu-aarch64 $HOME/qemu-aarch64-binfmt
 # hack to copy qemu binary in non-existing path
 (while [ ! -e  /var/lib/mock-urpm/openmandriva-$platform_arch/root/usr/bin/ ]
  do sleep 1;done
- sudo cp $HOME/qemu-* /var/lib/mock-urpm/openmandriva-$platform_arch/root/usr/bin/) &
+ cp $HOME/qemu-* /var/lib/mock-urpm/openmandriva-$platform_arch/root/usr/bin/) &
  subshellpid=$!
 fi
 # remove me in future
-sudo sh -c "echo '$platform_arch-mandriva-linux-gnueabi' > /etc/rpm/platform"
+sh -c "echo '$platform_arch-mandriva-linux-gnueabi' > /etc/rpm/platform"
 fi
 
 if [[ "$platform_arch" == "armv7hl" ]]; then
@@ -115,11 +115,11 @@ chmod +x $HOME/qemu-arm $HOME/qemu-arm-binfmt
 # hack to copy qemu binary in non-existing path
 (while [ ! -e  /var/lib/mock-urpm/openmandriva-$platform_arch/root/usr/bin/ ]
  do sleep 1;done
- sudo cp $HOME/qemu-* /var/lib/mock-urpm/openmandriva-$platform_arch/root/usr/bin/) &
+ cp $HOME/qemu-* /var/lib/mock-urpm/openmandriva-$platform_arch/root/usr/bin/) &
  subshellpid=$!
 fi
 # remove me in future
-sudo sh -c "echo '$platform_arch-mandriva-linux-gnueabi' > /etc/rpm/platform"
+sh -c "echo '$platform_arch-mandriva-linux-gnueabi' > /etc/rpm/platform"
 fi
 
 }
@@ -206,9 +206,9 @@ popd
 
 cleanup() {
 echo "cleanup"
-sudo rm -fv /etc/rpm/platform
-sudo rm -fv /etc/mock-urpm/default.cfg
-sudo rm -rf /var/lib/mock-urpm/
+rm -fv /etc/rpm/platform
+rm -fv /etc/mock-urpm/default.cfg
+rm -rf /var/lib/mock-urpm/
 rm -rfv $HOME/${PACKAGE}
 rm -rfv $HOME/output/
 }
