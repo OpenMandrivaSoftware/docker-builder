@@ -1,5 +1,6 @@
 #!/bin/bash
 set -x
+trap 'pkill -TERM -P $$; exit' EXIT
 
 MOCK_BIN=/usr/bin/mock-urpm
 config_dir=/etc/mock-urpm/
