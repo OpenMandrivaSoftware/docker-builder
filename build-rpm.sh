@@ -210,7 +210,6 @@ echo "cleanup"
 rm -fv /etc/rpm/platform
 rm -fv /etc/mock-urpm/default.cfg
 rm -rf /var/lib/mock-urpm/
-rm -rfv $HOME/${PACKAGE}
 rm -rfv $HOME/output/
 }
 
@@ -219,3 +218,5 @@ generate_config
 clone_repo
 build_rpm
 container_data
+# wipe package
+rm -rfv $HOME/${PACKAGE}
