@@ -1,6 +1,14 @@
 #!/bin/bash
-set -x
-trap 'pkill -TERM -P $$; exit' EXIT
+
+cleanup() {
+echo "cleanup"
+rm -fv /etc/rpm/platform
+rm -fv /etc/mock-urpm/default.cfg
+rm -rf /var/lib/mock-urpm/
+rm -rfv $HOME/output/
+}
+
+trap 'pkill -TERM -P $$; cleanup; exit' EXIT
 
 MOCK_BIN=/usr/bin/mock-urpm
 config_dir=/etc/mock-urpm/
@@ -205,15 +213,7 @@ popd
 # build package
 }
 
-cleanup() {
-echo "cleanup"
-rm -fv /etc/rpm/platform
-rm -fv /etc/mock-urpm/default.cfg
-rm -rf /var/lib/mock-urpm/
-rm -rfv $HOME/output/
-}
 
-cleanup
 generate_config
 clone_repo
 build_rpm
