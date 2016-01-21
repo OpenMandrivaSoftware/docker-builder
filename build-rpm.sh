@@ -8,7 +8,9 @@ rm -rf /var/lib/mock-urpm/
 rm -rfv $HOME/output/
 }
 
-trap 'pkill -TERM -P $$; cleanup; exit' EXIT
+cleanup
+
+trap 'pkill -TERM -P $$; exit' TERM
 
 MOCK_BIN=/usr/bin/mock-urpm
 config_dir=/etc/mock-urpm/
