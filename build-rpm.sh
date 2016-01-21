@@ -1,6 +1,4 @@
 #!/bin/bash
-set -o nounset
-set -o errexit
 
 cleanup() {
 echo "cleanup"
