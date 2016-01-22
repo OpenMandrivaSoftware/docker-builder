@@ -5,7 +5,6 @@
 # Based on https://github.com/juanluisbaptiste/docker-brew-mageia
 #
 
-set -x
 set -e
 
 mkimg="$(basename "$0")"
