@@ -4,7 +4,7 @@ cleanup() {
 echo "cleanup"
 rm -fv /etc/rpm/platform
 rm -fv /etc/mock-urpm/default.cfg
-rm -rf /var/lib/mock-urpm/
+rm -rf /var/lib/mock-urpm/*
 rm -rfv $HOME/output/
 }
 
