@@ -5,20 +5,20 @@
 # Based on https://github.com/juanluisbaptiste/docker-brew-mageia
 #
 
+set -x
 set -e
 
 mkimg="$(basename "$0")"
 
 usage() {
 	echo >&2 "usage: $mkimg --rootfs=rootfs_path --version=openmandriva_version [--mirror=url]"
-	echo >&2 "   ie: $mkimg --rootfs=. --version=4 --mirror=http://distro.ibiblio.org/openmandriva/distrib/4/x86_64/"
-	echo >&2 "       $mkimg --rootfs=. --version=cauldron --mirror=http://distro.ibiblio.org/openmandriva/distrib/cauldron/x86_64/"
-	echo >&2 "       $mkimg --rootfs=/tmp/rootfs --version=4 --mirror=http://distro.ibiblio.org/openmandriva/distrib/4/x86_64/"
-	echo >&2 "       $mkimg --rootfs=. --version=4"
+	echo >&2 "   ie: $mkimg --rootfs=. --version=cooker --mirror=http://abf-downloads.rosalinux.ru/cooker/repository/x86_64/main/release/"
+	echo >&2 "       $mkimg --rootfs=. --version=cooker"
+	echo >&2 "       $mkimg --rootfs=/tmp/rootfs --version=openmandriva2014.0 --arch=x86_64"
 	exit 1
 }
 
-optTemp=$(getopt --options '+d,v:,m:,s,h' --longoptions 'rootfs:,version:,mirror:,with-systemd, help' --name mkimage-urpmi -- "$@")
+optTemp=$(getopt --options '+d,v:,m:,a:,s,h' --longoptions 'rootfs:,version:,mirror:,arch:,with-systemd, help' --name mkimage-urpmi -- "$@")
 eval set -- "$optTemp"
 unset optTemp
 
@@ -29,6 +29,7 @@ while true; do
                 -d|--rootfs) dir=$2 ; shift 2 ;;
                 -v|--version) installversion="$2" ; shift 2 ;;
                 -m|--mirror) mirror="$2" ; shift 2 ;;
+                -a|--arch) arch="$2" ; shift 2 ;;
                 -s|--with-systemd) systemd=true ; shift ;;
                 -h|--help) usage ;;
                  --) shift ; break ;;
@@ -45,7 +46,7 @@ rootfsDir="$dir/rootfs"
 if [ -z $installversion ]; then
         # Attempt to match host version
         if [ -r /etc/distro-release ]; then
-                installversion="$(sed 's/^[^0-9\]*\([0-9.]\+\).*$/\1/' /etc/distro-release)"
+                installversion="$(sed 's/^[^0-9\]*\([0-9.]\+\).*$/\1/' /etc/version)"
         else
                 echo "Error: no version supplied and unable to detect host openmandriva version"
                 exit 1
@@ -53,8 +54,8 @@ if [ -z $installversion ]; then
 fi
 
 if [ -z $mirror ]; then
-        # No mirror provided, default to mirrorlist
-        mirror="--mirrorlist http://downloads.openmandriva.org/mirrors/openmandriva.$installversion.x86_64.list"
+        # No repo provided, use main
+	mirror=http://abf-downloads.rosalinux.ru/$installversion/repository/$arch/main/release/
 fi
 
 if [ ! -z $systemd ]; then
@@ -65,12 +66,13 @@ if [ ! -z $systemd ]; then
 fi
 
 (
-        urpmi.addmedia --distrib \
+        urpmi.addmedia main_release \
                 $mirror \
                 --urpmi-root "$rootfsDir"
         urpmi basesystem-minimal urpmi locales locales-en $systemd \
                 --auto \
                 --no-suggests \
+		--no-verify-rpm \
                 --urpmi-root "$rootfsDir" \
                 --root "$rootfsDir"
 )
