@@ -21,7 +21,6 @@ RUN urpmi --auto --auto-update --no-verify-rpm \
  && /bin/bash -l -c "rvm $RUBY do rvm gemset create abf-worker" \
  && /bin/bash -l -c "rvm use $RUBY@abf-worker --default" \
  && /bin/bash -l -c "rvm gemset create abf-worker" \
- && echo "tmpfs /var/lib/mock-urpm/ tmpfs defaults,size=4096m,uid=$(id -u root),gid=$(id -g root),mode=0700 0 0" >> /etc/fstab \
  && rm -rf /var/cache/urpmi/rpms/*
 
 ## put me in RUN if you have more than 16gb of RAM
