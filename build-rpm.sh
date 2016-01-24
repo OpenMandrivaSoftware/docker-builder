@@ -1,16 +1,17 @@
 #!/bin/bash
+set -x
 
 cleanup() {
 echo "cleanup"
-rm -fv /etc/rpm/platform
+sudo rm -fv /etc/rpm/platform
 rm -fv /etc/mock-urpm/default.cfg
-rm -rf /var/lib/mock-urpm/*
-rm -rfv $HOME/output/
+sudo rm -rf /var/lib/mock-urpm/*
+rm -rf $HOME/output/
 }
 
 cleanup
 
-trap 'pkill -TERM -P $$; exit' TERM
+trap 'sudo pkill -TERM -P $$; exit' TERM
 
 MOCK_BIN=/usr/bin/mock-urpm
 config_dir=/etc/mock-urpm/
@@ -109,11 +110,11 @@ chmod +x $HOME/qemu-aarch64 $HOME/qemu-aarch64-binfmt
 # hack to copy qemu binary in non-existing path
 (while [ ! -e  /var/lib/mock-urpm/openmandriva-$platform_arch/root/usr/bin/ ]
  do sleep 1;done
- cp $HOME/qemu-* /var/lib/mock-urpm/openmandriva-$platform_arch/root/usr/bin/) &
+ sudo cp $HOME/qemu-* /var/lib/mock-urpm/openmandriva-$platform_arch/root/usr/bin/) &
  subshellpid=$!
 fi
 # remove me in future
-sh -c "echo '$platform_arch-mandriva-linux-gnueabi' > /etc/rpm/platform"
+sudo sh -c "echo '$platform_arch-mandriva-linux-gnueabi' > /etc/rpm/platform"
 fi
 
 if [[ "$platform_arch" == "armv7hl" ]]; then
@@ -126,11 +127,11 @@ chmod +x $HOME/qemu-arm $HOME/qemu-arm-binfmt
 # hack to copy qemu binary in non-existing path
 (while [ ! -e  /var/lib/mock-urpm/openmandriva-$platform_arch/root/usr/bin/ ]
  do sleep 1;done
- cp $HOME/qemu-* /var/lib/mock-urpm/openmandriva-$platform_arch/root/usr/bin/) &
+ sudo cp $HOME/qemu-* /var/lib/mock-urpm/openmandriva-$platform_arch/root/usr/bin/) &
  subshellpid=$!
 fi
 # remove me in future
-sh -c "echo '$platform_arch-mandriva-linux-gnueabi' > /etc/rpm/platform"
+sudo sh -c "echo '$platform_arch-mandriva-linux-gnueabi' > /etc/rpm/platform"
 fi
 
 }
@@ -215,10 +216,9 @@ popd
 # build package
 }
 
-
 generate_config
 clone_repo
 build_rpm
 container_data
 # wipe package
-rm -rfv $HOME/${PACKAGE}
+rm -rf $HOME/${PACKAGE}

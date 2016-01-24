@@ -21,6 +21,10 @@ RUN urpmi --auto --auto-update --no-verify-rpm \
  && /bin/bash -l -c "rvm $RUBY do rvm gemset create abf-worker" \
  && /bin/bash -l -c "rvm use $RUBY@abf-worker --default" \
  && /bin/bash -l -c "rvm gemset create abf-worker" \
+ && adduser omv \
+ && usermod -a -G mock-urpm omv \
+ && usermod -a -G rvm omv \
+ && chown -R omv:mock-urpm /etc/mock-urpm \
  && rm -rf /var/cache/urpmi/rpms/*
 
 ## put me in RUN if you have more than 16gb of RAM
@@ -31,7 +35,8 @@ ADD ./build-rpm.sh /mdv/build-rpm.sh
 ADD ./config-generator.sh /mdv/config-generator.sh
 ADD ./download_sources.sh /mdv/download_sources.sh
 
-ENV HOME /root
+USER omv
+ENV HOME /home/omv
 
 COPY entrypoint.sh /sbin/entrypoint.sh
-ENTRYPOINT ["/sbin/entrypoint.sh"]
+#ENTRYPOINT ["/sbin/entrypoint.sh"]
