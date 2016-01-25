@@ -26,7 +26,7 @@ git_repo="$GIT_REPO"
 commit_hash="$COMMIT_HASH"
 
 echo "mount tmpfs filesystem to builddir"
-mount -a
+sudo mount -a
 if [ ! -d "$OUTPUT_FOLDER" ]; then
         mkdir -p $OUTPUT_FOLDER
 else
