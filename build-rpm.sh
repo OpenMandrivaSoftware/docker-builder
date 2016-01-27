@@ -11,7 +11,7 @@ rm -rf $HOME/output/
 
 cleanup
 
-trap 'sudo pkill -TERM -P $$; exit 4' TERM
+trap 'sudo pkill -TERM -P $$; exit 4' EXIT
 
 MOCK_BIN=/usr/bin/mock-urpm
 config_dir=/etc/mock-urpm/
