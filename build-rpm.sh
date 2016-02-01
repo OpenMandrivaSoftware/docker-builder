@@ -24,6 +24,10 @@ uname="$UNAME"
 email="$EMAIL"
 git_repo="$GIT_REPO"
 commit_hash="$COMMIT_HASH"
+extra_build_rpm_options="$EXTRA_BUILD_RPM_OPTIONS"
+extra_build_src_rpm_options="$EXTRA_BUILD_SRC_RPM_OPTIONS"
+extra_cfg_options="$EXTRA_CFG_OPTIONS"
+extra_cfg_urpm_options="$EXTRA_CFG_URPM_OPTIONS"
 
 echo "mount tmpfs filesystem to builddir"
 sudo mount -a
@@ -39,6 +43,7 @@ sed '17c/format: %(message)s' $config_dir/logging.ini > ~/logging.ini
 mv -f ~/logging.ini $config_dir/logging.ini
 
 EXTRA_CFG_OPTIONS="$extra_cfg_options" \
+  EXTRA_CFG_URPM_OPTIONS="$extra_cfg_urpm_options" \
   UNAME=$uname \
   EMAIL=$email \
   PLATFORM_NAME=$platform_name \
@@ -141,7 +146,7 @@ probe_cpu
 build_rpm() {
 arm_platform_detector
 echo '--> Build src.rpm'
-$MOCK_BIN -v --configdir=$config_dir --buildsrpm --spec=$build_package/${PACKAGE}.spec --sources=$build_package --no-cleanup-after --resultdir=$OUTPUT_FOLDER
+$MOCK_BIN -v --configdir=$config_dir --buildsrpm --spec=$build_package/${PACKAGE}.spec --sources=$build_package --no-cleanup-after $extra_build_src_rpm_options --resultdir=$OUTPUT_FOLDER
 # Save exit code
 rc=$?
 kill $subshellpid
@@ -153,7 +158,7 @@ if [ $rc != 0 ] ; then
   exit 1
 fi
 
-$MOCK_BIN -v --configdir=$config_dir --rebuild $OUTPUT_FOLDER/${PACKAGE}-*.src.rpm --no-cleanup-after --no-clean --resultdir=$OUTPUT_FOLDER
+$MOCK_BIN -v --configdir=$config_dir --rebuild $OUTPUT_FOLDER/${PACKAGE}-*.src.rpm --no-cleanup-after --no-clean $extra_build_rpm_options --resultdir=$OUTPUT_FOLDER
 
 # Extract rpmlint logs into separate file
 echo "--> Grepping rpmlint logs from $OUTPUT_FOLDER//build.log to $OUTPUT_FOLDER//rpmlint.log"
