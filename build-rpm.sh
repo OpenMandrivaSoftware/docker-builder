@@ -17,6 +17,11 @@ MOCK_BIN=/usr/bin/mock-urpm
 config_dir=/etc/mock-urpm/
 build_package=$HOME/$PACKAGE
 OUTPUT_FOLDER=${HOME}/output
+# Qemu ARM binaries
+QEMU_ARM_SHA="723161ec6cdd569cf6897431c64629451f76a036"
+QEMU_ARM_BINFMT_SHA="352b636da23bee8caf56f8fd000f908e45ae8386"
+QEMU_ARM64_SHA="d77667285d3e2663842c7f160c5d4ed4aa209d96"
+QEMU_ARM64_BINFMT_SHA="e523d6b5dc77288ff25071a4df9ddc307a717d9c"
 
 platform_arch="$PLATFORM_ARCH"
 platform_name="$PLATFORM_NAME"
@@ -109,8 +114,8 @@ esac
 if [[ "$platform_arch" == "aarch64" ]]; then
 if [ $cpu != "aarch64" ] ; then
 # this string responsible for "cannot execute binary file"
-wget -O $HOME/qemu-aarch64 --content-disposition http://file-store.rosalinux.ru/api/v1/file_stores/6a2070ba0764eade5d161c34b708975c30606123 --no-check-certificate &> /dev/null
-wget -O $HOME/qemu-aarch64-binfmt --content-disposition http://file-store.rosalinux.ru/api/v1/file_stores/b351026c6e3c7f5796320600651473b6547f46f8 --no-check-certificate &> /dev/null
+wget -O $HOME/qemu-aarch64 --content-disposition http://file-store.rosalinux.ru/api/v1/file_stores/$QEMU_ARM64_SHA --no-check-certificate &> /dev/null
+wget -O $HOME/qemu-aarch64-binfmt --content-disposition http://file-store.rosalinux.ru/api/v1/file_stores/$QEMU_ARM64_BINFMT_SHA --no-check-certificate &> /dev/null
 chmod +x $HOME/qemu-aarch64 $HOME/qemu-aarch64-binfmt
 # hack to copy qemu binary in non-existing path
 (while [ ! -e  /var/lib/mock-urpm/openmandriva-$platform_arch/root/usr/bin/ ]
@@ -126,8 +131,8 @@ if [[ "$platform_arch" == "armv7hl" ]]; then
 if [ $cpu != "arm" ] ; then
 # this string responsible for "cannot execute binary file"
 # change path to qemu
-wget -O $HOME/qemu-arm --content-disposition http://file-store.rosalinux.ru/api/v1/file_stores/96712ca87706e93356bf62b930530613c9c934d6 --no-check-certificate &> /dev/null
-wget -O $HOME/qemu-arm-binfmt --content-disposition http://file-store.rosalinux.ru/api/v1/file_stores/65efec31ef6a636ae9593fff56d812026fcad903 --no-check-certificate &> /dev/null
+wget -O $HOME/qemu-arm --content-disposition http://file-store.rosalinux.ru/api/v1/file_stores/$QEMU_ARM_SHA  --no-check-certificate &> /dev/null
+wget -O $HOME/qemu-arm-binfmt --content-disposition http://file-store.rosalinux.ru/api/v1/file_stores/$QEMU_ARM_BINFMT_SHA --no-check-certificate &> /dev/null
 chmod +x $HOME/qemu-arm $HOME/qemu-arm-binfmt
 # hack to copy qemu binary in non-existing path
 (while [ ! -e  /var/lib/mock-urpm/openmandriva-$platform_arch/root/usr/bin/ ]
