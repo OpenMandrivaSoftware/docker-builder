@@ -3,7 +3,7 @@
 Clone repository
 
 ```bash
-git clone https://github.com/OpenMandrivaAssociation/docker-builder.git
+git clone https://github.com/OpenMandrivaSoftware/docker-builder.git
 ```
 Create builder image:
 
