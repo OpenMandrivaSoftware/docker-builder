@@ -28,7 +28,7 @@ platform_name="$PLATFORM_NAME"
 uname="$UNAME"
 email="$EMAIL"
 git_repo="$GIT_REPO"
-commit_hash="$COMMIT_HASH"
+project_version="$PROJECT_VERSION"
 extra_build_rpm_options="$EXTRA_BUILD_RPM_OPTIONS"
 extra_build_src_rpm_options="$EXTRA_BUILD_SRC_RPM_OPTIONS"
 extra_cfg_options="$EXTRA_CFG_OPTIONS"
@@ -207,12 +207,12 @@ do
 	fi
 done
 
-# checkout specific commit hash if defined
-if [[ ! -z "$commit_hash" ]] ; then
+# checkout specific branch/tag if defined
+if [[ ! -z "$project_version" ]] ; then
 pushd $HOME/${PACKAGE}
 git submodule update --init
 git remote rm origin
-git checkout $commit_hash
+git checkout $project_version
 popd
 fi
 
