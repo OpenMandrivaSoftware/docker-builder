@@ -213,6 +213,7 @@ pushd $HOME/${PACKAGE}
 git submodule update --init
 git remote rm origin
 git checkout $project_version
+git rev-parse HEAD > $HOME/commit_hash
 popd
 fi
 
