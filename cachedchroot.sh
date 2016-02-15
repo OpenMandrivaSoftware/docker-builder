@@ -12,8 +12,6 @@ QEMU_ARM_SHA="723161ec6cdd569cf6897431c64629451f76a036"
 QEMU_ARM_BINFMT_SHA="352b636da23bee8caf56f8fd000f908e45ae8386"
 QEMU_ARM64_SHA="d77667285d3e2663842c7f160c5d4ed4aa209d96"
 QEMU_ARM64_BINFMT_SHA="e523d6b5dc77288ff25071a4df9ddc307a717d9c"
-repo_names="main"
-repo_url="http://abf-downloads.openmandriva.org/$platform_name/repository/$arch/main/release/"
 
 platform_name="$PLATFORM_NAME"
 token="$TOKEN"
@@ -34,6 +32,9 @@ generate_config() {
 # Change output format for mock-urpm
 sed '17c/format: %(message)s' $config_dir/logging.ini > ~/logging.ini
 mv -f ~/logging.ini $config_dir/logging.ini
+
+repo_names="main"
+repo_url="http://abf-downloads.openmandriva.org/$platform_name/repository/$arch/main/release/"
 
 PLATFORM_NAME=$platform_name \
   PLATFORM_ARCH=$arch \
