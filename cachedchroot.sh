@@ -5,7 +5,6 @@ echo '--> mdv-scripts/cached-chroot: build.sh'
 
 MOCK_BIN=/usr/bin/mock-urpm
 config_dir=/etc/mock-urpm/
-build_package=$HOME/$PACKAGE
 #OUTPUT_FOLDER=${HOME}/output
 OUTPUT_FOLDER=`pwd`/results
 # Qemu ARM binaries
@@ -29,6 +28,10 @@ sudo rm -rf ${chroot_path}/*
 # wipe all
 cleanup
 
+echo $HOME
+whoami
+pwd
+pushd $HOME/${PACKAGE}
 
 generate_config() {
 # Change output format for mock-urpm
@@ -105,7 +108,6 @@ fi
 
 for arch in $arches ; do
   # init mock-urpm config
-  pushd $HOME/${PACKAGE}
   generate_config
   arm_platform_detector
   
