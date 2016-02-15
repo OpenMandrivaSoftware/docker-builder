@@ -58,23 +58,23 @@ case "$cpu" in
    ;;
 esac
 
-if [[ "$platform_arch" == "aarch64" ]]; then
+if [[ "$arch" == "aarch64" ]]; then
 if [ $cpu != "aarch64" ] ; then
 # this string responsible for "cannot execute binary file"
 wget -O $HOME/qemu-aarch64 --content-disposition http://file-store.rosalinux.ru/api/v1/file_stores/$QEMU_ARM64_SHA --no-check-certificate &> /dev/null
 wget -O $HOME/qemu-aarch64-binfmt --content-disposition http://file-store.rosalinux.ru/api/v1/file_stores/$QEMU_ARM64_BINFMT_SHA --no-check-certificate &> /dev/null
 chmod +x $HOME/qemu-aarch64 $HOME/qemu-aarch64-binfmt
 # hack to copy qemu binary in non-existing path
-(while [ ! -e  ${chroot_path}/$platform_name-$platform_arch/root/usr/bin/ ]
+(while [ ! -e  ${chroot_path}/$platform_name-$arch/root/usr/bin/ ]
  do sleep 1;done
- sudo cp $HOME/qemu-* ${chroot_path}/$platform_name-$platform_arch/root/usr/bin/) &
+ sudo cp $HOME/qemu-* ${chroot_path}/$platform_name-$arch/root/usr/bin/) &
  subshellpid=$!
 fi
 # remove me in future
-sudo sh -c "echo '$platform_arch-mandriva-linux-gnueabi' > /etc/rpm/platform"
+sudo sh -c "echo '$arch-mandriva-linux-gnueabi' > /etc/rpm/platform"
 fi
 
-if [[ "$platform_arch" == "armv7hl" ]]; then
+if [[ "$arch" == "armv7hl" ]]; then
 if [ $cpu != "arm" ] ; then
 # this string responsible for "cannot execute binary file"
 # change path to qemu
@@ -82,13 +82,13 @@ wget -O $HOME/qemu-arm --content-disposition http://file-store.rosalinux.ru/api/
 wget -O $HOME/qemu-arm-binfmt --content-disposition http://file-store.rosalinux.ru/api/v1/file_stores/$QEMU_ARM_BINFMT_SHA --no-check-certificate &> /dev/null
 chmod +x $HOME/qemu-arm $HOME/qemu-arm-binfmt
 # hack to copy qemu binary in non-existing path
-(while [ ! -e  ${chroot_path}/$platform_name-$platform_arch/root/usr/bin/ ]
+(while [ ! -e  ${chroot_path}/$platform_name-$arch/root/usr/bin/ ]
  do sleep 1;done
- sudo cp $HOME/qemu-* ${chroot_path}/$platform_name-$platform_arch/root/usr/bin/) &
+ sudo cp $HOME/qemu-* ${chroot_path}/$platform_name-$arch/root/usr/bin/) &
  subshellpid=$!
 fi
 # remove me in future
-sudo sh -c "echo '$platform_arch-mandriva-linux-gnueabi' > /etc/rpm/platform"
+sudo sh -c "echo '$arch-mandriva-linux-gnueabi' > /etc/rpm/platform"
 fi
 
 }
