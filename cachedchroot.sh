@@ -38,7 +38,7 @@ repo_url="http://abf-downloads.openmandriva.org/$platform_name/repository/$arch/
 
 PLATFORM_NAME=$platform_name \
   PLATFORM_ARCH=$arch \
-  names_arr=$repo_names urls_arr=$repo_url \
+  REPO_NAMES=$repo_names REPO_URL=$repo_url \
   /bin/bash "config-generator.sh"
 }
 
