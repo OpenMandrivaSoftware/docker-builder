@@ -29,6 +29,7 @@ sudo rm -rf ${chroot_path}/*
 # wipe all
 cleanup
 
+
 generate_config() {
 # Change output format for mock-urpm
 sed '17c/format: %(message)s' $config_dir/logging.ini > ~/logging.ini
@@ -104,6 +105,7 @@ fi
 
 for arch in $arches ; do
   # init mock-urpm config
+  pushd $HOME/${PACKAGE}
   generate_config
   arm_platform_detector
   
@@ -129,6 +131,7 @@ for arch in $arches ; do
   # need sudo to pack root:root dirs
   sudo XZ_OPT="-4 -T0" tar -Jcvf ${OUTPUT_FOLDER}/${chroot}.tar.xz ${chroot_path}/${chroot}
   sudo rm -rf ${chroot_path}/${chroot}
+  popd
 done
 
 echo '--> Build has been done successfully!'
