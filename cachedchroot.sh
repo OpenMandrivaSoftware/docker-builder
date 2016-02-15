@@ -36,7 +36,7 @@ mv -f ~/logging.ini $config_dir/logging.ini
 EXTRA_CFG_OPTIONS="$extra_cfg_options" \
   PLATFORM_NAME=$platform_name \
   PLATFORM_ARCH=$arch \
-  /bin/bash "/mdv/config-generator.sh"
+  /bin/bash "config-generator.sh"
 }
 
 arm_platform_detector(){
