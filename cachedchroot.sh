@@ -1,4 +1,5 @@
 #!/bin/sh
+set -x
 
 echo '--> mdv-scripts/cached-chroot: build.sh'
 
