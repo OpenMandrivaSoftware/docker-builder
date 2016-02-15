@@ -34,6 +34,7 @@ RUN urpmi --auto --auto-update --no-verify-rpm \
 ADD ./build-rpm.sh /mdv/build-rpm.sh
 ADD ./config-generator.sh /mdv/config-generator.sh
 ADD ./download_sources.sh /mdv/download_sources.sh
+ADD ./cachedchroot.sh /mdv/cachedchroot.sh
 
 USER omv
 ENV HOME /home/omv
