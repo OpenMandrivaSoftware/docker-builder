@@ -37,7 +37,7 @@ mv -f ~/logging.ini $config_dir/logging.ini
 
 PLATFORM_NAME=$platform_name \
   PLATFORM_ARCH=$arch \
-  $repo_names $repo_url \
+  $names_arr=$repo_names $urls_arr=$repo_url \
   /bin/bash "config-generator.sh"
 }
 
