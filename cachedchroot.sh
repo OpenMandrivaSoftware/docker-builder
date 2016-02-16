@@ -5,7 +5,7 @@ echo '--> mdv-scripts/cached-chroot: build.sh'
 
 MOCK_BIN=/usr/bin/mock-urpm
 config_dir=/etc/mock-urpm/
-OUTPUT_FOLDER=`pwd`/results
+OUTPUT_FOLDER=/home/omv/iso_builder/results
 # Qemu ARM binaries
 QEMU_ARM_SHA="723161ec6cdd569cf6897431c64629451f76a036"
 QEMU_ARM_BINFMT_SHA="352b636da23bee8caf56f8fd000f908e45ae8386"
@@ -38,7 +38,7 @@ repo_url="http://abf-downloads.openmandriva.org/$platform_name/repository/$arch/
 PLATFORM_NAME=$platform_name \
   PLATFORM_ARCH=$arch \
   REPO_NAMES=$repo_names REPO_URL=$repo_url \
-  /bin/bash "`pwd`/config-generator.sh"
+  /bin/bash "/home/omv/iso_builder/config-generator.sh"
 }
 
 arm_platform_detector(){
