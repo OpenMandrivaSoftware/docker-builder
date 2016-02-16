@@ -6,6 +6,7 @@ extra_cfg_urpm_options="$EXTRA_CFG_URPM_OPTIONS"
 uname="$UNAME"
 email="$EMAIL"
 platform_arch="$PLATFORM_ARCH"
+platform_name=${PLATFORM_NAME:-"openmandriva"}
 repo_url="$REPO_URL"
 repo_names="$REPO_NAMES"
 
@@ -49,7 +50,7 @@ EOF
 fi
 
 cat <<EOF>> $default_cfg
-config_opts['root'] = 'openmandriva-$platform_arch'
+config_opts['root'] = '$platform_name-$platform_arch'
 config_opts['chroot_setup'] = 'basesystem-minimal locales locales-en distro-release-OpenMandriva gnupg rpm-build urpmi wget meta-task task-devel clang'
 config_opts['urpm_options'] = '--xml-info=never $extra_cfg_urpm_options'
 
