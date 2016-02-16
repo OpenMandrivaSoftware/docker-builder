@@ -168,6 +168,8 @@ $MOCK_BIN -v --configdir=$config_dir --rebuild $OUTPUT_FOLDER/${PACKAGE}-*.src.r
 # Extract rpmlint logs into separate file
 echo "--> Grepping rpmlint logs from $OUTPUT_FOLDER//build.log to $OUTPUT_FOLDER/rpmlint.log"
 sed -n "/Executing \"\/usr\/bin\/rpmlint/,/packages and.*specfiles checked/p" $OUTPUT_FOLDER/build.log > $OUTPUT_FOLDER/rpmlint.log
+echo "--> Create rpm -qa list"
+rpm --root=/var/lib/mock-urpm/openmandriva-$platform_arch/root/ -qa >> $OUTPUT_FOLDER/rpm-qa.log
 
 }
 
