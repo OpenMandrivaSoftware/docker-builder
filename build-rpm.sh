@@ -34,6 +34,12 @@ extra_build_src_rpm_options="$EXTRA_BUILD_SRC_RPM_OPTIONS"
 extra_cfg_options="$EXTRA_CFG_OPTIONS"
 extra_cfg_urpm_options="$EXTRA_CFG_URPM_OPTIONS"
 
+if [ "`uname -m`" = "x86_64" ] && echo "$platform_arch" |grep -qE 'i[0-9]86'; then
+	# Change the kernel personality so build scripts don't think
+	# we're building for 64-bit
+	MOCK_BIN="/usr/bin/i386 $MOCK_BIN"
+fi
+
 echo "mount tmpfs filesystem to builddir"
 sudo mount -a
 if [ ! -d "$OUTPUT_FOLDER" ]; then
