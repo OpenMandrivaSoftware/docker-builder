@@ -166,7 +166,7 @@ fi
 $MOCK_BIN -v --configdir=$config_dir --rebuild $OUTPUT_FOLDER/${PACKAGE}-*.src.rpm --no-cleanup-after --no-clean $extra_build_rpm_options --resultdir=$OUTPUT_FOLDER
 
 # Extract rpmlint logs into separate file
-echo "--> Grepping rpmlint logs from $OUTPUT_FOLDER//build.log to $OUTPUT_FOLDER//rpmlint.log"
+echo "--> Grepping rpmlint logs from $OUTPUT_FOLDER//build.log to $OUTPUT_FOLDER/rpmlint.log"
 sed -n "/Executing \"\/usr\/bin\/rpmlint/,/packages and.*specfiles checked/p" $OUTPUT_FOLDER/build.log > $OUTPUT_FOLDER/rpmlint.log
 
 }
