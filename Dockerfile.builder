@@ -2,11 +2,11 @@ FROM openmandriva/cooker
 #FROM openmandriva/cooker-aarch64
 #FROM openmandriva/cooker-armv7hl
 # replace me with armv7hl, aarch64
-ENV ARCH x86_64
+ENV RARCH x86_64
 ENV RUBY=ruby-2.2.3
 
 RUN urpmi --auto --auto-update --no-verify-rpm \
- && urpmi.addmedia contrib http://abf-downloads.rosalinux.ru/cooker/repository/$ARCH/contrib/release/ \
+ && urpmi.addmedia contrib http://abf-downloads.openmandriva.org/cooker/repository/$RARCH/contrib/release/ \
  && rm -f /etc/localtime \
  && ln -s /usr/share/zoneinfo/UTC /etc/localtime \
  && gpg2 --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 \
