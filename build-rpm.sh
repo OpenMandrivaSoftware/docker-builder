@@ -218,8 +218,6 @@ done
 # checkout specific branch/tag if defined
 if [[ ! -z "$project_version" ]] ; then
 pushd $HOME/${PACKAGE}
-git submodule update --init
-git remote rm origin
 git checkout $project_version
 git rev-parse HEAD > $HOME/commit_hash
 popd
