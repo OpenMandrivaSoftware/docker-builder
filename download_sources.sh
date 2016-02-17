@@ -16,7 +16,7 @@ if [ -e "${abfyml}" ]; then
       fi
     else
       echo -n "try to download... "
-      if curl -L "http://file-store.rosalinux.ru/download/${sha}" -o "${file}"; then
+      if curl -L "http://file-store.openmandriva.org/download/${sha}" -o "${file}"; then
         echo "ok"
         echo -n "check sum... "
         if echo "${sha}  ${file}" | sha1sum -c --status; then
