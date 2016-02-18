@@ -35,9 +35,9 @@ extra_cfg_options="$EXTRA_CFG_OPTIONS"
 extra_cfg_urpm_options="$EXTRA_CFG_URPM_OPTIONS"
 
 if [ "`uname -m`" = "x86_64" ] && echo "$platform_arch" |grep -qE 'i[0-9]86'; then
-	# Change the kernel personality so build scripts don't think
-	# we're building for 64-bit
-	MOCK_BIN="/usr/bin/i386 $MOCK_BIN"
+    # Change the kernel personality so build scripts don't think
+    # we're building for 64-bit
+    MOCK_BIN="/usr/bin/i386 $MOCK_BIN"
 fi
 
 echo "mount tmpfs filesystem to builddir"
@@ -156,8 +156,29 @@ probe_cpu
 
 build_rpm() {
 arm_platform_detector
+
+# set up re-tries when building rpm
+MAX_RETRIES=5
+WAIT_TIME=10
+
 echo '--> Build src.rpm'
-$MOCK_BIN -v --configdir=$config_dir --buildsrpm --spec=$build_package/${PACKAGE}.spec --sources=$build_package --no-cleanup-after $extra_build_src_rpm_options --resultdir=$OUTPUT_FOLDER
+try_rebuild=true
+retry=0
+while $try_rebuild
+do
+    rm -rf $OUTPUT_FOLDER
+    $MOCK_BIN -v --configdir=$config_dir --buildsrpm --spec=$build_package/${PACKAGE}.spec --sources=$build_package --no-cleanup-after $extra_build_src_rpm_options --resultdir=$OUTPUT_FOLDER
+    rc=$?
+    try_rebuild=false
+    if [[ $rc != 0 && $retry < $MAX_RETRIES ]] ; then
+	try_rebuild=true
+	(( retry=$retry+1 ))
+	echo "--> --> Repository was changed in the middle, will rerun the build. Next try (${retry} from ${MAX_RETRIES})..."
+	echo "--> Delay ${WAIT_TIME} sec..."
+	sleep $WAIT_TIME
+    fi
+done
+
 # Save exit code
 rc=$?
 kill $subshellpid
@@ -169,7 +190,33 @@ if [ $rc != 0 ] ; then
   exit 1
 fi
 
-$MOCK_BIN -v --configdir=$config_dir --rebuild $OUTPUT_FOLDER/${PACKAGE}-*.src.rpm --no-cleanup-after --no-clean $extra_build_rpm_options --resultdir=$OUTPUT_FOLDER
+echo '--> Build rpm'
+try_rebuild=true
+retry=0
+while $try_rebuild
+do
+    $MOCK_BIN -v --configdir=$config_dir --rebuild $OUTPUT_FOLDER/${PACKAGE}-*.src.rpm --no-cleanup-after --no-clean $extra_build_rpm_options --resultdir=$OUTPUT_FOLDER
+    rc=$?
+    try_rebuild=false
+    if [[ $rc != 0 && $retry < $MAX_RETRIES ]] ; then
+	try_rebuild=true
+	(( retry=$retry+1 ))
+	echo "--> --> Repository was changed in the middle, will rerun the build. Next try (${retry} from ${MAX_RETRIES})..."
+	echo "--> Delay ${WAIT_TIME} sec..."
+	sleep $WAIT_TIME
+    fi
+done
+
+# Save exit code
+rc=$?
+kill $subshellpid
+echo '--> Done.'
+
+# Check exit code after build
+if [ $rc != 0 ] ; then
+  echo '--> Build failed: mock-urpm encountered a problem.'
+  exit 1
+fi
 
 # Extract rpmlint logs into separate file
 echo "--> Grepping rpmlint logs from $OUTPUT_FOLDER//build.log to $OUTPUT_FOLDER/rpmlint.log"
