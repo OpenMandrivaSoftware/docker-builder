@@ -157,9 +157,12 @@ probe_cpu
 build_rpm() {
 arm_platform_detector
 
-# set up re-tries when building rpm
+# We will rerun the build in case when repository is modified in the middle,
+# but for safety let's limit number of retest attempts
+# (since in case when repository metadata is really broken we can loop here forever)
 MAX_RETRIES=5
 WAIT_TIME=10
+RETRY_GREP_STR="You may need to update your urpmi database\|problem reading synthesis file of medium\|retrieving failed: "
 
 echo '--> Build src.rpm'
 try_rebuild=true
@@ -171,11 +174,13 @@ do
     rc=$?
     try_rebuild=false
     if [[ $rc != 0 && $retry < $MAX_RETRIES ]] ; then
-	try_rebuild=true
-	(( retry=$retry+1 ))
-	echo "--> --> Repository was changed in the middle, will rerun the build. Next try (${retry} from ${MAX_RETRIES})..."
-	echo "--> Delay ${WAIT_TIME} sec..."
-	sleep $WAIT_TIME
+	if grep -q "$RETRY_GREP_STR" $OUTPUT_FOLDER/root.log; then
+	    try_rebuild=true
+	    (( retry=$retry+1 ))
+	    echo "--> --> Repository was changed in the middle, will rerun the build. Next try (${retry} from ${MAX_RETRIES})..."
+	    echo "--> Delay ${WAIT_TIME} sec..."
+	    sleep $WAIT_TIME
+	fi
     fi
 done
 
@@ -205,7 +210,7 @@ if [ $rc != 0 ] ; then
 fi
 
 # Extract rpmlint logs into separate file
-echo "--> Grepping rpmlint logs from $OUTPUT_FOLDER//build.log to $OUTPUT_FOLDER/rpmlint.log"
+echo "--> Grepping rpmlint logs from $OUTPUT_FOLDER/build.log to $OUTPUT_FOLDER/rpmlint.log"
 sed -n "/Executing \"\/usr\/bin\/rpmlint/,/packages and.*specfiles checked/p" $OUTPUT_FOLDER/build.log > $OUTPUT_FOLDER/rpmlint.log
 echo "--> Create rpm -qa list"
 rpm --root=/var/lib/mock-urpm/openmandriva-$platform_arch/root/ -qa >> $OUTPUT_FOLDER/rpm-qa.log
