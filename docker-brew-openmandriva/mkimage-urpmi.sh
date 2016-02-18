@@ -11,7 +11,7 @@ mkimg="$(basename "$0")"
 
 usage() {
 	echo >&2 "usage: $mkimg --rootfs=rootfs_path --version=openmandriva_version [--mirror=url]"
-	echo >&2 "   ie: $mkimg --rootfs=. --version=cooker --mirror=http://abf-downloads.rosalinux.ru/cooker/repository/x86_64/main/release/"
+	echo >&2 "   ie: $mkimg --rootfs=. --version=cooker --mirror=http://abf-downloads.openmandriva.org/cooker/repository/x86_64/main/release/"
 	echo >&2 "       $mkimg --rootfs=. --version=cooker"
 	echo >&2 "       $mkimg --rootfs=/tmp/rootfs --version=openmandriva2014.0 --arch=x86_64"
 	exit 1
@@ -35,10 +35,7 @@ while true; do
         esac
 done
 
-#dir="$1"
 rootfsDir="$dir/rootfs"
-#shift
-
 
 #[ "$dir" ] || usage
 
@@ -54,7 +51,7 @@ fi
 
 if [ -z $mirror ]; then
         # No repo provided, use main
-	mirror=http://abf-downloads.rosalinux.ru/$installversion/repository/$arch/main/release/
+	mirror=http://abf-downloads.openmandriva.org/$installversion/repository/$arch/main/release/
 fi
 
 if [ ! -z $systemd ]; then
@@ -68,15 +65,13 @@ fi
         urpmi.addmedia main_release \
                 $mirror \
                 --urpmi-root "$rootfsDir"
-        urpmi basesystem-minimal urpmi locales locales-en $systemd \
+        urpmi basesystem-minimal urpmi distro-release-OpenMandriva locales locales-en $systemd \
                 --auto \
                 --no-suggests \
 		--no-verify-rpm \
                 --urpmi-root "$rootfsDir" \
                 --root "$rootfsDir"
 )
-
-"$(dirname "$BASH_SOURCE")/.febootstrap-minimize" "$rootfsDir"
 
 if [ -d "$rootfsDir/etc/sysconfig" ]; then
         # allow networking init scripts inside the container to work without extra steps
@@ -113,11 +108,9 @@ else
     tarFile="$dir/rootfs.tar.xz"
 fi
     
-touch "$tarFile"
-
 (
         set -x
-        tar --numeric-owner -caf "$tarFile" -C "$rootfsDir" --transform='s,^./,,' .
+        tar --numeric-owner -caf "$tarFile" -c "$rootfsDir"
 )
 
 ( set -x; rm -rf "$rootfsDir" )
