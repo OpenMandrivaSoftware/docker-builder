@@ -191,21 +191,7 @@ if [ $rc != 0 ] ; then
 fi
 
 echo '--> Build rpm'
-try_rebuild=true
-retry=0
-while $try_rebuild
-do
-    $MOCK_BIN -v --configdir=$config_dir --rebuild $OUTPUT_FOLDER/${PACKAGE}-*.src.rpm --no-cleanup-after --no-clean $extra_build_rpm_options --resultdir=$OUTPUT_FOLDER
-    rc=$?
-    try_rebuild=false
-    if [[ $rc != 0 && $retry < $MAX_RETRIES ]] ; then
-	try_rebuild=true
-	(( retry=$retry+1 ))
-	echo "--> --> Repository was changed in the middle, will rerun the build. Next try (${retry} from ${MAX_RETRIES})..."
-	echo "--> Delay ${WAIT_TIME} sec..."
-	sleep $WAIT_TIME
-    fi
-done
+$MOCK_BIN -v --configdir=$config_dir --rebuild $OUTPUT_FOLDER/${PACKAGE}-*.src.rpm --no-cleanup-after --no-clean $extra_build_rpm_options --resultdir=$OUTPUT_FOLDER
 
 # Save exit code
 rc=$?
