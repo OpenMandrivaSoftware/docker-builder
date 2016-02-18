@@ -1,10 +1,5 @@
 #!/usr/bin/env bash
 #
-# Script to create OpenMandriva official base images for integration with stackbrew 
-# library.
-# Based on https://github.com/juanluisbaptiste/docker-brew-mageia
-#
-
 set -e
 
 mkimg="$(basename "$0")"
@@ -21,11 +16,9 @@ optTemp=$(getopt --options '+d,v:,m:,a:,s,h' --longoptions 'rootfs:,version:,mir
 eval set -- "$optTemp"
 unset optTemp
 
-installversion=
-mirror=
 while true; do
         case "$1" in
-                -d|--rootfs) dir=$2 ; shift 2 ;;
+                -d|--rootfs) rootfsdir=$2 ; shift 2 ;;
                 -v|--version) installversion="$2" ; shift 2 ;;
                 -m|--mirror) mirror="$2" ; shift 2 ;;
                 -a|--arch) arch="$2" ; shift 2 ;;
@@ -35,14 +28,13 @@ while true; do
         esac
 done
 
-rootfsDir="$dir/rootfs"
 
-#[ "$dir" ] || usage
+target_dir="$rootfsdir/rootfs"
 
 if [ -z $installversion ]; then
         # Attempt to match host version
         if [ -r /etc/distro-release ]; then
-                installversion="$(sed 's/^[^0-9\]*\([0-9.]\+\).*$/\1/' /etc/version)"
+                installversion="$(rpm --eval %distro_release)"
         else
                 echo "Error: no version supplied and unable to detect host openmandriva version"
                 exit 1
@@ -51,66 +43,57 @@ fi
 
 if [ -z $mirror ]; then
         # No repo provided, use main
-	mirror=http://abf-downloads.openmandriva.org/$installversion/repository/$arch/main/release/
+        mirror=http://abf-downloads.openmandriva.org/$installversion/repository/$arch/main/release/
 fi
+
+# run me here
+install_chroot(){
+	urpmi.addmedia main_release $mirror --urpmi-root "$target_dir";
+	urpmi basesystem-minimal urpmi distro-release-OpenMandriva locales locales-en $systemd \
+	--auto \
+        --no-suggests \
+        --no-verify-rpm \
+        --urpmi-root "$target_dir" \
+        --root "$target_dir"
+}
+install_chroot
 
 if [ ! -z $systemd ]; then
         echo -e "--------------------------------------"
         echo -e "Creating image with systemd support."
         echo -e "--------------------------------------\n"
-        systemd="systemd" 
-fi
-
-(
-        urpmi.addmedia main_release \
-                $mirror \
-                --urpmi-root "$rootfsDir"
-        urpmi basesystem-minimal urpmi distro-release-OpenMandriva locales locales-en $systemd \
-                --auto \
-                --no-suggests \
-		--no-verify-rpm \
-                --urpmi-root "$rootfsDir" \
-                --root "$rootfsDir"
-)
-
-if [ -d "$rootfsDir/etc/sysconfig" ]; then
-        # allow networking init scripts inside the container to work without extra steps
-        echo 'NETWORKING=yes' > "$rootfsDir/etc/sysconfig/network"
+        systemd="systemd"
 fi
 
 if [ ! -z $systemd ]; then
-	#Prevent systemd from starting unneeded services
-	(cd $rootfsDir/lib/systemd/system/sysinit.target.wants/; for i in *; do [ $i == systemd-tmpfiles-setup.service ] || rm -f $i; done); \
-        rm -f $rootfsDir/lib/systemd/system/multi-user.target.wants/*;\
-        rm -f $rootfsDir/etc/systemd/system/*.wants/*;\
-        rm -f $rootfsDir/lib/systemd/system/local-fs.target.wants/*; \
-        rm -f $rootfsDir/lib/systemd/system/sockets.target.wants/*udev*; \
-        rm -f $rootfsDir/lib/systemd/system/sockets.target.wants/*initctl*; \
-        rm -f $rootfsDir/lib/systemd/system/basic.target.wants/*;\
-        rm -f $rootfsDir/lib/systemd/system/anaconda.target.wants/*;
+        #Prevent systemd from starting unneeded services
+        (cd $target_dir/lib/systemd/system/sysinit.target.wants/; for i in *; do [ $i == systemd-tmpfiles-setup.service ] || rm -f $i; done); \
+        rm -f $target_dir/lib/systemd/system/multi-user.target.wants/*;\
+        rm -f $target_dir/etc/systemd/system/*.wants/*;\
+        rm -f $target_dir/lib/systemd/system/local-fs.target.wants/*; \
+        rm -f $target_dir/lib/systemd/system/sockets.target.wants/*udev*; \
+        rm -f $target_dir/lib/systemd/system/sockets.target.wants/*initctl*; \
+        rm -f $target_dir/lib/systemd/system/basic.target.wants/*;\
+        rm -f $target_dir/lib/systemd/system/anaconda.target.wants/*;
 fi
 
-
-# Docker mounts tmpfs at /dev and procfs at /proc so we can remove them
-rm -rf "$rootfsDir/dev" "$rootfsDir/proc"
-mkdir -p "$rootfsDir/dev" "$rootfsDir/proc"
+if [ -d "$target_dir/etc/sysconfig" ]; then
+        # allow networking init scripts inside the container to work without extra steps
+        echo 'NETWORKING=yes' > "$target_dir/etc/sysconfig/network"
+fi
 
 # make sure /etc/resolv.conf has something useful in it
-mkdir -p "$rootfsDir/etc"
-cat > "$rootfsDir/etc/resolv.conf" <<'EOF'
+mkdir -p "$target_dir/etc"
+cat > "$target_dir/etc/resolv.conf" <<'EOF'
 nameserver 8.8.8.8
 nameserver 8.8.4.4
 EOF
 
 if [ ! -z $systemd ]; then
-    tarFile="$dir/rootfs-systemd.tar.xz"
+    tarFile="$rootfsdir/rootfs-${arch}-systemd.tar.xz"
 else
-    tarFile="$dir/rootfs.tar.xz"
+    tarFile="$rootfsdir/rootfs-${arch}.tar.xz"
 fi
-    
-(
-        set -x
-        tar --numeric-owner -caf "$tarFile" -c "$rootfsDir"
-)
 
-( set -x; rm -rf "$rootfsDir" )
+tar --numeric-owner -caf "$tarFile" -c "$target_dir"
+rm -rf $target_dir
