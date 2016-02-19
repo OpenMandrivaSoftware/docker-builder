@@ -161,7 +161,7 @@ arm_platform_detector
 # but for safety let's limit number of retest attempts
 # (since in case when repository metadata is really broken we can loop here forever)
 MAX_RETRIES=5
-WAIT_TIME=10
+WAIT_TIME=20
 RETRY_GREP_STR="You may need to update your urpmi database\|problem reading synthesis file of medium\|retrieving failed: "
 
 echo '--> Build src.rpm'
