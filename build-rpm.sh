@@ -6,8 +6,8 @@ echo "cleanup"
 sudo rm -fv /etc/rpm/platform
 rm -fv /etc/mock-urpm/default.cfg
 sudo rm -rf /var/lib/mock-urpm/*
-# mask it, we need to keep this dir
-#rm -rf $HOME/output/
+# unmask/mask it, we need to keep logs
+rm -rf $HOME/output/
 }
 
 cleanup
