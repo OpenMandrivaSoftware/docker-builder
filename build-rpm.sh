@@ -6,7 +6,8 @@ echo "cleanup"
 sudo rm -fv /etc/rpm/platform
 rm -fv /etc/mock-urpm/default.cfg
 sudo rm -rf /var/lib/mock-urpm/*
-rm -rf $HOME/output/
+# mask it, we need to keep this dir
+#rm -rf $HOME/output/
 }
 
 cleanup
@@ -42,11 +43,6 @@ fi
 
 echo "mount tmpfs filesystem to builddir"
 sudo mount -a
-if [ ! -d "$OUTPUT_FOLDER" ]; then
-        mkdir -p $OUTPUT_FOLDER
-else
-        rm -f $OUTPUT_FOLDER/*
-fi
 
 generate_config() {
 # Change output format for mock-urpm
