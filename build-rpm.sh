@@ -157,7 +157,7 @@ arm_platform_detector
 # but for safety let's limit number of retest attempts
 # (since in case when repository metadata is really broken we can loop here forever)
 MAX_RETRIES=5
-WAIT_TIME=20
+WAIT_TIME=60
 RETRY_GREP_STR="You may need to update your urpmi database\|problem reading synthesis file of medium\|retrieving failed: "
 
 echo '--> Build src.rpm'
@@ -202,6 +202,8 @@ echo '--> Done.'
 # Check exit code after build
 if [ $rc != 0 ] ; then
   echo '--> Build failed: mock-urpm encountered a problem.'
+# clean all the rpm files because build was not completed
+  rm -rf $OUTPUT_FOLDER/${PACKAGE}-*.rpm
   exit 1
 fi
 
@@ -231,7 +233,7 @@ fi
 clone_repo() {
 
 MAX_RETRIES=5
-WAIT_TIME=10
+WAIT_TIME=60
 try_reclone=true
 retry=0
 while $try_reclone
