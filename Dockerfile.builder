@@ -3,7 +3,7 @@ FROM openmandriva/cooker
 #FROM openmandriva/cooker-armv7hl
 # replace me with armv7hl, aarch64
 ENV RARCH x86_64
-ENV RUBY=ruby-2.2.3
+ENV RUBY ruby-2.2.3
 
 RUN urpmi --auto --auto-update --no-verify-rpm \
  && urpmi.addmedia contrib http://abf-downloads.openmandriva.org/cooker/repository/$RARCH/contrib/release/ \

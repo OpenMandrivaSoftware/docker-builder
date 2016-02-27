@@ -23,6 +23,8 @@ if [ -e "${abfyml}" ]; then
           echo "ok"
         else
           echo "sha1sum INCORRECT! skipping..."
+	  echo "remove file ${file}"
+	  rm -f ${file}
         fi
       else
         echo "filed! skipping..."
