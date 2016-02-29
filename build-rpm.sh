@@ -192,7 +192,7 @@ if [ $rc != 0 ] ; then
 fi
 
 echo '--> Build rpm'
-$MOCK_BIN -v --configdir=$config_dir --rebuild $OUTPUT_FOLDER/${PACKAGE}-*.src.rpm --no-cleanup-after --no-clean $extra_build_rpm_options --resultdir=$OUTPUT_FOLDER
+$MOCK_BIN -v --configdir=$config_dir --rebuild $OUTPUT_FOLDER/*.src.rpm --no-cleanup-after --no-clean $extra_build_rpm_options --resultdir=$OUTPUT_FOLDER
 
 # Save exit code
 rc=$?
@@ -203,7 +203,7 @@ echo '--> Done.'
 if [ $rc != 0 ] ; then
   echo '--> Build failed: mock-urpm encountered a problem.'
 # clean all the rpm files because build was not completed
-  rm -rf $OUTPUT_FOLDER/${PACKAGE}-*.rpm
+  rm -rf $OUTPUT_FOLDER/*.rpm
   exit 1
 fi
 
