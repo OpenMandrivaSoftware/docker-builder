@@ -95,5 +95,7 @@ else
     tarFile="$rootfsdir/rootfs-${arch}.tar.xz"
 fi
 
-tar --numeric-owner -caf "$tarFile" -c "$target_dir"
+pushd $target_dir
+tar --numeric-owner -caf $tarFile -c .
+popd
 rm -rf $target_dir
