@@ -19,9 +19,9 @@ config_dir=/etc/mock-urpm/
 build_package=$HOME/$PACKAGE
 OUTPUT_FOLDER=${HOME}/output
 # Qemu ARM binaries
-QEMU_ARM_SHA="97ee98312c2b0ae565602d6286d382fe64d111a2"
+QEMU_ARM_SHA="9c7e32080fab6751a773f363bfebab8ac8cb9f4a"
 QEMU_ARM_BINFMT_SHA="10131ee0db7a486186c32e0cb7229f4368d0d28b"
-QEMU_ARM64_SHA="9384d5f67210a0b97d66f821ecf5d546e58fe1b4"
+QEMU_ARM64_SHA="240d661cee1fc7fbaf7623baa3a5b04dfb966424"
 QEMU_ARM64_BINFMT_SHA="ec864fdf8b57ac77652cd6ab998e56fc4ed7ef5d"
 
 filestore_url="http://file-store.openmandriva.org/api/v1/file_stores"
