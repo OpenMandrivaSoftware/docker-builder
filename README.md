@@ -49,3 +49,4 @@ Then you need to restart binfmt service
 ```bash
 systemctl restart systemd-binfmt.service
 ```
+[![demo](https://asciinema.org/a/9c5mzq43h15kmeg4roiq8yvok.png)](https://asciinema.org/a/9c5mzq43h15kmeg4roiq8yvok?autoplay=1)
