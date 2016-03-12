@@ -8,7 +8,7 @@ rm -fv /etc/mock-urpm/default.cfg
 sudo rm -rf /var/lib/mock-urpm/*
 # unmask/mask it, we need to keep logs
 rm -rf $HOME/output/
-rm -fv ~/bad_dep.log
+rm -fv ~/build_fail_reason.log
 }
 
 cleanup
@@ -191,7 +191,7 @@ if [ $rc != 0 ] ; then
   echo '--> Build failed: mock-urpm encountered a problem.'
   # 99% of all build failures at src.rpm creation is broken deps
   # m1 show only first match -oP show only matching
-  grep -m1 -oP "\(due to unsatisfied(.*)$" $OUTPUT_FOLDER/root.log >> ~/bad_dep.log
+  grep -m1 -oP "\(due to unsatisfied(.*)$" $OUTPUT_FOLDER/root.log >> ~/build_fail_reason.log
   exit 1
 fi
 
@@ -207,6 +207,7 @@ echo '--> Done.'
 if [ $rc != 0 ] ; then
   echo '--> Build failed: mock-urpm encountered a problem.'
 # clean all the rpm files because build was not completed
+  grep -m1 -oP "error: (.*)$" $OUTPUT_FOLDER/build.log >> ~/build_fail_reason.log
   rm -rf $OUTPUT_FOLDER/*.rpm
   exit 1
 fi
