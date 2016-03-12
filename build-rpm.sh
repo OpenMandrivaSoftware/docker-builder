@@ -8,6 +8,7 @@ rm -fv /etc/mock-urpm/default.cfg
 sudo rm -rf /var/lib/mock-urpm/*
 # unmask/mask it, we need to keep logs
 rm -rf $HOME/output/
+rm -fv ~/bad_dep.log
 }
 
 cleanup
