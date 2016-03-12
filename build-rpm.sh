@@ -188,6 +188,9 @@ echo '--> Done.'
 # Check exit code after build
 if [ $rc != 0 ] ; then
   echo '--> Build failed: mock-urpm encountered a problem.'
+  # 99% of all build failures at src.rpm creation is broken deps
+  # m1 show only first match -oP show only matching
+  grep -m1 -oP "\(due to unsatisfied(.*)$" $OUTPUT_FOLDER/root.log >> ~/bad_dep.log
   exit 1
 fi
 
