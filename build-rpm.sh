@@ -15,7 +15,7 @@ cleanup
 
 trap "sudo pkill -TERM -P $$; exit" EXIT
 
-MOCK_BIN="/usr/bin/sudo /usr/sbin/mock-urpm"
+MOCK_BIN="/usr/bin/sudo /usr/bin/mock-urpm"
 config_dir=/etc/mock-urpm/
 build_package=$HOME/$PACKAGE
 OUTPUT_FOLDER=${HOME}/output
