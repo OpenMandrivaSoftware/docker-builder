@@ -207,7 +207,7 @@ echo '--> Done.'
 if [ $rc != 0 ] ; then
   echo '--> Build failed: mock-urpm encountered a problem.'
 # clean all the rpm files because build was not completed
-  grep -m1 -oP "error: (.*)$" $OUTPUT_FOLDER/build.log >> ~/build_fail_reason.log
+  grep -m1 -i -oP "error: (.*)$|Segmentation Fault|cannot find (.*)$|undefined reference (.*)$|cp: (.*)$|Hunk #1 FAILED"  $OUTPUT_FOLDER/build.log >> ~/build_fail_reason.log
   rm -rf $OUTPUT_FOLDER/*.rpm
   exit 1
 fi
