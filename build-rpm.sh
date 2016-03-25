@@ -25,6 +25,8 @@ QEMU_ARM_BINFMT_SHA="10131ee0db7a486186c32e0cb7229f4368d0d28b"
 QEMU_ARM64_SHA="240d661cee1fc7fbaf7623baa3a5b04dfb966424"
 QEMU_ARM64_BINFMT_SHA="ec864fdf8b57ac77652cd6ab998e56fc4ed7ef5d"
 
+GREP_PATTERN='error: (.*)$|Segmentation Fault|cannot find (.*)$|undefined reference (.*)$|cp: (.*)$|Hunk #1 FAILED|\(due to unsatisfied(.*)$'
+
 filestore_url="http://file-store.openmandriva.org/api/v1/file_stores"
 platform_arch="$PLATFORM_ARCH"
 platform_name="$PLATFORM_NAME"
@@ -207,7 +209,7 @@ echo '--> Done.'
 if [ $rc != 0 ] ; then
   echo '--> Build failed: mock-urpm encountered a problem.'
 # clean all the rpm files because build was not completed
-  grep -m1 -i -oP "error: (.*)$|Segmentation Fault|cannot find (.*)$|undefined reference (.*)$|cp: (.*)$|Hunk #1 FAILED"  $OUTPUT_FOLDER/build.log >> ~/build_fail_reason.log
+  grep -m1 -i -oP "$GREP_PATTERN" $OUTPUT_FOLDER/build.log >> ~/build_fail_reason.log
   rm -rf $OUTPUT_FOLDER/*.rpm
   exit 1
 fi
