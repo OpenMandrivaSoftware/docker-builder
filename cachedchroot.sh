@@ -64,9 +64,9 @@ wget -O $HOME/qemu-aarch64 --content-disposition $filestore_url/$QEMU_ARM64_SHA 
 wget -O $HOME/qemu-aarch64-binfmt --content-disposition $filestore_url/$QEMU_ARM64_BINFMT_SHA --no-check-certificate &> /dev/null
 chmod +x $HOME/qemu-aarch64 $HOME/qemu-aarch64-binfmt
 # hack to copy qemu binary in non-existing path
-(while [ ! -e  ${chroot_path}/$platform_name-$arch/root/usr/bin/ ]
+(while [ ! -e  ${chroot_path}/$distro_release-$arch/root/usr/bin/ ]
  do sleep 1;done
- sudo cp $HOME/qemu-* ${chroot_path}/$platform_name-$arch/root/usr/bin/) &
+ sudo cp $HOME/qemu-* ${chroot_path}/$distro_release-$arch/root/usr/bin/) &
  subshellpid=$!
 fi
 # remove me in future
@@ -81,9 +81,9 @@ wget -O $HOME/qemu-arm --content-disposition $filestore_url/$QEMU_ARM_SHA  --no-
 wget -O $HOME/qemu-arm-binfmt --content-disposition $filestore_url/$QEMU_ARM_BINFMT_SHA --no-check-certificate &> /dev/null
 chmod +x $HOME/qemu-arm $HOME/qemu-arm-binfmt
 # hack to copy qemu binary in non-existing path
-(while [ ! -e  ${chroot_path}/$platform_name-$arch/root/usr/bin/ ]
+(while [ ! -e  ${chroot_path}/$distro_release-$arch/root/usr/bin/ ]
  do sleep 1;done
- sudo cp $HOME/qemu-* ${chroot_path}/$platform_name-$arch/root/usr/bin/) &
+ sudo cp $HOME/qemu-* ${chroot_path}/$distro_release-$arch/root/usr/bin/) &
  subshellpid=$!
 fi
 # remove me in future
