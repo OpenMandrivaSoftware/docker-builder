@@ -127,7 +127,6 @@ for arch in $arches ; do
   # need sudo to pack root:root dirs
   sudo XZ_OPT="-4 -T0" tar -Jcvf ${OUTPUT_FOLDER}/${chroot}.tar.xz ${chroot_path}/${chroot}
   sudo rm -rf ${chroot_path}/${chroot}
-  popd
 done
 
 echo '--> Build has been done successfully!'
