@@ -100,6 +100,20 @@ echo ']' >> ${c_data}
 
 }
 
+download_cache() {
+
+if [[ "${CACHED_CHROOT_SHA1}" != '' ]] ; then
+	# if chroot not exist download it
+	if [ ! -f $HOME/${CACHED_CHROOT_SHA1}.tar.xz ]; then
+	curl -L "${filestore_url}/${CACHED_CHROOT_SHA1}" -o "$HOME/${CACHED_CHROOT_SHA1}.tar.xz"
+	fi
+	# unpack in root
+	echo "extracting chroot $CACHED_CHROOT_SHA1"
+	sudo tar -xf $HOME/${CACHED_CHROOT_SHA1}.tar.xz -C /
+fi
+
+}
+
 arm_platform_detector(){
 probe_cpu() {
 # probe cpu type
@@ -169,7 +183,15 @@ retry=0
 while $try_rebuild
 do
     rm -rf $OUTPUT_FOLDER
-    $MOCK_BIN -v --configdir=$config_dir --buildsrpm --spec=$build_package/${PACKAGE}.spec --sources=$build_package --no-cleanup-after $extra_build_src_rpm_options --resultdir=$OUTPUT_FOLDER
+    if [[ "${CACHED_CHROOT_SHA1}" != '' ]] ; then
+	    echo "--> Uses cached chroot with sha1 '$CACHED_CHROOT_SHA1'..."
+	    $MOCK_BIN --chroot "urpmi.removemedia -a"
+	    $MOCK_BIN --readdrepo -v --configdir $config_dir
+	    $MOCK_BIN -v --configdir=$config_dir --buildsrpm --spec=$build_package/${PACKAGE}.spec --sources=$build_package --no-cleanup-after --no-clean $extra_build_src_rpm_options --resultdir=$OUTPUT_FOLDER
+    else
+	    $MOCK_BIN -v --configdir=$config_dir --buildsrpm --spec=$build_package/${PACKAGE}.spec --sources=$build_package --no-cleanup-after $extra_build_src_rpm_options --resultdir=$OUTPUT_FOLDER
+    fi
+
     rc=$?
     try_rebuild=false
     if [[ $rc != 0 && $retry < $MAX_RETRIES ]] ; then
@@ -278,6 +300,7 @@ popd
 
 generate_config
 clone_repo
+download_cache
 build_rpm
 container_data
 # wipe package

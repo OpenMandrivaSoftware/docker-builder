@@ -1,18 +1,18 @@
 #!/bin/sh
-set -x
-
 echo '--> mdv-scripts/cached-chroot: build.sh'
 
 MOCK_BIN=/usr/bin/mock-urpm
 config_dir=/etc/mock-urpm/
 OUTPUT_FOLDER=/home/omv/iso_builder/results
 # Qemu ARM binaries
-QEMU_ARM_SHA="723161ec6cdd569cf6897431c64629451f76a036"
-QEMU_ARM_BINFMT_SHA="352b636da23bee8caf56f8fd000f908e45ae8386"
-QEMU_ARM64_SHA="d77667285d3e2663842c7f160c5d4ed4aa209d96"
-QEMU_ARM64_BINFMT_SHA="e523d6b5dc77288ff25071a4df9ddc307a717d9c"
+QEMU_ARM_SHA="9c7e32080fab6751a773f363bfebab8ac8cb9f4a"
+QEMU_ARM_BINFMT_SHA="10131ee0db7a486186c32e0cb7229f4368d0d28b"
+QEMU_ARM64_SHA="240d661cee1fc7fbaf7623baa3a5b04dfb966424"
+QEMU_ARM64_BINFMT_SHA="ec864fdf8b57ac77652cd6ab998e56fc4ed7ef5d"
 
-platform_name="$PLATFORM_NAME"
+filestore_url="http://file-store.openmandriva.org/api/v1/file_stores"
+
+distro_release=${DISTRO_RELEASE:-"cooker"}
 token="$TOKEN"
 arches=${ARCHES:-"i586 x86_64 aarch64 armv7hl"}
 
@@ -33,9 +33,9 @@ sed '17c/format: %(message)s' $config_dir/logging.ini > ~/logging.ini
 mv -f ~/logging.ini $config_dir/logging.ini
 
 repo_names="main"
-repo_url="http://abf-downloads.openmandriva.org/$platform_name/repository/$arch/main/release/"
+repo_url="http://abf-downloads.openmandriva.org/$distro_release/repository/$arch/main/release/"
 
-PLATFORM_NAME=$platform_name \
+DISTRO_RELEASE=$distro_release \
   PLATFORM_ARCH=$arch \
   REPO_NAMES=$repo_names REPO_URL=$repo_url \
   /bin/bash "/home/omv/iso_builder/config-generator.sh"
@@ -60,8 +60,8 @@ esac
 if [[ "$arch" == "aarch64" ]]; then
 if [ $cpu != "aarch64" ] ; then
 # this string responsible for "cannot execute binary file"
-wget -O $HOME/qemu-aarch64 --content-disposition http://file-store.rosalinux.ru/api/v1/file_stores/$QEMU_ARM64_SHA --no-check-certificate &> /dev/null
-wget -O $HOME/qemu-aarch64-binfmt --content-disposition http://file-store.rosalinux.ru/api/v1/file_stores/$QEMU_ARM64_BINFMT_SHA --no-check-certificate &> /dev/null
+wget -O $HOME/qemu-aarch64 --content-disposition $filestore_url/$QEMU_ARM64_SHA --no-check-certificate &> /dev/null
+wget -O $HOME/qemu-aarch64-binfmt --content-disposition $filestore_url/$QEMU_ARM64_BINFMT_SHA --no-check-certificate &> /dev/null
 chmod +x $HOME/qemu-aarch64 $HOME/qemu-aarch64-binfmt
 # hack to copy qemu binary in non-existing path
 (while [ ! -e  ${chroot_path}/$platform_name-$arch/root/usr/bin/ ]
@@ -77,8 +77,8 @@ if [[ "$arch" == "armv7hl" ]]; then
 if [ $cpu != "arm" ] ; then
 # this string responsible for "cannot execute binary file"
 # change path to qemu
-wget -O $HOME/qemu-arm --content-disposition http://file-store.rosalinux.ru/api/v1/file_stores/$QEMU_ARM_SHA  --no-check-certificate &> /dev/null
-wget -O $HOME/qemu-arm-binfmt --content-disposition http://file-store.rosalinux.ru/api/v1/file_stores/$QEMU_ARM_BINFMT_SHA --no-check-certificate &> /dev/null
+wget -O $HOME/qemu-arm --content-disposition $filestore_url/$QEMU_ARM_SHA  --no-check-certificate &> /dev/null
+wget -O $HOME/qemu-arm-binfmt --content-disposition $filestore_url/$QEMU_ARM_BINFMT_SHA --no-check-certificate &> /dev/null
 chmod +x $HOME/qemu-arm $HOME/qemu-arm-binfmt
 # hack to copy qemu binary in non-existing path
 (while [ ! -e  ${chroot_path}/$platform_name-$arch/root/usr/bin/ ]
