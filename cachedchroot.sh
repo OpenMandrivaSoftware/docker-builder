@@ -125,10 +125,8 @@ for arch in $arches ; do
 
   # xz options -4e is 4th extreme level of compression, and -T0 is to use all available threads to speedup compress
   # need sudo to pack root:root dirs
-  pushd ${chroot_path}/${chroot}/root
-  sudo XZ_OPT="-4 -T0" tar -zcvf ${OUTPUT_FOLDER}/${chroot}.tar.xz .
+  sudo XZ_OPT="-4 -T0" tar -Jcvf ${OUTPUT_FOLDER}/${chroot}.tar.xz ${chroot_path}/${chroot}
   sudo rm -rf ${chroot_path}/${chroot}
-  popd
 done
 
 echo '--> Build has been done successfully!'
