@@ -1,4 +1,5 @@
 #!/bin/sh
+set -x
 echo '--> mdv-scripts/cached-chroot: build.sh'
 
 MOCK_BIN=/usr/bin/mock-urpm
@@ -66,7 +67,7 @@ chmod +x $HOME/qemu-aarch64 $HOME/qemu-aarch64-binfmt
 # hack to copy qemu binary in non-existing path
 (while [ ! -e  ${chroot_path}/$distro_release-$arch/root/usr/bin/ ]
  do sleep 1;done
- sudo cp $HOME/qemu-* ${chroot_path}/$distro_release-$arch/root/usr/bin/) &
+ sudo cp -v $HOME/qemu-* ${chroot_path}/$distro_release-$arch/root/usr/bin/) &
  subshellpid=$!
 fi
 # remove me in future
@@ -83,7 +84,7 @@ chmod +x $HOME/qemu-arm $HOME/qemu-arm-binfmt
 # hack to copy qemu binary in non-existing path
 (while [ ! -e  ${chroot_path}/$distro_release-$arch/root/usr/bin/ ]
  do sleep 1;done
- sudo cp $HOME/qemu-* ${chroot_path}/$distro_release-$arch/root/usr/bin/) &
+ sudo cp -v $HOME/qemu-* ${chroot_path}/$distro_release-$arch/root/usr/bin/) &
  subshellpid=$!
 fi
 # remove me in future
