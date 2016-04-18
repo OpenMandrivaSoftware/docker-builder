@@ -14,6 +14,7 @@ QEMU_ARM64_BINFMT_SHA="ec864fdf8b57ac77652cd6ab998e56fc4ed7ef5d"
 filestore_url="http://file-store.openmandriva.org/api/v1/file_stores"
 
 distro_release=${DISTRO_RELEASE:-"cooker"}
+platform_name=${PLATFORM_NAME:-"openmandriva"}
 token="$TOKEN"
 arches=${ARCHES:-"i586 x86_64 aarch64 armv7hl"}
 
@@ -65,9 +66,9 @@ wget -O $HOME/qemu-aarch64 --content-disposition $filestore_url/$QEMU_ARM64_SHA 
 wget -O $HOME/qemu-aarch64-binfmt --content-disposition $filestore_url/$QEMU_ARM64_BINFMT_SHA --no-check-certificate &> /dev/null
 chmod +x $HOME/qemu-aarch64 $HOME/qemu-aarch64-binfmt
 # hack to copy qemu binary in non-existing path
-(while [ ! -e  ${chroot_path}/$distro_release-$arch/root/usr/bin/ ]
+(while [ ! -e  ${chroot_path}/$platform_name-$arch/root/usr/bin/ ]
  do sleep 1;done
- sudo cp -v $HOME/qemu-* ${chroot_path}/$distro_release-$arch/root/usr/bin/) &
+ sudo cp -v $HOME/qemu-* ${chroot_path}/$platform_name-$arch/root/usr/bin/) &
  subshellpid=$!
 fi
 # remove me in future
@@ -82,9 +83,9 @@ wget -O $HOME/qemu-arm --content-disposition $filestore_url/$QEMU_ARM_SHA  --no-
 wget -O $HOME/qemu-arm-binfmt --content-disposition $filestore_url/$QEMU_ARM_BINFMT_SHA --no-check-certificate &> /dev/null
 chmod +x $HOME/qemu-arm $HOME/qemu-arm-binfmt
 # hack to copy qemu binary in non-existing path
-(while [ ! -e  ${chroot_path}/$distro_release-$arch/root/usr/bin/ ]
+(while [ ! -e  ${chroot_path}/$platform_name-$arch/root/usr/bin/ ]
  do sleep 1;done
- sudo cp -v $HOME/qemu-* ${chroot_path}/$distro_release-$arch/root/usr/bin/) &
+ sudo cp -v $HOME/qemu-* ${chroot_path}/$platform_name-$arch/root/usr/bin/) &
  subshellpid=$!
 fi
 # remove me in future
