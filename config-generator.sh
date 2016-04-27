@@ -71,5 +71,3 @@ config_opts["urpmi_media"] = {
 EOF
 
 gen_included_repos
-
-cat $default_cfg
