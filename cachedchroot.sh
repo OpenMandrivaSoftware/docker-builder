@@ -34,11 +34,11 @@ generate_config() {
 sed '17c/format: %(message)s' $config_dir/logging.ini > ~/logging.ini
 mv -f ~/logging.ini $config_dir/logging.ini
 
-repo_names="main"
-
 if [[ ${distro_release,,} =~ ^openmandriva* ]]; then
+  repo_names="main main_updates"
   repo_url="http://abf-downloads.openmandriva.org/$distro_release/repository/$arch/main/release/ http://abf-downloads.openmandriva.org/$distro_release/repository/$arch/main/updates/"
 else
+  repo_names="main"
   repo_url="http://abf-downloads.openmandriva.org/$distro_release/repository/$arch/main/release/"
 fi
 
