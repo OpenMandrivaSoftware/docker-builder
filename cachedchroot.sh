@@ -35,7 +35,12 @@ sed '17c/format: %(message)s' $config_dir/logging.ini > ~/logging.ini
 mv -f ~/logging.ini $config_dir/logging.ini
 
 repo_names="main"
-repo_url="http://abf-downloads.openmandriva.org/$distro_release/repository/$arch/main/release/"
+
+if [[ ${distro_release,,} =~ ^openmandriva* ]]; then
+  repo_url="http://abf-downloads.openmandriva.org/$distro_release/repository/$arch/main/release/ http://abf-downloads.openmandriva.org/$distro_release/repository/$arch/main/updates/"
+else
+  repo_url="http://abf-downloads.openmandriva.org/$distro_release/repository/$arch/main/release/"
+fi
 
 DISTRO_RELEASE=$distro_release \
   PLATFORM_ARCH=$arch \
