@@ -18,10 +18,7 @@ urls_arr=($repo_url)
 
 for (( i=0; i<${#names_arr[@]}; i++ ));
 do
-	for (( j=0; j<${#urls_arr[@]}; j++ ));
-	do
-		echo '"'${names_arr[i]}'"': '"'${urls_arr[j]}'"', >> $default_cfg
-	done
+	echo '"'${names_arr[i]}'"': '"'${urls_arr[i]}'"', >> $default_cfg
 done
 # close urpmi repos section
 echo '}' >> $default_cfg
