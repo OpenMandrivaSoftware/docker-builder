@@ -5,7 +5,8 @@ abfyml=.abf.yml
 local file sha
 if [ -e "${abfyml}" ]; then
   echo "parsing file '${abfyml}'"
-  sed -rn '$G;s/^[\"'\''[:space:]]*([^[:space:]:\"'\'']+)[\"'\''[:space:]]*.*[\"'\''[:space:]]*([0-9a-fA-F]{40})[\"'\''[:space:]]*$/\1 \2/p' ${abfyml} | \
+  sed -ne '/^[Ss]ources\:.*$/,$p' ${abfyml} | \
+  sed -rn '$G;s/^[\"'\''[:space:]]*([^[:space:]:\"'\'']+)[\"'\''[:space:]]*.*[\"'\''[:space:]]*([0-9a-fA-F]{40})[\"'\''[:space:]]*$/\1 \2/p' | \
   while read file sha; do
     echo -n "found entry: file=${file} ... "
     if [ -e ${file} ]; then
