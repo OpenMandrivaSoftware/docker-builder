@@ -189,9 +189,9 @@ do
 	    echo "--> Uses cached chroot with sha1 '$CACHED_CHROOT_SHA1'..."
 	    $MOCK_BIN --chroot "urpmi.removemedia -a"
 	    $MOCK_BIN --readdrepo -v --configdir $config_dir
-	    $MOCK_BIN -v --configdir=$config_dir --buildsrpm --spec=$build_package/*.spec --sources=$build_package --no-cleanup-after --no-clean $extra_build_src_rpm_options --resultdir=$OUTPUT_FOLDER
+	    $MOCK_BIN -v --configdir=$config_dir --buildsrpm --spec=$build_package/${PACKAGE}.spec --sources=$build_package --no-cleanup-after --no-clean $extra_build_src_rpm_options --resultdir=$OUTPUT_FOLDER
     else
-	    $MOCK_BIN -v --configdir=$config_dir --buildsrpm --spec=$build_package/*.spec --sources=$build_package --no-cleanup-after $extra_build_src_rpm_options --resultdir=$OUTPUT_FOLDER
+	    $MOCK_BIN -v --configdir=$config_dir --buildsrpm --spec=$build_package/${PACKAGE}.spec --sources=$build_package --no-cleanup-after $extra_build_src_rpm_options --resultdir=$OUTPUT_FOLDER
     fi
 
     rc=$?
