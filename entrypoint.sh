@@ -19,8 +19,8 @@ cd
 git clone https://github.com/OpenMandrivaSoftware/docker-worker.git
 pushd docker-worker
 export PATH="${PATH}:/usr/local/rvm/bin"
-which rvm
-gem install bundler
+# https://github.com/bundler/bundler/issues/4367
+gem install bundler -v '< 1.12'
 bundle install
 ENV=production CURRENT_PATH=$PWD bundle exec rake abf_worker:start
 }
