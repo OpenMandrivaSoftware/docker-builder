@@ -244,6 +244,45 @@ sed -n "/Executing \"\/usr\/bin\/rpmlint/,/packages and.*specfiles checked/p" $O
 echo "--> Create rpm -qa list"
 rpm --root=/var/lib/mock-urpm/openmandriva-$platform_arch/root/ -qa >> $OUTPUT_FOLDER/rpm-qa.log
 
+# Test RPM files
+TEST_CHROOT_PATH=$($MOCK_BIN --configdir=$config_dir --print-root-path)/root
+test_code=0
+test_log="$OUTPUT_FOLDER"/tests.log
+echo '--> Checking if rpm packages can be installed' >> $test_log
+sudo mkdir -p "$TEST_CHROOT_PATH"/test_root
+sudo cp "$OUTPUT_FOLDER"/*.rpm "$TEST_CHROOT_PATH"/
+
+try_retest=true
+retry=0
+while $try_retest
+do
+    sudo chroot $TEST_CHROOT_PATH urpmi --split-length 0 --downloader wget --wget-options --auth-no-challenge -v --debug --no-verify-rpm --fastunsafe --no-suggests --test `ls  $TEST_CHROOT_PATH | grep rpm` --root test_root --auto > $test_log.tmp 2>&1
+    test_code=$?
+    try_retest=false
+    if [[ $test_code != 0 && $retry < $MAX_RETRIES ]] ; then
+	if grep -q "$RETRY_GREP_STR" $test_log_tmp; then
+	    echo '--> Repository was changed in the middle, will rerun the tests' >> $test_log
+	    sleep $WAIT_TIME
+	    sudo chroot $chroot_path urpmi.update -a >> $test_log 2>&1
+	    try_retest=true
+	    (( retry=$retry+1 ))
+	fi
+    fi
+done
+
+cat $test_log.tmp >> $test_log
+echo 'Test code output: ' $test_code >> $test_log 2>&1
+sudo rm -f  $TEST_CHROOT_PATH/*.rpm
+sudo rm -rf $TEST_CHROOT_PATH/test_root
+rm -f $test_log.tmp
+
+# Check exit code after testing
+if [ $test_code != 0 ] ; then
+  echo '--> Test failed, see: tests.log'
+  exit 5
+fi
+# End tests
+
 }
 
 find_spec() {
