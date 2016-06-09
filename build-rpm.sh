@@ -9,6 +9,11 @@ sudo rm -rf /var/lib/mock-urpm/*
 # unmask/mask it, we need to keep logs
 rm -rf $HOME/output/
 rm -fv ~/build_fail_reason.log
+# (tpg) remove old files
+# in many cases these are leftovers when build fails
+# would be nice to remove them to free disk space
+find $HOME ! -name 'qemu-a*' -mtime +2 -exec rm -rf {} \; &> /dev/null
+
 }
 
 cleanup
@@ -103,13 +108,13 @@ echo ']' >> ${c_data}
 download_cache() {
 
 if [[ "${CACHED_CHROOT_SHA1}" != '' ]] ; then
-	# if chroot not exist download it
-	if [ ! -f $HOME/${CACHED_CHROOT_SHA1}.tar.xz ]; then
+    # if chroot not exist download it
+    if [ ! -f $HOME/${CACHED_CHROOT_SHA1}.tar.xz ]; then
 	curl -L "${filestore_url}/${CACHED_CHROOT_SHA1}" -o "$HOME/${CACHED_CHROOT_SHA1}.tar.xz"
-	fi
-	# unpack in root
-	echo "extracting chroot $CACHED_CHROOT_SHA1"
-	sudo tar -xf $HOME/${CACHED_CHROOT_SHA1}.tar.xz -C /
+    fi
+    # unpack in root
+    echo "extracting chroot $CACHED_CHROOT_SHA1"
+    sudo tar -xf $HOME/${CACHED_CHROOT_SHA1}.tar.xz -C /
 fi
 
 }
@@ -131,36 +136,48 @@ case "$cpu" in
 esac
 
 if [[ "$platform_arch" == "aarch64" ]]; then
-if [ $cpu != "aarch64" ] ; then
+    if [ $cpu != "aarch64" ] ; then
 # this string responsible for "cannot execute binary file"
-wget -O $HOME/qemu-aarch64 --content-disposition $filestore_url/$QEMU_ARM64_SHA --no-check-certificate &> /dev/null
-wget -O $HOME/qemu-aarch64-binfmt --content-disposition $filestore_url/$QEMU_ARM64_BINFMT_SHA --no-check-certificate &> /dev/null
-chmod +x $HOME/qemu-aarch64 $HOME/qemu-aarch64-binfmt
+	if [ ! -e $HOME/qemu-aarch64 -o $QEMU_ARM64_SHA != `sha1sum $HOME/qemu-aarch64 | awk '{print $1}'` ]; then
+	    wget -O $HOME/qemu-aarch64 --content-disposition $filestore_url/$QEMU_ARM64_SHA --no-check-certificate &> /dev/null
+	fi
+
+	if [ ! -e $HOME/qemu-aarch64-binfmt -o $QEMU_ARM64_BINFMT_SHA != `sha1sum $HOME/qemu-aarch64-binfmt | awk '{print $1}'` ]; then
+	    wget -O $HOME/qemu-aarch64-binfmt --content-disposition $filestore_url/$QEMU_ARM64_BINFMT_SHA --no-check-certificate &> /dev/null
+	fi
+
+	chmod +x $HOME/qemu-aarch64 $HOME/qemu-aarch64-binfmt
 # hack to copy qemu binary in non-existing path
-(while [ ! -e  /var/lib/mock-urpm/openmandriva-$platform_arch/root/usr/bin/ ]
- do sleep 1;done
- sudo cp $HOME/qemu-* /var/lib/mock-urpm/openmandriva-$platform_arch/root/usr/bin/) &
- subshellpid=$!
-fi
+	(while [ ! -e  /var/lib/mock-urpm/openmandriva-$platform_arch/root/usr/bin/ ]
+	do sleep 1;done
+	sudo cp $HOME/qemu-* /var/lib/mock-urpm/openmandriva-$platform_arch/root/usr/bin/) &
+	subshellpid=$!
+    fi
 # remove me in future
-sudo sh -c "echo '$platform_arch-mandriva-linux-gnueabi' > /etc/rpm/platform"
+    sudo sh -c "echo '$platform_arch-mandriva-linux-gnueabi' > /etc/rpm/platform"
 fi
 
 if [[ "$platform_arch" == "armv7hl" ]]; then
-if [ $cpu != "arm" ] ; then
+    if [ $cpu != "arm" ] ; then
 # this string responsible for "cannot execute binary file"
 # change path to qemu
-wget -O $HOME/qemu-arm --content-disposition $filestore_url/$QEMU_ARM_SHA  --no-check-certificate &> /dev/null
-wget -O $HOME/qemu-arm-binfmt --content-disposition $filestore_url/$QEMU_ARM_BINFMT_SHA --no-check-certificate &> /dev/null
-chmod +x $HOME/qemu-arm $HOME/qemu-arm-binfmt
+	if [ ! -e $HOME/qemu-arm -o $QEMU_ARM_SHA != `sha1sum $HOME/qemu-arm | awk '{print $1}'` ]; then
+	    wget -O $HOME/qemu-arm --content-disposition $filestore_url/$QEMU_ARM_SHA --no-check-certificate &> /dev/null
+	fi
+
+	if [ ! -e $HOME/qemu-arm-binfmt -o $QEMU_ARM_BINFMT_SHA != `sha1sum $HOME/qemu-arm-binfmt | awk '{print $1}'` ]; then
+	    wget -O $HOME/qemu-arm-binfmt --content-disposition $filestore_url/$QEMU_ARM_BINFMT_SHA --no-check-certificate &> /dev/null
+	fi
+
+	chmod +x $HOME/qemu-arm $HOME/qemu-arm-binfmt
 # hack to copy qemu binary in non-existing path
-(while [ ! -e  /var/lib/mock-urpm/openmandriva-$platform_arch/root/usr/bin/ ]
- do sleep 1;done
- sudo cp $HOME/qemu-* /var/lib/mock-urpm/openmandriva-$platform_arch/root/usr/bin/) &
- subshellpid=$!
-fi
+	(while [ ! -e  /var/lib/mock-urpm/openmandriva-$platform_arch/root/usr/bin/ ]
+	do sleep 1;done
+	sudo cp $HOME/qemu-* /var/lib/mock-urpm/openmandriva-$platform_arch/root/usr/bin/) &
+	subshellpid=$!
+    fi
 # remove me in future
-sudo sh -c "echo '$platform_arch-mandriva-linux-gnueabi' > /etc/rpm/platform"
+    sudo sh -c "echo '$platform_arch-mandriva-linux-gnueabi' > /etc/rpm/platform"
 fi
 
 }
@@ -184,12 +201,12 @@ while $try_rebuild
 do
     rm -rf $OUTPUT_FOLDER
     if [[ "${CACHED_CHROOT_SHA1}" != '' ]] ; then
-	    echo "--> Uses cached chroot with sha1 '$CACHED_CHROOT_SHA1'..."
-	    $MOCK_BIN --chroot "urpmi.removemedia -a"
-	    $MOCK_BIN --readdrepo -v --configdir $config_dir
-	    $MOCK_BIN -v --configdir=$config_dir --buildsrpm --spec=$build_package/${PACKAGE}.spec --sources=$build_package --no-cleanup-after --no-clean $extra_build_src_rpm_options --resultdir=$OUTPUT_FOLDER
+	echo "--> Uses cached chroot with sha1 '$CACHED_CHROOT_SHA1'..."
+	$MOCK_BIN --chroot "urpmi.removemedia -a"
+	$MOCK_BIN --readdrepo -v --configdir $config_dir
+	$MOCK_BIN -v --configdir=$config_dir --buildsrpm --spec=$build_package/${PACKAGE}.spec --sources=$build_package --no-cleanup-after --no-clean $extra_build_src_rpm_options --resultdir=$OUTPUT_FOLDER
     else
-	    $MOCK_BIN -v --configdir=$config_dir --buildsrpm --spec=$build_package/${PACKAGE}.spec --sources=$build_package --no-cleanup-after $extra_build_src_rpm_options --resultdir=$OUTPUT_FOLDER
+	$MOCK_BIN -v --configdir=$config_dir --buildsrpm --spec=$build_package/${PACKAGE}.spec --sources=$build_package --no-cleanup-after $extra_build_src_rpm_options --resultdir=$OUTPUT_FOLDER
     fi
 
     rc=$?
@@ -229,11 +246,11 @@ echo '--> Done.'
 
 # Check exit code after build
 if [ $rc != 0 ] ; then
-  echo '--> Build failed: mock-urpm encountered a problem.'
+    echo '--> Build failed: mock-urpm encountered a problem.'
 # clean all the rpm files because build was not completed
-  grep -m1 -i -oP "$GREP_PATTERN" $OUTPUT_FOLDER/root.log >> ~/build_fail_reason.log
-  rm -rf $OUTPUT_FOLDER/*.rpm
-  exit 1
+    grep -m1 -i -oP "$GREP_PATTERN" $OUTPUT_FOLDER/root.log >> ~/build_fail_reason.log
+    rm -rf $OUTPUT_FOLDER/*.rpm
+    exit 1
 fi
 
 # Extract rpmlint logs into separate file
@@ -276,8 +293,8 @@ rm -f $test_log.tmp
 
 # Check exit code after testing
 if [ $test_code != 0 ] ; then
-  echo '--> Test failed, see: tests.log'
-  exit 5
+    echo '--> Test failed, see: tests.log'
+    exit 5
 fi
 # End tests
 
@@ -306,25 +323,25 @@ try_reclone=true
 retry=0
 while $try_reclone
 do
-	rm -rf $HOME/${PACKAGE}
-	git clone $git_repo $HOME/${PACKAGE}
-	rc=$?
-	try_reclone=false
-	if [[ $rc != 0 && $retry < $MAX_RETRIES ]] ; then
-	  try_reclone=true
-	  (( retry=$retry+1 ))
-	  echo "--> Something wrong with git repository, next try (${retry} from ${MAX_RETRIES})..."
-	  echo "--> Delay ${WAIT_TIME} sec..."
-	  sleep $WAIT_TIME
-	fi
+    rm -rf $HOME/${PACKAGE}
+    git clone $git_repo $HOME/${PACKAGE}
+    rc=$?
+    try_reclone=false
+    if [[ $rc != 0 && $retry < $MAX_RETRIES ]] ; then
+	try_reclone=true
+	(( retry=$retry+1 ))
+	echo "--> Something wrong with git repository, next try (${retry} from ${MAX_RETRIES})..."
+	echo "--> Delay ${WAIT_TIME} sec..."
+	sleep $WAIT_TIME
+    fi
 done
 
 # checkout specific branch/tag if defined
 if [[ ! -z "$project_version" ]] ; then
-pushd $HOME/${PACKAGE}
-git checkout $project_version
-git rev-parse HEAD > $HOME/commit_hash
-popd
+    pushd $HOME/${PACKAGE}
+    git checkout $project_version
+    git rev-parse HEAD > $HOME/commit_hash
+    popd
 fi
 
 pushd $HOME/${PACKAGE}
