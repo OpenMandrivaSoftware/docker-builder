@@ -284,7 +284,16 @@ retry=0
 while $try_reclone
 do
     rm -rf $HOME/${PACKAGE}
-    git clone $git_repo $HOME/${PACKAGE}
+# checkout specific branch/tag if defined
+    if [[ ! -z "$project_version" ]]; then
+# (tpg) clone only history of 100 commits to reduce bandwith
+	git clone --depth 100 -b $project_version $git_repo $HOME/${PACKAGE}
+	pushd $HOME/${PACKAGE}
+	git rev-parse HEAD > $HOME/commit_hash
+	popd
+    else
+	git clone --depth 100 $git_repo $HOME/${PACKAGE}
+    fi
     rc=$?
     try_reclone=false
     if [[ $rc != 0 && $retry < $MAX_RETRIES ]] ; then
@@ -296,19 +305,11 @@ do
     fi
 done
 
-# checkout specific branch/tag if defined
-if [[ ! -z "$project_version" ]]; then
-    pushd $HOME/${PACKAGE}
-    git checkout $project_version
-    git rev-parse HEAD > $HOME/commit_hash
-    popd
-fi
-
 pushd $HOME/${PACKAGE}
-# download sources from .abf.yml
-/bin/bash /mdv/download_sources.sh
 # count number of specs (should be 1)
 find_spec
+# download sources from .abf.yml
+/bin/bash /mdv/download_sources.sh
 popd
 
 # build package
