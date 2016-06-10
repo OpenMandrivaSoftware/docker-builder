@@ -31,7 +31,7 @@ done
 target_dir="$rootfsdir/rootfs"
 
 errorCatch() {
-    echo "Something went wrong. Exiting"
+    echo "Error catched. Exiting"
 	rm -rf $target_dir
     exit 1
 }
@@ -63,7 +63,10 @@ install_chroot(){
 		--urpmi-root "$target_dir" \
 		--root "$target_dir"
 
-	[[ $? != 0 ]] && errorCatch
+	if [[ $? != 0 ]]; then
+		echo "Creating urpmi chroot failed."
+		errorCatch
+	fi
 }
 
 install_chroot
