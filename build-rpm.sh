@@ -208,7 +208,7 @@ do
 	$MOCK_BIN -v --configdir=$config_dir --buildsrpm --spec=$build_package/${PACKAGE}.spec --sources=$build_package --no-cleanup-after $extra_build_src_rpm_options --resultdir=$OUTPUT_FOLDER
     fi
 
-    rc=$?
+    rc=${PIPESTATUS[0]}
     try_rebuild=false
     if [[ $rc != 0 && $retry < $MAX_RETRIES ]] ; then
 	if grep -q "$RETRY_GREP_STR" $OUTPUT_FOLDER/root.log; then
@@ -221,27 +221,20 @@ do
     fi
 done
 
-# Save exit code
-rc=$?
-kill $subshellpid
-echo '--> Done.'
-
 # Check exit code after build
-if [ $rc != 0 ] ; then
+if [ $rc != 0 ] || [ ! -e $OUTPUT_FOLDER/*.src.rpm ]]; then
     echo '--> Build failed: mock-urpm encountered a problem.'
     # 99% of all build failures at src.rpm creation is broken deps
     # m1 show only first match -oP show only matching
     grep -m1 -oP "\(due to unsatisfied(.*)$" $OUTPUT_FOLDER/root.log >> ~/build_fail_reason.log
+    [ -z $subshellpid ] && kill $subshellpid
     exit 1
 fi
 
+echo '--> Done.'
+
 echo '--> Build rpm'
 $MOCK_BIN -v --configdir=$config_dir --rebuild $OUTPUT_FOLDER/*.src.rpm --no-cleanup-after --no-clean $extra_build_rpm_options --resultdir=$OUTPUT_FOLDER
-
-# Save exit code
-rc=$?
-kill $subshellpid
-echo '--> Done.'
 
 # Check exit code after build
 if [ $rc != 0 ] ; then
@@ -249,8 +242,10 @@ if [ $rc != 0 ] ; then
 # clean all the rpm files because build was not completed
     grep -m1 -i -oP "$GREP_PATTERN" $OUTPUT_FOLDER/root.log >> ~/build_fail_reason.log
     rm -rf $OUTPUT_FOLDER/*.rpm
+        [ -z $subshellpid ] && kill $subshellpid
     exit 1
 fi
+echo '--> Done.'
 
 # Extract rpmlint logs into separate file
 echo "--> Grepping rpmlint logs from $OUTPUT_FOLDER/build.log to $OUTPUT_FOLDER/rpmlint.log"
