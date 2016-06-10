@@ -63,7 +63,7 @@ install_chroot(){
 		--urpmi-root "$target_dir" \
 		--root "$target_dir"
 
-	[ $? -gt 0 ] && errorCatch
+	[[ $? != 0 ]] && errorCatch
 }
 
 install_chroot
