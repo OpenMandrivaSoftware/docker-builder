@@ -8,9 +8,9 @@ echo export BUILD_PLATFORM="$BUILD_PLATFORM"
 prepare_and_run() {
 OUTPUT_FOLDER=${HOME}/output
 if [ ! -d "$OUTPUT_FOLDER" ]; then
-        mkdir -p $OUTPUT_FOLDER
+    mkdir -p $OUTPUT_FOLDER
 else
-        rm -f $OUTPUT_FOLDER/*
+    rm -f $OUTPUT_FOLDER/*
 fi
 source /etc/profile
 echo "prepare ABF builder environment"
