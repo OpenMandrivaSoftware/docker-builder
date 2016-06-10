@@ -41,7 +41,7 @@ mv -f ~/logging.ini $config_dir/logging.ini
 
 if [[ ${distro_release,,} = cooker ]]; then
     repo_names="main"
-    repo_url="http://abf-downloads.openmandriva.org/$distro_release/repository/$arch/main/release/" 
+    repo_url="http://abf-downloads.openmandriva.org/$distro_release/repository/$arch/main/release/"
 else
     repo_names="main main_updates"
     repo_url="http://abf-downloads.openmandriva.org/$distro_release/repository/$arch/main/release/ http://abf-downloads.openmandriva.org/$distro_release/repository/$arch/main/updates/"
