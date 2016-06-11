@@ -125,6 +125,7 @@ for arch in $arches ; do
   # Check exit code after build
     if [ $rc != 0 ] ; then
 	echo '--> Build failed: mock-urpm encountered a problem.'
+	cleanup
 	exit 1
     fi
 
@@ -132,6 +133,7 @@ for arch in $arches ; do
 
     if [ "${chroot}" == '' ] ; then
 	echo '--> Build failed: chroot does not exist.'
+	cleanup
 	exit 1
     fi
 
