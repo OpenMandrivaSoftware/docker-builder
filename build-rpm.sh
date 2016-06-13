@@ -9,10 +9,12 @@ sudo rm -rf /var/lib/mock-urpm/*
 # unmask/mask it, we need to keep logs
 rm -rf $HOME/output/
 rm -fv ~/build_fail_reason.log
+# (tpg) remove package
+rm -rf $HOME/${PACKAGE}
 # (tpg) remove old files
 # in many cases these are leftovers when build fails
 # would be nice to remove them to free disk space
-find $HOME ! -name 'qemu-a*' -mtime +2 -exec rm -rf {} \; &> /dev/null
+find $HOME -maxdepth 1 ! -name 'qemu-a*' ! -name 'docker-worker' ! -name '.gem' ! -name 'envfile' -mmin +1560 -delete &> /dev/null
 }
 
 cleanup
