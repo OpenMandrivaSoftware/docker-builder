@@ -225,7 +225,7 @@ do
 done
 
 # Check exit code after build
-if [ $rc != 0 ] || [ ! -e $OUTPUT_FOLDER/*.src.rpm ]]; then
+if [ $rc != 0 ] || [ ! -e $OUTPUT_FOLDER/*.src.rpm ]; then
     echo '--> Build failed: mock-urpm encountered a problem.'
     # 99% of all build failures at src.rpm creation is broken deps
     # m1 show only first match -oP show only matching
