@@ -1,9 +1,0 @@
-#!/bin/bash
-
-echo "Fake build script"
-echo "Going sleeping for 20 seconds"
-sleep 5
-rm -rf ~/output
-cp -r /builder-c/output ~
-cp /builder-c/output/commit_hash ~
-exit 0
