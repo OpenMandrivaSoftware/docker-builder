@@ -75,10 +75,19 @@ container_data() {
 c_data=$OUTPUT_FOLDER/container_data.json
 project_name=`echo ${git_repo} | sed s%.*/%% | sed s/.git$//`
 echo '[' > ${c_data}
+comma=0
 for rpm in ${OUTPUT_FOLDER}/*.rpm; do
     nevr=(`rpm -qp --queryformat "%{NAME} %{EPOCH} %{VERSION} %{RELEASE}" ${rpm}`)
     name=${nevr[0]}
     if [ "${name}" != '' ] ; then
+	if [ $comma -eq 1 ]
+	then
+		echo -n "," >> ${c_data}
+	fi
+	if [ $comma -eq 0 ]
+	then
+		comma=1
+	fi
 	fullname=`basename $rpm`
 	epoch=${nevr[1]}
 	version=${nevr[2]}
@@ -99,11 +108,9 @@ for rpm in ${OUTPUT_FOLDER}/*.rpm; do
 	echo "\"epoch\":\"${epoch}\","                    >> ${c_data}
 	echo "\"version\":\"${version}\","                >> ${c_data}
 	echo "\"release\":\"${release}\""                 >> ${c_data}
-	echo '},' >> ${c_data}
+	echo '}' >> ${c_data}
     fi
 done
-# Add '{}'' because ',' before
-echo '{}' >> ${c_data}
 echo ']' >> ${c_data}
 
 }
