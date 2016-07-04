@@ -273,7 +273,7 @@ echo "--> Create rpm -qa list"
 rpm --root=/var/lib/mock-urpm/openmandriva-$platform_arch/root/ -qa >> $OUTPUT_FOLDER/rpm-qa.log
 
 # Test RPM files
-TEST_CHROOT_PATH=$($MOCK_BIN --configdir=$config_dir --print-root-path)/root
+TEST_CHROOT_PATH=$($MOCK_BIN --configdir=$config_dir --print-root-path)
 test_code=0
 test_log="$OUTPUT_FOLDER"/tests.log
 echo '--> Checking if rpm packages can be installed' >> $test_log
