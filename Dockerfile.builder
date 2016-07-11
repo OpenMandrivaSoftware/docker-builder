@@ -22,13 +22,5 @@ RUN urpmi --auto --auto-update --no-verify-rpm \
 # && echo "tmpfs /var/lib/mock-urpm/ tmpfs defaults,size=4096m,uid=$(id -u omv),gid=$(id -g omv),mode=0700 0 0" >> /etc/fstab \
 #
 
-ADD ./build-rpm.sh /mdv/build-rpm.sh
-ADD ./config-generator.sh /mdv/config-generator.sh
-ADD ./download_sources.sh /mdv/download_sources.sh
-ADD ./cachedchroot.sh /mdv/cachedchroot.sh
-
-USER omv
-ENV HOME /home/omv
-
 COPY entrypoint.sh /sbin/entrypoint.sh
 ENTRYPOINT ["/sbin/entrypoint.sh"]
