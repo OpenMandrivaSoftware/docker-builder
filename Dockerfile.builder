@@ -9,21 +9,12 @@ RUN urpmi --auto --auto-update --no-verify-rpm \
  && urpmi.addmedia contrib http://abf-downloads.openmandriva.org/cooker/repository/$RARCH/contrib/release/ \
  && rm -f /etc/localtime \
  && ln -s /usr/share/zoneinfo/UTC /etc/localtime \
- && gpg2 --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 \
+ && gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 \
  && urpmi --no-suggests --no-verify-rpm --auto mock-urpm git curl sudo gnutar yaml-devel gcc-c++ readline-devel openssl-devel libtool bison\
  && sed -i -e "s/Defaults    requiretty.*/ #Defaults    requiretty/g" /etc/sudoers \
  && echo "%mock-urpm ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers \
- && /bin/bash -l -c "curl -L get.rvm.io | bash -s stable" \
- && export PATH=$PATH:/usr/local/rvm/bin/ \
- && /bin/bash -l -c "source /usr/local/rvm/scripts/rvm" \
- && /bin/bash -l -c "rvm install $RUBY" \
- && /bin/bash -l -c "rvm use $RUBY" \
- && /bin/bash -l -c "rvm $RUBY do rvm gemset create abf-worker" \
- && /bin/bash -l -c "rvm use $RUBY@abf-worker --default" \
- && /bin/bash -l -c "rvm gemset create abf-worker" \
  && adduser omv \
  && usermod -a -G mock-urpm omv \
- && usermod -a -G rvm omv \
  && chown -R omv:mock-urpm /etc/mock-urpm \
  && rm -rf /var/cache/urpmi/rpms/*
 
