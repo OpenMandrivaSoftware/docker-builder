@@ -19,8 +19,6 @@ find $HOME -maxdepth 1 ! -name 'qemu-a*' ! -name 'docker-worker' ! -name '.gem' 
 
 cleanup
 
-trap "sudo pkill -TERM -P $$; exit" EXIT
-
 MOCK_BIN="/usr/bin/mock-urpm"
 config_dir=/etc/mock-urpm/
 # $PACKAGE same as project name
