@@ -293,7 +293,7 @@ do
     test_code=$?
     try_retest=false
     if [[ $test_code != 0 && $retry < $MAX_RETRIES ]] ; then
-	if grep -q "$RETRY_GREP_STR" $test_log_tmp; then
+	if grep -q "$RETRY_GREP_STR" $test_log.tmp; then
 	    echo '--> Repository was changed in the middle, will rerun the tests' >> $test_log
 	    sleep $WAIT_TIME
 	    sudo chroot $chroot_path urpmi.update -a >> $test_log 2>&1
