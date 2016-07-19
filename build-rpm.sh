@@ -121,13 +121,13 @@ if [[ "${CACHED_CHROOT_SHA1}" != '' ]] ; then
 	curl -L "${filestore_url}/${CACHED_CHROOT_SHA1}" -o "$HOME/${CACHED_CHROOT_SHA1}.tar.xz"
     fi
 # unpack in root
-    echo "extracting chroot $CACHED_CHROOT_SHA1"
-	if echo "${CACHED_CHROOT_SHA1} "$HOME/${CACHED_CHROOT_SHA1}.tar.xz" | sha1sum -c --status; then
-    sudo tar -xf $HOME/${CACHED_CHROOT_SHA1}.tar.xz -C /
-	else
+    echo "Extracting chroot $CACHED_CHROOT_SHA1"
+    if echo "${CACHED_CHROOT_SHA1} $HOME/${CACHED_CHROOT_SHA1}.tar.xz" | sha1sum -c --status &> /dev/null; then
+	sudo tar -xf $HOME/${CACHED_CHROOT_SHA1}.tar.xz -C /
+    else
 	echo "Building without cached chroot, becasue SHA1 is wrong."
 	export CACHED_CHROOT_SHA1=""
-	fi
+    fi
 fi
 
 }
