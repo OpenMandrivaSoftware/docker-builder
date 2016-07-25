@@ -317,7 +317,7 @@ rm -f $test_log.tmp
 # Check exit code after testing
 if [ $test_code != 0 ] ; then
     echo '--> Test failed, see: tests.log'
-    exit 5
+    test_code_exit=5
 fi
 # End tests
 
