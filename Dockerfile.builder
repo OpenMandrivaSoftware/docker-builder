@@ -3,7 +3,6 @@ FROM openmandriva/cooker
 #FROM openmandriva/cooker-armv7hl
 # replace me with armv7hl, aarch64
 ENV RARCH x86_64
-ENV RUBY ruby-2.2.3
 
 RUN urpmi --auto --auto-update --no-verify-rpm \
  && urpmi.addmedia contrib http://abf-downloads.openmandriva.org/cooker/repository/$RARCH/contrib/release/ \
@@ -16,7 +15,8 @@ RUN urpmi --auto --auto-update --no-verify-rpm \
  && adduser omv \
  && usermod -a -G mock-urpm omv \
  && chown -R omv:mock-urpm /etc/mock-urpm \
- && rm -rf /var/cache/urpmi/rpms/*
+ && rm -rf /var/cache/urpmi/rpms/* \
+ && rm -rf /usr/share/man/
 
 ## put me in RUN if you have more than 16gb of RAM
 # && echo "tmpfs /var/lib/mock-urpm/ tmpfs defaults,size=4096m,uid=$(id -u omv),gid=$(id -g omv),mode=0700 0 0" >> /etc/fstab \
