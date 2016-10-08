@@ -202,7 +202,7 @@ arm_platform_detector
 # We will rerun the build in case when repository is modified in the middle,
 # but for safety let's limit number of retest attempts
 # (since in case when repository metadata is really broken we can loop here forever)
-MAX_RETRIES=5
+MAX_RETRIES=10
 WAIT_TIME=60
 RETRY_GREP_STR="You may need to update your urpmi database\|problem reading synthesis file of medium\|retrieving failed: "
 
