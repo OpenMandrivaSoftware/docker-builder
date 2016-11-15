@@ -6,13 +6,14 @@ mkimg="$(basename "$0")"
 
 usage() {
     echo >&2 "usage: $mkimg --rootfs=rootfs_path --version=openmandriva_version [--mirror=url]"
-    echo >&2 "   ie: $mkimg --rootfs=. --version=cooker --mirror=http://abf-downloads.openmandriva.org/cooker/repository/x86_64/main/release/"
-    echo >&2 "       $mkimg --rootfs=. --version=cooker"
+    echo >&2 "       $mkimg --rootfs=/tmp/rootfs --version=3.0 --arch=x86_64 --with-updates"
     echo >&2 "       $mkimg --rootfs=/tmp/rootfs --version=openmandriva2014.0 --arch=x86_64"
+    echo >&2 "       $mkimg --rootfs=. --version=cooker --mirror=http://abf-downloads.openmandriva.org/cooker/repository/x86_64/main/release/"
+    echo >&2 "       $mkimg --rootfs=. --version=cooker"
     exit 1
 }
 
-optTemp=$(getopt --options '+d,v:,m:,a:,s,h' --longoptions 'rootfs:,version:,mirror:,arch:,with-systemd, help' --name mkimage-urpmi -- "$@")
+optTemp=$(getopt --options '+d,v:,m:,a:,s,u,h' --longoptions 'rootfs:,version:,mirror:,arch:,with-systemd,with-updates, help' --name mkimage-urpmi -- "$@")
 eval set -- "$optTemp"
 unset optTemp
 
@@ -23,6 +24,7 @@ while true; do
 	-m|--mirror) mirror="$2" ; shift 2 ;;
 	-a|--arch) arch="$2" ; shift 2 ;;
 	-s|--with-systemd) systemd=true ; shift ;;
+	-u|--with-updates) updates=true ; shift ;;
 	-h|--help) usage ;;
 	--) shift ; break ;;
     esac
@@ -51,11 +53,16 @@ fi
 if [ -z $mirror ]; then
 # No repo provided, use main
     mirror=http://abf-downloads.openmandriva.org/$installversion/repository/$arch/main/release/
+    update_mirror=http://abf-downloads.openmandriva.org/$installversion/repository/$arch/main/updates/
 fi
+
 
 # run me here
 install_chroot(){
     urpmi.addmedia main_release $mirror --urpmi-root "$target_dir";
+if [ ! -z $updates ]; then
+    urpmi.addmedia main_updates $update_mirror --urpmi-root "$target_dir";
+fi
     urpmi basesystem-minimal urpmi distro-release-OpenMandriva locales locales-en $systemd \
 	--auto \
 	--no-suggests \
