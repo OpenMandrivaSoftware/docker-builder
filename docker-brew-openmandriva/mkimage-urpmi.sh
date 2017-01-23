@@ -140,7 +140,7 @@ if [[ "$arch" == "aarch64" ]]; then
 fi
 
 if [[ "$arch" == "armv7hl" ]]; then
-    if [ $cpu != "armb7hl" ] ; then
+    if [ $cpu != "arm" ] ; then
 	mkdir -p $target_dir/usr/bin/
         cp -v $HOME/qemu-arm $HOME/qemu-arm-binfmt $target_dir/usr/bin/
     fi
