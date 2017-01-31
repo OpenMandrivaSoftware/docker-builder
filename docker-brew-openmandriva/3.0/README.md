@@ -1,5 +1,5 @@
 Build image
 
 ```bash
-docker build --tag=openmandriva/lx3 --file Dockerfile .
+docker build --tag=openmandriva/3.0 --file Dockerfile .
 ```
