@@ -10,7 +10,7 @@ sudo rm -rf /var/lib/mock-urpm/*
 rm -rf $HOME/output/
 rm -fv ~/build_fail_reason.log
 # (tpg) remove package
-rm -rf $HOME/${PACKAGE}
+rm -rf "$HOME/${PACKAGE}"
 # (tpg) remove old files
 # in many cases these are leftovers when build fails
 # would be nice to remove them to free disk space
