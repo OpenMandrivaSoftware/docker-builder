@@ -16,7 +16,7 @@ RUN urpmi --auto --auto-update --no-verify-rpm \
  && usermod -a -G mock-urpm omv \
  && chown -R omv:mock-urpm /etc/mock-urpm \
  && rm -rf /var/cache/urpmi/rpms/* \
- && rm -rf /usr/share/man/
+ && rm -rf /usr/share/man/ /usr/share/cracklib /usr/share/doc
 
 ## put me in RUN if you have more than 16gb of RAM
 # && echo "tmpfs /var/lib/mock-urpm/ tmpfs defaults,size=4096m,uid=$(id -u omv),gid=$(id -g omv),mode=0700 0 0" >> /etc/fstab \

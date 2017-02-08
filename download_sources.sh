@@ -10,7 +10,7 @@ if [ -e "${abfyml}" ]; then
 
     while read file sha; do
 	echo -n "found entry: file=${file} ... "
-	if [ -e ${file} ]; then
+	if [ -e "${file}" ]; then
 	    if echo "${sha}  ${file}" | sha1sum -c --status; then
 		echo "sha1sum correct"
 	    else
