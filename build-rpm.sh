@@ -351,28 +351,27 @@ validate_arch() {
     validate_build() {
         local _PLATFORM=($1)
 # count for occurences
-        for item in ${SPEC_ARCH[@]}; do
-            if [[ "${_PLATFORM[@]}" =~ "${item}" ]] ; then
-                FOUND_MATCH=1
-                echo "--> Found match of ${item} in ${_PLATFORM[@]} for ${BUILD_TYPE}"
-            fi
-        done
+	for item in ${SPEC_ARCH[@]}; do
+	    if [[ "${_PLATFORM[@]}" =~ "${item}" ]] ; then
+		FOUND_MATCH=1
+		echo "--> Found match of ${item} in ${_PLATFORM[@]} for ${BUILD_TYPE}"
+	    fi
+	done
 
-        if [ -n "${FOUND_MATCH}" -a "${BUILD_TYPE,,}" = "excludearch" ]; then
-            echo "--> Build for this architecture is forbidden because of ${BUILD_TYPE} set in spec file!"
-            exit 6
-        elif [ -z "${FOUND_MATCH}" -a "${BUILD_TYPE,,}" = "exclusivearch" ]; then
-            echo "--> Build for this architecture is forbidden because of ${BUILD_TYPE} set in spec file!"
-            exit 6
-        else
-            echo "--> Spec validated for ExcludeArch and ExclusiveArch. Continue building."
-        fi
-
-}
+	if [ -n "${FOUND_MATCH}" -a "${BUILD_TYPE,,}" = "excludearch" ]; then
+	    echo "--> Build for this architecture is forbidden because of ${BUILD_TYPE} set in spec file!"
+	    exit 6
+	elif [ -z "${FOUND_MATCH}" -a "${BUILD_TYPE,,}" = "exclusivearch" ]; then
+	    echo "--> Build for this architecture is forbidden because of ${BUILD_TYPE} set in spec file!"
+	    exit 6
+	else
+	    echo "--> Spec validated for ExcludeArch and ExclusiveArch. Continue building."
+	fi
+    }
 
 # translate arch into various options that may be set up in spec file
     case ${PLATFORM_ARCH,,} in
-        armv7hl)
+	armv7hl)
                 validate_build "armx %armx %{armx} armv7hl"
                 ;;
         aarch64)
