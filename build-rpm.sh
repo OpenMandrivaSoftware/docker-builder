@@ -211,7 +211,7 @@ try_rebuild=true
 retry=0
 while $try_rebuild
 do
-    rm -rf $OUTPUT_FOLDER
+    rm -rf "$OUTPUT_FOLDER"
     if [[ "${CACHED_CHROOT_SHA1}" != '' ]] ; then
 	echo "--> Uses cached chroot with sha1 '$CACHED_CHROOT_SHA1'..."
 	$MOCK_BIN --chroot "urpmi.removemedia -a"
@@ -271,7 +271,7 @@ if [ $rc != 0 ]; then
 # clean all the rpm files because build was not completed
     grep -m1 -i -oP "$GREP_PATTERN" $OUTPUT_FOLDER/root.log >> ~/build_fail_reason.log
     rm -rf $OUTPUT_FOLDER/*.rpm
-    [ -n $subshellpid ] && kill $subshellpid
+    [[ -n $subshellpid ]] && kill $subshellpid
     exit 1
 fi
 echo '--> Done.'
@@ -325,13 +325,12 @@ fi
 
 find_spec() {
 # Check count of *.spec files (should be one)
-x=`ls -1 | grep '.spec$' | wc -l | sed 's/^ *//' | sed 's/ *$//'`
-spec_name=`ls -1 | grep '.spec$'`
-if [ $x -eq '0' ] ; then
+x=$(ls -1 | grep -c '.spec$' | sed 's/^ *//' | sed 's/ *$//')
+if [ "$x" -eq "0" ] ; then
     echo '--> There are no spec files in repository.'
     exit 1
 else
-    if [ $x -ne '1' ] ; then
+    if [ "$x" -ne "1" ] ; then
 	echo '--> There are more than one spec file in repository.'
 	exit 1
     fi
