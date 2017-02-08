@@ -342,7 +342,7 @@ validate_arch() {
     BUILD_TYPE=`grep -i '^excludearch:.*$\|^exclusivearch:.*$' *.spec | awk -F'[:]' '{print $1}'`
 
 # check if spec file have both ExcludeArch and ExclusiveArch set up
-    [[ ${#BUILD_TYPE} > 15 ]] && echo "Spec file has set ExcludeArch and ExclusiveArch. Exiting!" && exit 1
+    [[ ${#BUILD_TYPE} -gt 15 ]] && echo "Spec file has set ExcludeArch and ExclusiveArch. Exiting!" && exit 1
 
     SPEC_ARCH=(`grep -i '^excludearch:.*$\|^exclusivearch:.*$' *.spec | awk -F'[[:blank:]]' '{$1="";print $0}' | sort -u`)
 
@@ -350,10 +350,10 @@ validate_arch() {
     validate_build() {
         local _PLATFORM=($1)
 # count for occurences
-	for item in ${SPEC_ARCH[@]}; do
-	    if [[ "${_PLATFORM[@]}" =~ "${item}" ]] ; then
+	for item in "${SPEC_ARCH[@]}"; do
+	    if [[ "${_PLATFORM[*]}" =~ "${item}" ]] ; then
 		FOUND_MATCH=1
-		echo "--> Found match of ${item} in ${_PLATFORM[@]} for ${BUILD_TYPE}"
+		echo "--> Found match of ${item} in ${_PLATFORM[*]} for ${BUILD_TYPE}"
 	    fi
 	done
 
