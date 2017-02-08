@@ -240,7 +240,7 @@ if [ $rc != 0 ] || [ ! -e $OUTPUT_FOLDER/*.src.rpm ]; then
     # 99% of all build failures at src.rpm creation is broken deps
     # m1 show only first match -oP show only matching
     grep -m1 -oP "\(due to unsatisfied(.*)$" $OUTPUT_FOLDER/root.log >> ~/build_fail_reason.log
-    [ -n $subshellpid ] && kill $subshellpid
+    [[ -n $subshellpid ]] && kill $subshellpid
     exit 1
 fi
 
