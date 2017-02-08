@@ -8,7 +8,7 @@ if [ -e "${abfyml}" ]; then
     sed -ne '/^[Ss]ources\:.*$/,$p' ${abfyml} | \
     sed -rn '$G;s/^[\"'\''[:space:]]*([^[:space:]:\"'\'']+)[\"'\''[:space:]]*.*[\"'\''[:space:]]*([0-9a-fA-F]{40})[\"'\''[:space:]]*$/\1 \2/p' | \
 
-    while read file sha; do
+    while read -r file sha; do
 	echo -n "found entry: file=${file} ... "
 	if [ -e "${file}" ]; then
 	    if echo "${sha}  ${file}" | sha1sum -c --status; then
@@ -26,7 +26,7 @@ if [ -e "${abfyml}" ]; then
     		else
         	    echo "sha1sum INCORRECT! skipping..."
 		    echo "remove file ${file}"
-		    rm -f ${file}
+		    rm -f "${file}"
     		fi
     	    else
     		echo "filed! skipping..."
