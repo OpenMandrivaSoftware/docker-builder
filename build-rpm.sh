@@ -241,6 +241,7 @@ if [ $rc != 0 ] || [ ! -e $OUTPUT_FOLDER/*.src.rpm ]; then
     # m1 show only first match -oP show only matching
     grep -m1 -oP "\(due to unsatisfied(.*)$" $OUTPUT_FOLDER/root.log >> ~/build_fail_reason.log
     [[ -n $subshellpid ]] && kill $subshellpid
+    cleanup
     exit 1
 fi
 
@@ -272,6 +273,7 @@ if [ $rc != 0 ]; then
     grep -m1 -i -oP "$GREP_PATTERN" $OUTPUT_FOLDER/root.log >> ~/build_fail_reason.log
     rm -rf $OUTPUT_FOLDER/*.rpm
     [[ -n $subshellpid ]] && kill $subshellpid
+    cleanup
     exit 1
 fi
 echo '--> Done.'
