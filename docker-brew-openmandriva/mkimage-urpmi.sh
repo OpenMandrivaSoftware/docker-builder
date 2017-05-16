@@ -13,7 +13,7 @@ usage() {
     exit 1
 }
 
-optTemp=$(getopt --options '+d,v:,m:,a:,s,u,p,h,+x' --longoptions 'rootfs:,version:,mirror:,arch:,with-systemd,with-updates,with-passwd,help,extra-package:' --name mkimage-urpmi -- "$@")
+optTemp=$(getopt --options '+d,v:,m:,a:,s,u,U,p,h,+x' --longoptions 'rootfs:,version:,mirror:,arch:,with-systemd,with-updates,without-user,with-passwd,help,extra-package:' --name mkimage-urpmi -- "$@")
 eval set -- "$optTemp"
 unset optTemp
 
@@ -28,6 +28,7 @@ while true; do
 	-s|--with-systemd) systemd=systemd ; shift ;;
 	-u|--with-updates) updates=true ; shift ;;
 	-u|--with-passwd) passwd=true ; shift ;;
+	-U|--without-user) without_user=true ; shift ;;
 	-h|--help) usage ;;
 	-x|--extra-package) extra_packages="$extra_packages $2" ; shift 2 ;;
 	--) shift ; break ;;
@@ -186,12 +187,20 @@ nameserver 8.8.8.8
 nameserver 8.8.4.4
 EOF
 
-if [ ! -z $passwd ]; then
-ROOT_PASSWD="root"
-echo "change password to $ROOT_PASSWD"
-sudo chroot $target_dir /bin/bash -c "echo '$ROOT_PASSWD' |passwd root --stdin"
+if [ ! -z "$without_user" ]; then
+	# Create user omv, password omv
+	echo 'omv:x:1001:1001::/home/omv:/bin/bash' >>"$target_dir"/etc/passwd
+	echo 'omv:$6$rG3bQ92hkTNubV1p$5qPB9FoXBhNcSE1FOklCoEDowveAgjSf2cHYVwCENZaWtgpFQaRRRN5Ihwd8nuaKMdA1R1XouOasJ7u5dbiGt0:17302:0:99999:7:::' >>"$target_dir"/etc/shadow
+	echo 'omv:x:1001:' >>"$target_dir"/etc/group
+	sed -i -e 's,wheel:x:10:$,wheel:x:10:omv,' "$target_dir"/etc/group
+fi
 
-cat << EOF > $target_dir/README.omv
+if [ ! -z "$passwd" ]; then
+	ROOT_PASSWD="root"
+	echo "change password to $ROOT_PASSWD"
+	sudo chroot $target_dir /bin/bash -c "echo '$ROOT_PASSWD' |passwd root --stdin"
+
+	cat << EOF > "$target_dir"/README.omv
 OpenMandriva $installversion distro
 default login\password is root:root
 You must change it!
