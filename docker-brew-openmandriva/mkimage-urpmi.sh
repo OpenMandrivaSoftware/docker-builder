@@ -13,9 +13,11 @@ usage() {
     exit 1
 }
 
-optTemp=$(getopt --options '+d,v:,m:,a:,s,u,p,h' --longoptions 'rootfs:,version:,mirror:,arch:,with-systemd,with-updates,with-passwd, help' --name mkimage-urpmi -- "$@")
+optTemp=$(getopt --options '+d,v:,m:,a:,s,u,p,h,+x' --longoptions 'rootfs:,version:,mirror:,arch:,with-systemd,with-updates,with-passwd,help,extra-package:' --name mkimage-urpmi -- "$@")
 eval set -- "$optTemp"
 unset optTemp
+
+extra_packages=""
 
 while true; do
     case "$1" in
@@ -23,10 +25,11 @@ while true; do
 	-v|--version) installversion="$2" ; shift 2 ;;
 	-m|--mirror) mirror="$2" ; shift 2 ;;
 	-a|--arch) arch="$2" ; shift 2 ;;
-	-s|--with-systemd) systemd=true ; shift ;;
+	-s|--with-systemd) systemd=systemd ; shift ;;
 	-u|--with-updates) updates=true ; shift ;;
 	-u|--with-passwd) passwd=true ; shift ;;
 	-h|--help) usage ;;
+	-x|--extra-package) extra_packages="$extra_packages $2" ; shift 2 ;;
 	--) shift ; break ;;
     esac
 done
