@@ -83,12 +83,6 @@ fi
 
 arm_platform_detector(){
 
-# Qemu ARM binaries
-QEMU_ARM_SHA="9c7e32080fab6751a773f363bfebab8ac8cb9f4a"
-QEMU_ARM_BINFMT_SHA="10131ee0db7a486186c32e0cb7229f4368d0d28b"
-QEMU_ARM64_SHA="240d661cee1fc7fbaf7623baa3a5b04dfb966424"
-QEMU_ARM64_BINFMT_SHA="ec864fdf8b57ac77652cd6ab998e56fc4ed7ef5d"
-
 filestore_url="http://file-store.openmandriva.org/api/v1/file_stores"
 
 probe_cpu() {
@@ -104,49 +98,21 @@ case "$cpu" in
       cpu="aarch64"
    ;;
 esac
-# download qemu binaries for non-native armx
-if [[ "$arch" == "aarch64" ]]; then
-    if [ $cpu != "aarch64" ] ; then
-        if [ ! -e $HOME/qemu-aarch64 ] || [ $QEMU_ARM64_SHA != `sha1sum $HOME/qemu-aarch64 | awk '{print $1}'` ]; then
-
-            wget -O $HOME/qemu-aarch64 --content-disposition $filestore_url/$QEMU_ARM64_SHA --no-check-certificate &> /dev/null
-        fi
-
-        if [ ! -e $HOME/qemu-aarch64-binfmt ] || [ $QEMU_ARM64_BINFMT_SHA != `sha1sum $HOME/qemu-aarch64-binfmt | awk '{print $1}'` ]; then
-            wget -O $HOME/qemu-aarch64-binfmt --content-disposition $filestore_url/$QEMU_ARM64_BINFMT_SHA --no-check-certificate &> /dev/null
-        fi
-        chmod +x $HOME/qemu-aarch64 $HOME/qemu-aarch64-binfmt
-    fi
-    sudo sh -c "echo '$arch-mandriva-linux-gnueabi' > /etc/rpm/platform"
-fi
-
-# download qemu binaries for non-native armx
-if [[ "$arch" == "armv7hl" ]]; then
-    if [ $cpu != "arm" ] ; then
-        if [ ! -e $HOME/qemu-arm ] || [ $QEMU_ARM_SHA != `sha1sum $HOME/qemu-arm | awk '{print $1}'` ]; then
-            wget -O $HOME/qemu-arm --content-disposition $filestore_url/$QEMU_ARM_SHA --no-check-certificate &> /dev/null
-        fi
-
-        if [ ! -e $HOME/qemu-arm-binfmt ] || [ $QEMU_ARM_BINFMT_SHA != `sha1sum $HOME/qemu-arm-binfmt | awk '{print $1}'` ]; then
-            wget -O $HOME/qemu-arm-binfmt --content-disposition $filestore_url/$QEMU_ARM_BINFMT_SHA --no-check-certificate &> /dev/null
-        fi
-        chmod +x $HOME/qemu-arm $HOME/qemu-arm-binfmt
-    fi
-    sudo sh -c "echo '$arch-mandriva-linux-gnueabi' > /etc/rpm/platform"
-fi
 
 # create path
 if [[ "$arch" == "aarch64" ]]; then
     if [ $cpu != "aarch64" ] ; then
 	mkdir -p $target_dir/usr/bin/
-        cp -v $HOME/qemu-aarch64 $HOME/qemu-aarch64-binfmt $target_dir/usr/bin/
+        sudo sh -c "echo '$arch-mandriva-linux-gnueabi' > /etc/rpm/platform"
+	cp /usr/bin/qemu-static-aarch64 $target_dir/usr/bin/
     fi
 fi
 
 if [[ "$arch" == "armv7hl" ]]; then
     if [ $cpu != "arm" ] ; then
 	mkdir -p $target_dir/usr/bin/
-        cp -v $HOME/qemu-arm $HOME/qemu-arm-binfmt $target_dir/usr/bin/
+        sudo sh -c "echo '$arch-mandriva-linux-gnueabi' > /etc/rpm/platform"
+	cp /usr/bin/qemu-static-arm $target_dir/usr/bin/
     fi
 fi
 }

@@ -5,11 +5,6 @@ echo '--> mdv-scripts/cached-chroot: build.sh'
 MOCK_BIN=/usr/bin/mock-urpm
 config_dir=/etc/mock-urpm/
 OUTPUT_FOLDER=/home/omv/iso_builder/results
-# Qemu ARM binaries
-QEMU_ARM_SHA="9c7e32080fab6751a773f363bfebab8ac8cb9f4a"
-QEMU_ARM_BINFMT_SHA="10131ee0db7a486186c32e0cb7229f4368d0d28b"
-QEMU_ARM64_SHA="240d661cee1fc7fbaf7623baa3a5b04dfb966424"
-QEMU_ARM64_BINFMT_SHA="ec864fdf8b57ac77652cd6ab998e56fc4ed7ef5d"
 filestore_url="http://file-store.openmandriva.org/api/v1/file_stores"
 distro_release=${DISTRO_RELEASE:-"cooker"}
 platform_name=${PLATFORM_NAME:-"openmandriva"}
@@ -71,14 +66,11 @@ esac
 
 if [[ "$arch" == "aarch64" ]]; then
     if [ $cpu != "aarch64" ] ; then
-	# this string responsible for "cannot execute binary file"
-	wget -O $HOME/qemu-aarch64 --content-disposition $filestore_url/$QEMU_ARM64_SHA --no-check-certificate &> /dev/null
-	wget -O $HOME/qemu-aarch64-binfmt --content-disposition $filestore_url/$QEMU_ARM64_BINFMT_SHA --no-check-certificate &> /dev/null
-	chmod +x $HOME/qemu-aarch64 $HOME/qemu-aarch64-binfmt
+# this string responsible for "cannot execute binary file"
 # hack to copy qemu binary in non-existing path
 	(while [ ! -e  ${chroot_path}/$platform_name-$arch/root/usr/bin/ ]
 	    do sleep 1;done
-	    sudo cp -v $HOME/qemu-* ${chroot_path}/$platform_name-$arch/root/usr/bin/) &
+	    sudo cp /usr/bin/qemu-static-aarch64 ${chroot_path}/$platform_name-$arch/root/usr/bin/) &
 	    subshellpid=$!
     fi
 # remove me in future
@@ -89,13 +81,10 @@ if [[ "$arch" == "armv7hl" ]]; then
     if [ $cpu != "arm" ] ; then
 # this string responsible for "cannot execute binary file"
 # change path to qemu
-	wget -O $HOME/qemu-arm --content-disposition $filestore_url/$QEMU_ARM_SHA  --no-check-certificate &> /dev/null
-	wget -O $HOME/qemu-arm-binfmt --content-disposition $filestore_url/$QEMU_ARM_BINFMT_SHA --no-check-certificate &> /dev/null
-	chmod +x $HOME/qemu-arm $HOME/qemu-arm-binfmt
 # hack to copy qemu binary in non-existing path
 	(while [ ! -e  ${chroot_path}/$platform_name-$arch/root/usr/bin/ ]
 	    do sleep 1;done
-	    sudo cp -v $HOME/qemu-* ${chroot_path}/$platform_name-$arch/root/usr/bin/) &
+	    sudo cp /usr/bin/qemu-static-arm ${chroot_path}/$platform_name-$arch/root/usr/bin/) &
 	    subshellpid=$!
     fi
 # remove me in future

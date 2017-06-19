@@ -150,20 +150,11 @@ esac
 
 if [[ "$platform_arch" == "aarch64" ]]; then
     if [ $cpu != "aarch64" ] ; then
-# this string responsible for "cannot execute binary file"
-	if [ ! -e $HOME/qemu-aarch64 ] || [ $QEMU_ARM64_SHA != `sha1sum $HOME/qemu-aarch64 | awk '{print $1}'` ]; then
-
-	    wget -O $HOME/qemu-aarch64 --content-disposition $filestore_url/$QEMU_ARM64_SHA --no-check-certificate &> /dev/null
-	fi
-
-	if [ ! -e $HOME/qemu-aarch64-binfmt ] || [ $QEMU_ARM64_BINFMT_SHA != `sha1sum $HOME/qemu-aarch64-binfmt | awk '{print $1}'` ]; then
-	    wget -O $HOME/qemu-aarch64-binfmt --content-disposition $filestore_url/$QEMU_ARM64_BINFMT_SHA --no-check-certificate &> /dev/null
-	fi
-	chmod +x $HOME/qemu-aarch64 $HOME/qemu-aarch64-binfmt
 # hack to copy qemu binary in non-existing path
 	(while [ ! -e  /var/lib/mock-urpm/openmandriva-$platform_arch/root/usr/bin/ ]
 	do sleep 1;done
-	sudo cp $HOME/qemu-* /var/lib/mock-urpm/openmandriva-$platform_arch/root/usr/bin/) &
+	# rebuild docker builder with qemu packages
+	sudo cp /usr/bin/qemu-static-aarch64 /var/lib/mock-urpm/openmandriva-$platform_arch/root/usr/bin/) &
 	subshellpid=$!
     fi
 # remove me in future
@@ -172,20 +163,10 @@ fi
 
 if [[ "$platform_arch" == "armv7hl" ]]; then
     if [ $cpu != "arm" ] ; then
-# this string responsible for "cannot execute binary file"
-# change path to qemu
-	if [ ! -e $HOME/qemu-arm ] || [ $QEMU_ARM_SHA != `sha1sum $HOME/qemu-arm | awk '{print $1}'` ]; then
-	    wget -O $HOME/qemu-arm --content-disposition $filestore_url/$QEMU_ARM_SHA --no-check-certificate &> /dev/null
-	fi
-
-	if [ ! -e $HOME/qemu-arm-binfmt ] || [ $QEMU_ARM_BINFMT_SHA != `sha1sum $HOME/qemu-arm-binfmt | awk '{print $1}'` ]; then
-	    wget -O $HOME/qemu-arm-binfmt --content-disposition $filestore_url/$QEMU_ARM_BINFMT_SHA --no-check-certificate &> /dev/null
-	fi
-	chmod +x $HOME/qemu-arm $HOME/qemu-arm-binfmt
 # hack to copy qemu binary in non-existing path
 	(while [ ! -e  /var/lib/mock-urpm/openmandriva-$platform_arch/root/usr/bin/ ]
 	do sleep 1;done
-	sudo cp $HOME/qemu-* /var/lib/mock-urpm/openmandriva-$platform_arch/root/usr/bin/) &
+	sudo cp /usr/bin/qemu-static-arm /var/lib/mock-urpm/openmandriva-$platform_arch/root/usr/bin/) &
 	subshellpid=$!
     fi
 # remove me in future
