@@ -162,7 +162,7 @@ if [[ "$platform_arch" == "aarch64" ]]; then
 fi
 
 if [[ "$platform_arch" == "armv7hl" ]]; then
-    if [ $cpu != "arm" ] ; then
+    if [ $cpu != "arm" ] || if [ $cpu != "aarch64" ] ; then
 # hack to copy qemu binary in non-existing path
 	(while [ ! -e  /var/lib/mock-urpm/openmandriva-$platform_arch/root/usr/bin/ ]
 	do sleep 1;done
