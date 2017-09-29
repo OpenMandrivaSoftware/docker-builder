@@ -96,9 +96,9 @@ probe_cpu
 }
 
 if [ ! -d "$OUTPUT_FOLDER" ]; then
-    mkdir -p $OUTPUT_FOLDER
+    mkdir -p "$OUTPUT_FOLDER"
 else
-    rm -f $OUTPUT_FOLDER/*
+    rm -f "$OUTPUT_FOLDER"/*
 fi
 
 for arch in $arches ; do
@@ -128,7 +128,7 @@ for arch in $arches ; do
 
     # xz options -4e is 4th extreme level of compression, and -T0 is to use all available threads to speedup compress
     # need sudo to pack root:root dirs
-    sudo XZ_OPT="-4e -T0" tar -Jcvf --no-xattrs --no-acls --absolute-paths ${OUTPUT_FOLDER}/${chroot}.tar.xz ${chroot_path}/${chroot}
+    sudo XZ_OPT="-4e -T0" tar --no-xattrs --no-acls --absolute-paths -Jcvf "${OUTPUT_FOLDER}"/"${chroot}".tar.xz "${chroot_path}"/"${chroot}"
 
     # Save exit code
     rc=$?
