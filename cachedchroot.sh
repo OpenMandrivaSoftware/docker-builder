@@ -14,7 +14,7 @@ arches=${ARCHES:-"i586 x86_64 aarch64 armv7hl"}
 chroot_path="/var/lib/mock-urpm"
 
 cleanup() {
-    echo "cleanup"
+    echo "Cleaning up..."
     sudo rm -fv /etc/rpm/platform
     rm -fv /etc/mock-urpm/default.cfg
     sudo rm -rf ${chroot_path}/*
@@ -102,7 +102,7 @@ else
 fi
 
 for arch in $arches ; do
-# init mock-urpm config
+    # init mock-urpm config
     generate_config
     arm_platform_detector
 
@@ -111,7 +111,7 @@ for arch in $arches ; do
     rc=$?
     echo '--> Done.'
 
-  # Check exit code after build
+    # Check exit code after build
     if [ $rc != 0 ] ; then
 	echo '--> Build failed: mock-urpm encountered a problem.'
 	cleanup
@@ -121,14 +121,24 @@ for arch in $arches ; do
     chroot=`ls -1 ${chroot_path} | grep ${arch} | head -1`
 
     if [ "${chroot}" == '' ] ; then
-	echo '--> Build failed: chroot does not exist.'
+    echo '--> Build failed: chroot does not exist.'
 	cleanup
 	exit 1
     fi
 
-  # xz options -4e is 4th extreme level of compression, and -T0 is to use all available threads to speedup compress
-  # need sudo to pack root:root dirs
+    # xz options -4e is 4th extreme level of compression, and -T0 is to use all available threads to speedup compress
+    # need sudo to pack root:root dirs
     sudo XZ_OPT="-4e -T0" tar -Jcvf --format=gnutar ${OUTPUT_FOLDER}/${chroot}.tar.xz ${chroot_path}/${chroot}
+
+    # Save exit code
+    rc=$?
+
+    # Check exit code after build
+    if [ $rc != 0 ] ; then
+	echo '--> Build failed: tar encountered a problem.'
+	cleanup
+	exit 1
+    fi
     sudo rm -rf ${chroot_path}/${chroot}
 done
 
