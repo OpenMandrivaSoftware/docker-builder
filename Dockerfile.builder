@@ -5,11 +5,10 @@ FROM openmandriva/cooker
 ENV RARCH x86_64
 
 RUN urpmi --auto --auto-update --no-verify-rpm \
- && urpmi.addmedia contrib http://abf-downloads.openmandriva.org/cooker/repository/$RARCH/contrib/release/ \
  && rm -f /etc/localtime \
  && ln -s /usr/share/zoneinfo/UTC /etc/localtime \
  && gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 \
- && urpmi --no-suggests --no-verify-rpm --auto mock-urpm git curl sudo gnutar builder-c \
+ && urpmi --no-suggests --no-verify-rpm --auto mock-urpm git curl sudo builder-c \
  && sed -i -e "s/Defaults    requiretty.*/ #Defaults    requiretty/g" /etc/sudoers \
  && echo "%mock-urpm ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers \
  && adduser omv \
