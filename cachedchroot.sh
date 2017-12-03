@@ -125,7 +125,11 @@ for arch in $arches ; do
 	cleanup
 	exit 1
     fi
-
+    
+    # Remove any stray lockfiles and nake sure rpmdb is clean.....
+    /bin/rm /var/lib/mock-urpm/openmandriva-$arch/root/var/lib/rpm/.RPMLOCK
+    $MOCK_BIN --chroot "/usr/bin/db52_recover"
+    
     # xz options -7e is 7th extreme level of compression, and -T0 is to use all available threads to speedup compress
     # need sudo to pack root:root dirs
     sudo XZ_OPT="-7e -T0" tar --format=gnutar --no-xattrs --no-acls --absolute-paths -Jcvf "${OUTPUT_FOLDER}"/"${chroot}".tar.xz "${chroot_path}"/"${chroot}"
