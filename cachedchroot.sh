@@ -126,8 +126,9 @@ for arch in $arches ; do
 	exit 1
     fi
     
-    # Remove any stray lockfiles and nake sure rpmdb is clean.....
+    # Remove any stray lockfiles and make sure rpmdb is clean.....
     /bin/rm /var/lib/mock-urpm/openmandriva-$arch/root/var/lib/rpm/.RPMLOCK
+    /bin/rm /var/lib/mock-urpm/openmandriva-$arch/root/var/lib/urpmi/.LOCK
     $MOCK_BIN --chroot "/usr/bin/db52_recover"
     
     # xz options -7e is 7th extreme level of compression, and -T0 is to use all available threads to speedup compress
