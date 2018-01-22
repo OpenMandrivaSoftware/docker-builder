@@ -1,6 +1,6 @@
 #!/bin/sh
 set -x
-echo '--> mdv-scripts/cached-chroot: build.sh'
+echo '--> docker-builder/cachedchroot.sh'
 
 MOCK_BIN=/usr/bin/mock-urpm
 config_dir=/etc/mock-urpm/
@@ -14,7 +14,7 @@ arches=${ARCHES:-"i586 x86_64 aarch64 armv7hl"}
 chroot_path="/var/lib/mock-urpm"
 
 cleanup() {
-    echo "Cleaning up..."
+    echo '--> Cleaning up...'
     sudo rm -fv /etc/rpm/platform
     rm -fv /etc/mock-urpm/default.cfg
     sudo rm -rf ${chroot_path}/*
@@ -125,12 +125,12 @@ for arch in $arches ; do
 	cleanup
 	exit 1
     fi
-    
-    # Remove any stray lockfiles and make sure rpmdb is clean.....
+
+    # Remove any stray lockfiles and make sure rpmdb is clean...
     /bin/rm /var/lib/mock-urpm/openmandriva-$arch/root/var/lib/rpm/.RPMLOCK
     /bin/rm /var/lib/mock-urpm/openmandriva-$arch/root/var/lib/urpmi/.LOCK
     $MOCK_BIN --chroot "/usr/bin/db52_recover"
-    
+
     # xz options -7e is 7th extreme level of compression, and -T0 is to use all available threads to speedup compress
     # need sudo to pack root:root dirs
     sudo XZ_OPT="-7e -T0" tar --format=gnutar --no-xattrs --no-acls --absolute-paths -Jcvf "${OUTPUT_FOLDER}"/"${chroot}".tar.xz "${chroot_path}"/"${chroot}"
