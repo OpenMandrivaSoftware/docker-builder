@@ -283,7 +283,7 @@ TEST_CHROOT_PATH=$($MOCK_BIN --configdir=$config_dir --print-root-path)
 test_code=0
 test_log="$OUTPUT_FOLDER"/tests.log
 echo '--> Checking if rpm packages can be installed' >> $test_log
-sudo mkdir -p "${$TEST_CHROOT_PATH}"/test_root
+sudo mkdir -p "${TEST_CHROOT_PATH}"/test_root
 sudo cp "$OUTPUT_FOLDER"/*.rpm "${TEST_CHROOT_PATH}"/
 
 try_retest=true
