@@ -191,8 +191,6 @@ probe_cpu
 
 test_rpm() {
 # Rerun tests
-if [ "$rerun_tests" == 'true' ] ; then
-  export RERUN_TESTS='true' \
        PACKAGES=${packages} \
        results_path=$results_path \
        tmpfs_path=$tmpfs_path \
@@ -203,6 +201,7 @@ if [ "$rerun_tests" == 'true' ] ; then
        use_extra_tests=$use_extra_tests \
        platform_name=$platform_name \
        platform_arch=$platform_arch
+
        TEST_CHROOT_PATH=$($MOCK_BIN --configdir=$config_dir --print-root-path)
        test_code=0
        test_log="$OUTPUT_FOLDER"/tests.log
@@ -226,11 +225,8 @@ if [ "$rerun_tests" == 'true' ] ; then
 	      exit $rc
 	    fi
 	  done
-
-	  mv *src.rpm $src_rpm_path
-
+	
 	  $MOCK_BIN --init --configdir $config_dir -v --no-cleanup-after
-	  chroot_path="${chroot_path}/root"
 	fi
 
 	try_retest=true
@@ -262,15 +258,17 @@ if [ "$rerun_tests" == 'true' ] ; then
 	    echo '--> Test failed, see: tests.log'
 	    test_code_exit=5
 	    exit 5
+	else
+		exit 0
 	fi
-
-  exit 0
-fi
-
 }
 
 build_rpm() {
 arm_platform_detector
+
+if [ "$rerun_tests" = 'true' ]; then
+	test_rpm
+fi
 
 # We will rerun the build in case when repository is modified in the middle,
 # but for safety let's limit number of retest attempts
@@ -363,7 +361,7 @@ if [[ ${rc} != 0 && ${save_buildroot} == 'true' ]]; then
 fi
 
 # Test RPM files
-test_rpm()
+test_rpm
 # End tests
 
 }
