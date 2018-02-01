@@ -52,6 +52,10 @@ extra_build_src_rpm_options="$EXTRA_BUILD_SRC_RPM_OPTIONS"
 extra_cfg_options="$EXTRA_CFG_OPTIONS"
 extra_cfg_urpm_options="$EXTRA_CFG_URPM_OPTIONS"
 save_buildroot=${SAVE_BUILDROOT}
+use_extra_tests=${USE_EXTRA_TESTS}
+rerun_tests=${RERUN_TESTS}
+# list of packages for tests relaunch
+packages="$PACKAGES"
 
 if [ "`uname -m`" = "x86_64" ] && echo "$platform_arch" |grep -qE 'i[0-9]86'; then
     # Change the kernel personality so build scripts don't think
@@ -185,6 +189,86 @@ fi
 probe_cpu
 }
 
+test_rpm() {
+# Rerun tests
+if [ "$rerun_tests" == 'true' ] ; then
+  export RERUN_TESTS='true' \
+       PACKAGES=${packages} \
+       results_path=$results_path \
+       tmpfs_path=$tmpfs_path \
+       rpm_path=$rpm_path \
+       chroot_path=$chroot_path \
+       src_rpm_path=$src_rpm_path \
+       rpm_build_script_path=$rpm_build_script_path \
+       use_extra_tests=$use_extra_tests \
+       platform_name=$platform_name \
+       platform_arch=$platform_arch
+       TEST_CHROOT_PATH=$($MOCK_BIN --configdir=$config_dir --print-root-path)
+       test_code=0
+       test_log="$OUTPUT_FOLDER"/tests.log
+       echo '--> Checking if rpm packages can be installed' >> $test_log
+       sudo mkdir -p "${TEST_CHROOT_PATH}"/test_root
+       sudo cp "$OUTPUT_FOLDER"/*.rpm "${TEST_CHROOT_PATH}"/
+
+	if [ "$rerun_tests" == 'true' ] ; then
+	  [[ "$packages" == '' ]] && echo '--> No packages!!!' && exit 1
+
+	  prefix='rerun-tests-'
+	  cd $rpm_path
+
+	  arr=($packages)
+	  for package in ${arr[@]} ; do
+	    echo "--> Downloading '$package'..." >> $test_log
+	    wget http://file-store.openmandriva.org/api/v1/file_stores/$package --content-disposition --no-check-certificate
+	    rc=$?
+	    if [ $rc != 0 ] ; then
+	      echo "--> Error on extracting package with sha1 '$package'!!!"
+	      exit $rc
+	    fi
+	  done
+
+	  mv *src.rpm $src_rpm_path
+
+	  $MOCK_BIN --init --configdir $config_dir -v --no-cleanup-after
+	  chroot_path="${chroot_path}/root"
+	fi
+
+	try_retest=true
+	retry=0
+	while $try_retest
+	do
+	    sudo chroot "${TEST_CHROOT_PATH}" urpmi --split-length 0 --downloader wget --wget-options --auth-no-challenge -v --debug --no-verify-rpm --fastunsafe --no-suggests --test `ls  $TEST_CHROOT_PATH | grep rpm` --root test_root --auto > $test_log.tmp 2>&1
+	    test_code=$?
+	    try_retest=false
+	    if [[ $test_code != 0 && $retry < $MAX_RETRIES ]] ; then
+		if grep -q "$RETRY_GREP_STR" $test_log.tmp; then
+		    echo '--> Repository was changed in the middle, will rerun the tests' >> $test_log
+		    sleep ${WAIT_TIME}
+		    sudo chroot "${TEST_CHROOT_PATH}" urpmi.update -a >> $test_log 2>&1
+		    try_retest=true
+		    (( retry=$retry+1 ))
+		fi
+	    fi
+	done
+
+	cat $test_log.tmp >> $test_log
+	echo 'Test code output: ' $test_code >> $test_log 2>&1
+	sudo rm -f  "${TEST_CHROOT_PATH}"/*.rpm
+	sudo rm -rf "${TEST_CHROOT_PATH}"/test_root
+	rm -f $test_log.tmp
+
+	# Check exit code after testing
+	if [ $test_code != 0 ] ; then
+	    echo '--> Test failed, see: tests.log'
+	    test_code_exit=5
+	    exit 5
+	fi
+
+  exit 0
+fi
+
+}
+
 build_rpm() {
 arm_platform_detector
 
@@ -279,48 +363,17 @@ if [[ ${rc} != 0 && ${save_buildroot} == 'true' ]]; then
 fi
 
 # Test RPM files
-TEST_CHROOT_PATH=$($MOCK_BIN --configdir=$config_dir --print-root-path)
-test_code=0
-test_log="$OUTPUT_FOLDER"/tests.log
-echo '--> Checking if rpm packages can be installed' >> $test_log
-sudo mkdir -p "${TEST_CHROOT_PATH}"/test_root
-sudo cp "$OUTPUT_FOLDER"/*.rpm "${TEST_CHROOT_PATH}"/
-
-try_retest=true
-retry=0
-while $try_retest
-do
-    sudo chroot "${TEST_CHROOT_PATH}" urpmi --split-length 0 --downloader wget --wget-options --auth-no-challenge -v --debug --no-verify-rpm --fastunsafe --no-suggests --test `ls  $TEST_CHROOT_PATH | grep rpm` --root test_root --auto > $test_log.tmp 2>&1
-    test_code=$?
-    try_retest=false
-    if [[ $test_code != 0 && $retry < $MAX_RETRIES ]] ; then
-	if grep -q "$RETRY_GREP_STR" $test_log.tmp; then
-	    echo '--> Repository was changed in the middle, will rerun the tests' >> $test_log
-	    sleep ${WAIT_TIME}
-	    sudo chroot "${TEST_CHROOT_PATH}" urpmi.update -a >> $test_log 2>&1
-	    try_retest=true
-	    (( retry=$retry+1 ))
-	fi
-    fi
-done
-
-cat $test_log.tmp >> $test_log
-echo 'Test code output: ' $test_code >> $test_log 2>&1
-sudo rm -f  "${TEST_CHROOT_PATH}"/*.rpm
-sudo rm -rf "${TEST_CHROOT_PATH}"/test_root
-rm -f $test_log.tmp
-
-# Check exit code after testing
-if [ $test_code != 0 ] ; then
-    echo '--> Test failed, see: tests.log'
-    test_code_exit=5
-    exit 5
-fi
+test_rpm()
 # End tests
 
 }
 
 find_spec() {
+
+if [ "$rerun_tests" = 'true' ]; then
+	return 0
+fi
+
 # Check count of *.spec files (should be one)
 x=$(ls -1 | grep -c '.spec$' | sed 's/^ *//' | sed 's/ *$//')
 if [ "$x" -eq "0" ] ; then
@@ -387,6 +440,10 @@ validate_arch() {
 }
 
 clone_repo() {
+
+if [ "$rerun_tests" = 'true' ]; then
+	return 0
+fi
 
 MAX_RETRIES=5
 WAIT_TIME=60
