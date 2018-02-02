@@ -191,43 +191,36 @@ probe_cpu
 
 test_rpm() {
 # Rerun tests
-       PACKAGES=${packages} \
-       results_path=$results_path \
-       tmpfs_path=$tmpfs_path \
-       rpm_path=$rpm_path \
-       chroot_path=$chroot_path \
-       src_rpm_path=$src_rpm_path \
-       rpm_build_script_path=$rpm_build_script_path \
-       use_extra_tests=$use_extra_tests \
-       platform_name=$platform_name \
-       platform_arch=$platform_arch
+    PACKAGES=${packages} \
+    chroot_path=$chroot_path \
+    use_extra_tests=$use_extra_tests \
 
-       TEST_CHROOT_PATH=$($MOCK_BIN --configdir=$config_dir --print-root-path)
-       test_code=0
-       test_log="$OUTPUT_FOLDER"/tests.log
-       echo '--> Checking if rpm packages can be installed' >> $test_log
-       sudo mkdir -p "${TEST_CHROOT_PATH}"/test_root
-       sudo cp "$OUTPUT_FOLDER"/*.rpm "${TEST_CHROOT_PATH}"/
+    TEST_CHROOT_PATH=$($MOCK_BIN --configdir=$config_dir --print-root-path)
+    test_code=0
+    test_log="$OUTPUT_FOLDER"/tests.log
 
-	if [ "$rerun_tests" == 'true' ] ; then
-	  [[ "$packages" == '' ]] && echo '--> No packages!!!' && exit 1
+    echo '--> Checking if rpm packages can be installed' >> $test_log
+    sudo mkdir -p "${TEST_CHROOT_PATH}"/test_root
 
-	  prefix='rerun-tests-'
-	  cd $rpm_path
 
-	  arr=($packages)
-	  for package in ${arr[@]} ; do
+    if [ "$rerun_tests" == 'true' ] ; then
+	[[ "$packages" == '' ]] && echo '--> No packages!!!' && exit 1
+	prefix='rerun-tests-'
+	arr=($packages)
+	for package in ${arr[@]} ; do
 	    echo "--> Downloading '$package'..." >> $test_log
 	    wget http://file-store.openmandriva.org/api/v1/file_stores/$package --content-disposition --no-check-certificate
 	    rc=$?
-	    if [ $rc != 0 ] ; then
-	      echo "--> Error on extracting package with sha1 '$package'!!!"
-	      exit $rc
-	    fi
-	  done
-	
-	  $MOCK_BIN --init --configdir $config_dir -v --no-cleanup-after
+		if [ $rc != 0 ]; then
+		    echo "--> Error on extracting package with sha1 '$package'!!!"
+		    exit $rc
+		fi
+	    done
+	    cd ..
+	    $MOCK_BIN --init --configdir $config_dir -v --no-cleanup-after
 	fi
+
+	sudo cp "$OUTPUT_FOLDER"/*.rpm "${TEST_CHROOT_PATH}"/
 
 	try_retest=true
 	retry=0
@@ -259,7 +252,7 @@ test_rpm() {
 	    test_code_exit=5
 	    exit 5
 	else
-		exit 0
+	    exit 0
 	fi
 }
 
@@ -267,7 +260,7 @@ build_rpm() {
 arm_platform_detector
 
 if [ "$rerun_tests" = 'true' ]; then
-	test_rpm
+    test_rpm
 fi
 
 # We will rerun the build in case when repository is modified in the middle,
@@ -369,7 +362,7 @@ test_rpm
 find_spec() {
 
 if [ "$rerun_tests" = 'true' ]; then
-	return 0
+    return 0
 fi
 
 # Check count of *.spec files (should be one)
@@ -440,7 +433,7 @@ validate_arch() {
 clone_repo() {
 
 if [ "$rerun_tests" = 'true' ]; then
-	return 0
+    return 0
 fi
 
 MAX_RETRIES=5
