@@ -82,6 +82,11 @@ EXTRA_CFG_OPTIONS="$extra_cfg_options" \
 
 container_data() {
 # Generate data for container
+
+if [ "$rerun_tests" = 'true' ]; then
+    return 0
+fi
+
 c_data=$OUTPUT_FOLDER/container_data.json
 project_name=`echo ${git_repo} | sed s%.*/%% | sed s/.git$//`
 echo '[' > ${c_data}
@@ -250,6 +255,7 @@ test_rpm() {
 	if [ $test_code != 0 ] ; then
 	    echo '--> Test failed, see: tests.log'
 	    test_code_exit=5
+	    container_data
 	    exit 5
 	else
 	    exit 0
