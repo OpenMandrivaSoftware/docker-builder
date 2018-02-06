@@ -259,7 +259,7 @@ test_rpm() {
 	    container_data
 	    exit 5
 	else
-	    return 0
+	    exit 0
 	fi
 }
 
