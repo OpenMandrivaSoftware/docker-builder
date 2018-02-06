@@ -205,7 +205,7 @@ test_rpm() {
     test_log="$OUTPUT_FOLDER"/tests.log
 
     echo '--> Checking if rpm packages can be installed' >> $test_log
-    [[ -e "$OUTPUT_FOLDER" ]] && mkdir -p "$OUTPUT_FOLDER"
+    [[ ! -e "$OUTPUT_FOLDER" ]] && mkdir -p "$OUTPUT_FOLDER"
     sudo mkdir -p "${TEST_CHROOT_PATH}"/test_root
 
     if [ "$rerun_tests" == 'true' ] ; then
