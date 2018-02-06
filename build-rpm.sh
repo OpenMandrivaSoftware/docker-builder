@@ -204,10 +204,11 @@ test_rpm() {
     test_log="$OUTPUT_FOLDER"/tests.log
     
     [[ ! -e "$OUTPUT_FOLDER" ]] && mkdir -p "$OUTPUT_FOLDER"
-    echo '--> Checking if rpm packages can be installed' >> $test_log
+    echo '--> Checking if rpm packages can be installed.' >> $test_log
 
-    if [ "$rerun_tests" == 'true' ] ; then
+    if [ "$rerun_tests" == 'true' ]; then
 	[[ "$packages" == '' ]] && echo '--> No packages!!!' && exit 1
+	echo "--> Re-running tests on `date -u`" >> $test_log
 	prefix='rerun-tests-'
 	arr=($packages)
 	cd "$OUTPUT_FOLDER"
@@ -247,6 +248,7 @@ test_rpm() {
 	done
 
 	cat $test_log.tmp >> $test_log
+	echo "--> Tests finished at `date -u`" >> $test_log
 	echo 'Test code output: ' $test_code >> $test_log 2>&1
 	sudo rm -f  "${TEST_CHROOT_PATH}"/*.rpm
 	sudo rm -rf "${TEST_CHROOT_PATH}"/test_root
@@ -255,8 +257,7 @@ test_rpm() {
 	# Check exit code after testing
 	if [ $test_code != 0 ] ; then
 	    echo '--> Test failed, see: tests.log'
-	    test_code_exit=5
-	    container_data
+	    test_code=5
 	    exit 5
 	else
 	    exit 0
