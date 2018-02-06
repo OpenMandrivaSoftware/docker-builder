@@ -30,7 +30,7 @@ MOCK_BIN="/usr/bin/mock-urpm"
 config_dir=/etc/mock-urpm/
 # $PACKAGE same as project name
 # e.g. github.com/OpenMandrivaAssociation/htop
-build_package=${HOME}/$PACKAGE
+build_package=${HOME}/"$PACKAGE"
 OUTPUT_FOLDER=${HOME}/output
 # Qemu ARM binaries
 QEMU_ARM_SHA="9c7e32080fab6751a773f363bfebab8ac8cb9f4a"
@@ -204,6 +204,7 @@ test_rpm() {
     test_log="$OUTPUT_FOLDER"/tests.log
     
     [[ ! -e "$OUTPUT_FOLDER" ]] && mkdir -p "$OUTPUT_FOLDER"
+    [[ ! -e "$build_package" ]] && mkdir -p "$build_package"
     echo '--> Checking if rpm packages can be installed.' >> $test_log
 
     if [ "$rerun_tests" == 'true' ]; then
@@ -211,7 +212,7 @@ test_rpm() {
 	echo "--> Re-running tests on `date -u`" >> $test_log
 	prefix='rerun-tests-'
 	arr=($packages)
-	cd "$OUTPUT_FOLDER"
+	cd "$build_package"
 	for package in ${arr[@]} ; do
 	    echo "--> Downloading '$package'..." >> $test_log
 	    wget http://file-store.openmandriva.org/api/v1/file_stores/$package --content-disposition --no-check-certificate
@@ -227,7 +228,7 @@ test_rpm() {
 
 	TEST_CHROOT_PATH=$($MOCK_BIN --configdir=$config_dir --print-root-path)
 	sudo mkdir -p "${TEST_CHROOT_PATH}"/test_root
-	sudo cp "$OUTPUT_FOLDER"/*.rpm "${TEST_CHROOT_PATH}"/
+	sudo cp "$build_package"/*.rpm "${TEST_CHROOT_PATH}"/
 
 	try_retest=true
 	retry=0
@@ -258,6 +259,7 @@ test_rpm() {
 	if [ $test_code != 0 ] ; then
 	    echo '--> Test failed, see: tests.log'
 	    test_code=5
+	    cleanup
 	    exit 5
 	else
 	    return $test_code
