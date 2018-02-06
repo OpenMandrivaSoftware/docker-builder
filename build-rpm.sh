@@ -51,9 +51,9 @@ extra_build_rpm_options="$EXTRA_BUILD_RPM_OPTIONS"
 extra_build_src_rpm_options="$EXTRA_BUILD_SRC_RPM_OPTIONS"
 extra_cfg_options="$EXTRA_CFG_OPTIONS"
 extra_cfg_urpm_options="$EXTRA_CFG_URPM_OPTIONS"
-save_buildroot=${SAVE_BUILDROOT}
-use_extra_tests=${USE_EXTRA_TESTS}
-rerun_tests=${RERUN_TESTS}
+save_buildroot="$SAVE_BUILDROOT"
+use_extra_tests="$USE_EXTRA_TESTS"
+rerun_tests="$RERUN_TESTS"
 # list of packages for tests relaunch
 packages="$PACKAGES"
 
