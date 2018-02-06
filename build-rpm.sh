@@ -260,7 +260,7 @@ test_rpm() {
 	    test_code=5
 	    exit 5
 	else
-	    exit 0
+	    return $test_code
 	fi
 }
 
@@ -269,6 +269,7 @@ arm_platform_detector
 
 if [ "$rerun_tests" = 'true' ]; then
     test_rpm
+    return 0
 fi
 
 # We will rerun the build in case when repository is modified in the middle,
