@@ -259,8 +259,11 @@ test_rpm() {
 	if [ $test_code != 0 ] ; then
 	    echo '--> Test failed, see: tests.log'
 	    test_code=5
-	    cleanup
-	    exit 5
+	    if [ "$rerun_tests" == 'true' ]; then
+	        cleanup
+		fi
+		
+	    exit $test_code
 	else
 	    return $test_code
 	fi
