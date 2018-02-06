@@ -198,20 +198,19 @@ test_rpm() {
 # Rerun tests
     PACKAGES=${packages} \
     chroot_path=$chroot_path \
-    use_extra_tests=$use_extra_tests \
+    use_extra_tests=$use_extra_tests
 
-    TEST_CHROOT_PATH=$($MOCK_BIN --configdir=$config_dir --print-root-path)
     test_code=0
     test_log="$OUTPUT_FOLDER"/tests.log
-
-    echo '--> Checking if rpm packages can be installed' >> $test_log
+    
     [[ ! -e "$OUTPUT_FOLDER" ]] && mkdir -p "$OUTPUT_FOLDER"
-    sudo mkdir -p "${TEST_CHROOT_PATH}"/test_root
+    echo '--> Checking if rpm packages can be installed' >> $test_log
 
     if [ "$rerun_tests" == 'true' ] ; then
 	[[ "$packages" == '' ]] && echo '--> No packages!!!' && exit 1
 	prefix='rerun-tests-'
 	arr=($packages)
+	cd "$OUTPUT_FOLDER"
 	for package in ${arr[@]} ; do
 	    echo "--> Downloading '$package'..." >> $test_log
 	    wget http://file-store.openmandriva.org/api/v1/file_stores/$package --content-disposition --no-check-certificate
@@ -225,6 +224,8 @@ test_rpm() {
 	    $MOCK_BIN --init --configdir $config_dir -v --no-cleanup-after
 	fi
 
+	TEST_CHROOT_PATH=$($MOCK_BIN --configdir=$config_dir --print-root-path)
+	sudo mkdir -p "${TEST_CHROOT_PATH}"/test_root
 	sudo cp "$OUTPUT_FOLDER"/*.rpm "${TEST_CHROOT_PATH}"/
 
 	try_retest=true
