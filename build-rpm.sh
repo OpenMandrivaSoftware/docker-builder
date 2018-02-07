@@ -223,14 +223,14 @@ test_rpm() {
 		fi
 	    done
 	    cd ..
-
-	    if [ "${CACHED_CHROOT_SHA1}" != '' ]; then
-	    	echo "--> Uses cached chroot with sha1 '$CACHED_CHROOT_SHA1'..." >> $test_log
-	    	$MOCK_BIN --chroot "urpmi.removemedia -a"
-		$MOCK_BIN --readdrepo -v --configdir $config_dir --no-cleanup-after --no-clean --update
-	    else
+# (tpg) TODO fix running tests with cached-chroot
+#	    if [ "${CACHED_CHROOT_SHA1}" != '' ]; then
+#	    	echo "--> Uses cached chroot with sha1 '$CACHED_CHROOT_SHA1'..." >> $test_log
+#	    	$MOCK_BIN --chroot "urpmi.removemedia -a"
+#		$MOCK_BIN --readdrepo -v --configdir $config_dir --no-cleanup-after --no-clean --update
+#	    else
 	    	$MOCK_BIN --init --configdir $config_dir -v --no-cleanup-after
-	    fi
+#	    fi
 
 	    OUTPUT_FOLDER="$build_package"
 	fi
@@ -244,7 +244,7 @@ test_rpm() {
 	retry=0
 	while $try_retest
 	do
-	    sudo chroot "${TEST_CHROOT_PATH}" urpmi --split-length 0 --downloader wget --wget-options --auth-no-challenge -v --debug --no-verify-rpm --fastunsafe --no-suggests --test `ls  $TEST_CHROOT_PATH | grep rpm` --root test_root --auto > $test_log.tmp 2>&1
+	    sudo chroot "${TEST_CHROOT_PATH}" urpmi --split-length 0 --downloader wget --wget-options --auth-no-challenge -v --debug --no-verify-rpm --fastunsafe --no-suggests --buildrequires --test `ls  $TEST_CHROOT_PATH | grep rpm` --root test_root --auto > $test_log.tmp 2>&1
 	    test_code=$?
 	    try_retest=false
 	    if [[ $test_code != 0 && $retry < $MAX_RETRIES ]] ; then
