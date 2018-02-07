@@ -225,9 +225,11 @@ test_rpm() {
 	    cd ..
 
 	    if [ "${CACHED_CHROOT_SHA1}" != '' ]; then
-	    	$MOCK_BIN --init --configdir $config_dir -v --no-cleanup-after
+	    	echo "--> Uses cached chroot with sha1 '$CACHED_CHROOT_SHA1'..." >> $test_log
+	    	$MOCK_BIN --chroot "urpmi.removemedia -a"
+		$MOCK_BIN --readdrepo -v --configdir $config_dir --no-cleanup-after --no-clean --update
 	    else
-	    	$MOCK_BIN --init --configdir $config_dir -v --no-cleanup-after --no-clean
+	    	$MOCK_BIN --init --configdir $config_dir -v --no-cleanup-after
 	    fi
 
 	    OUTPUT_FOLDER="$build_package"
