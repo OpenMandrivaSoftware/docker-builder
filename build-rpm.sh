@@ -202,15 +202,15 @@ test_rpm() {
 
     test_code=0
     test_log="$OUTPUT_FOLDER"/tests.log
-
-    echo '--> Checking if rpm packages can be installed.' >> $test_log
-
+    echo '--> Starting RPM tests.'
+  
     if [ "$rerun_tests" == 'true' ]; then
-	[[ "$packages" == '' ]] && echo '--> No packages!!!' && exit 1
+	[[ "$packages" == '' ]] && echo '--> No packages for testing. Something is wrong. Exiting. !!!' && exit 1
 
 	[[ ! -e "$OUTPUT_FOLDER" ]] && mkdir -p "$OUTPUT_FOLDER"
 	[[ ! -e "$build_package" ]] && mkdir -p "$build_package"
-
+	
+	test_log="$OUTPUT_FOLDER"/tests-`printf '%(%F-%R)T'.log`
 	echo "--> Re-running tests on `date -u`" >> $test_log
 	prefix='rerun-tests-'
 	arr=($packages)
@@ -229,6 +229,7 @@ test_rpm() {
 	    OUTPUT_FOLDER="$build_package"
 	fi
 
+	echo '--> Checking if rpm packages can be installed.' >> $test_log
 	TEST_CHROOT_PATH=$($MOCK_BIN --configdir=$config_dir --print-root-path)
 	sudo mkdir -p "${TEST_CHROOT_PATH}"/test_root
 	sudo cp "$OUTPUT_FOLDER"/*.rpm "${TEST_CHROOT_PATH}"/
