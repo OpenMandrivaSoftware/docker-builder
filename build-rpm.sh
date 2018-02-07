@@ -202,13 +202,15 @@ test_rpm() {
 
     test_code=0
     test_log="$OUTPUT_FOLDER"/tests.log
-    
-    [[ ! -e "$OUTPUT_FOLDER" ]] && mkdir -p "$OUTPUT_FOLDER"
-    [[ ! -e "$build_package" ]] && mkdir -p "$build_package"
+
     echo '--> Checking if rpm packages can be installed.' >> $test_log
 
     if [ "$rerun_tests" == 'true' ]; then
 	[[ "$packages" == '' ]] && echo '--> No packages!!!' && exit 1
+
+	[[ ! -e "$OUTPUT_FOLDER" ]] && mkdir -p "$OUTPUT_FOLDER"
+	[[ ! -e "$build_package" ]] && mkdir -p "$build_package"
+
 	echo "--> Re-running tests on `date -u`" >> $test_log
 	prefix='rerun-tests-'
 	arr=($packages)
@@ -224,11 +226,12 @@ test_rpm() {
 	    done
 	    cd ..
 	    $MOCK_BIN --init --configdir $config_dir -v --no-cleanup-after
+	    OUTPUT_FOLDER="$build_package"
 	fi
 
 	TEST_CHROOT_PATH=$($MOCK_BIN --configdir=$config_dir --print-root-path)
 	sudo mkdir -p "${TEST_CHROOT_PATH}"/test_root
-	sudo cp "$build_package"/*.rpm "${TEST_CHROOT_PATH}"/
+	sudo cp "$OUTPUT_FOLDER"/*.rpm "${TEST_CHROOT_PATH}"/
 
 	try_retest=true
 	retry=0
