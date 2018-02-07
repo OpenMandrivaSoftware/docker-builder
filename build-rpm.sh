@@ -23,8 +23,8 @@ find ${HOME} -maxdepth 1 ! -name 'qemu-a*' ! -name 'docker-worker' ! -name '.gem
 cleanup
 
 # (tpg) remove these files
-[[ -e ~/build_fail_reason.log ]] && rm -rf ~/build_fail_reason.log
-[[ -e ${HOME}/output ]] && rm -rf ${HOME}/output
+[ -e ~/build_fail_reason.log ] && rm -rf ~/build_fail_reason.log
+[ -e "${HOME}"/output ] && rm -rf "${HOME}"/output
 
 MOCK_BIN="/usr/bin/mock-urpm"
 config_dir=/etc/mock-urpm/
@@ -83,9 +83,7 @@ EXTRA_CFG_OPTIONS="$extra_cfg_options" \
 container_data() {
 # Generate data for container
 
-if [ "$rerun_tests" = 'true' ]; then
-    return 0
-fi
+[ "$rerun_tests" = 'true' ] && return 0
 
 c_data=$OUTPUT_FOLDER/container_data.json
 project_name=`echo ${git_repo} | sed s%.*/%% | sed s/.git$//`
@@ -132,7 +130,7 @@ echo ']' >> ${c_data}
 
 download_cache() {
 
-if [[ "${CACHED_CHROOT_SHA1}" != '' ]] ; then
+if [ "${CACHED_CHROOT_SHA1}" != '' ]; then
 # if chroot not exist download it
     if [ ! -f ${HOME}/${CACHED_CHROOT_SHA1}.tar.xz ]; then
 	curl -L "${filestore_url}/${CACHED_CHROOT_SHA1}" -o "${HOME}/${CACHED_CHROOT_SHA1}.tar.xz"
@@ -165,7 +163,7 @@ case "$cpu" in
    ;;
 esac
 
-if [[ "$platform_arch" == "aarch64" ]]; then
+if [ "$platform_arch" = 'aarch64' ]; then
     if [ $cpu != "aarch64" ] ; then
 # hack to copy qemu binary in non-existing path
 	(while [ ! -e  /var/lib/mock-urpm/openmandriva-$platform_arch/root/usr/bin/ ]
@@ -178,7 +176,7 @@ if [[ "$platform_arch" == "aarch64" ]]; then
     sudo sh -c "echo '$platform_arch-mandriva-linux-gnueabi' > /etc/rpm/platform"
 fi
 
-if [[ "$platform_arch" == "armv7hl" ]]; then
+if [ "$platform_arch" = 'armv7hl' ]; then
     if [ $cpu != "arm" ] || [ $cpu != "aarch64" ] ; then
 # hack to copy qemu binary in non-existing path
 	(while [ ! -e  /var/lib/mock-urpm/openmandriva-$platform_arch/root/usr/bin/ ]
@@ -203,13 +201,13 @@ test_rpm() {
     test_code=0
     test_log="$OUTPUT_FOLDER"/tests.log
     echo '--> Starting RPM tests.'
-  
-    if [ "$rerun_tests" == 'true' ]; then
-	[[ "$packages" == '' ]] && echo '--> No packages for testing. Something is wrong. Exiting. !!!' && exit 1
 
-	[[ ! -e "$OUTPUT_FOLDER" ]] && mkdir -p "$OUTPUT_FOLDER"
-	[[ ! -e "$build_package" ]] && mkdir -p "$build_package"
-	
+    if [ "$rerun_tests" = 'true' ]; then
+	[ "$packages" = '' ] && echo '--> No packages for testing. Something is wrong. Exiting. !!!' && exit 1
+
+	[ ! -e "$OUTPUT_FOLDER" ] && mkdir -p "$OUTPUT_FOLDER"
+	[ ! -e "$build_package" ] && mkdir -p "$build_package"
+
 	test_log="$OUTPUT_FOLDER"/tests-`printf '%(%F-%R)T'.log`
 	echo "--> Re-running tests on `date -u`" >> $test_log
 	prefix='rerun-tests-'
@@ -260,13 +258,10 @@ test_rpm() {
 	rm -f $test_log.tmp
 
 	# Check exit code after testing
-	if [ $test_code != 0 ] ; then
+	if [ $test_code != 0 ]; then
 	    echo '--> Test failed, see: tests.log'
 	    test_code=5
-	    if [ "$rerun_tests" == 'true' ]; then
-	    	cleanup
-	    fi
-		
+	    [ "$rerun_tests" = 'true' ] && cleanup
 	    exit $test_code
 	else
 	    return $test_code
@@ -294,7 +289,7 @@ retry=0
 while $try_rebuild
 do
     rm -rf "$OUTPUT_FOLDER"
-    if [[ "${CACHED_CHROOT_SHA1}" != '' ]]; then
+    if [ "${CACHED_CHROOT_SHA1}" != '' ]; then
 	echo "--> Uses cached chroot with sha1 '$CACHED_CHROOT_SHA1'..."
 	$MOCK_BIN --chroot "urpmi.removemedia -a"
 	$MOCK_BIN --readdrepo -v --configdir $config_dir
@@ -322,7 +317,7 @@ if [ $rc != 0 ] || [ ! -e $OUTPUT_FOLDER/*.src.rpm ]; then
     # 99% of all build failures at src.rpm creation is broken deps
     # m1 show only first match -oP show only matching
     grep -m1 -oP "\(due to unsatisfied(.*)$" $OUTPUT_FOLDER/root.log >> ~/build_fail_reason.log
-    [[ -n $subshellpid ]] && kill $subshellpid
+    [ -n $subshellpid ] && kill $subshellpid
     cleanup
     exit 1
 fi
@@ -354,7 +349,7 @@ if [ $rc != 0 ]; then
 # clean all the rpm files because build was not completed
     grep -m1 -i -oP "$GREP_PATTERN" $OUTPUT_FOLDER/root.log >> ~/build_fail_reason.log
     rm -rf $OUTPUT_FOLDER/*.rpm
-    [[ -n $subshellpid ]] && kill $subshellpid
+    [ -n $subshellpid ] && kill $subshellpid
     cleanup
     exit 1
 fi
@@ -367,7 +362,7 @@ echo '--> Create rpm -qa list'
 rpm --root=/var/lib/mock-urpm/openmandriva-$platform_arch/root/ -qa >> $OUTPUT_FOLDER/rpm-qa.log
 
 # (tpg) Save build chroot
-if [[ ${rc} != 0 && ${save_buildroot} == 'true' ]]; then
+if [ "${rc}" != 0 ] && [ "${save_buildroot}" = 'true' ]; then
     sudo tar --exclude=root/dev -zcvf "${OUTPUT_FOLDER}"/rpm-buildroot.tar.gz /var/lib/mock-urpm/openmandriva-$platform_arch/root/
 fi
 
@@ -379,9 +374,7 @@ test_rpm
 
 find_spec() {
 
-if [ "$rerun_tests" = 'true' ]; then
-    return 0
-fi
+[ "$rerun_tests" = 'true' ] && return 0
 
 # Check count of *.spec files (should be one)
 x=$(ls -1 | grep -c '.spec$' | sed 's/^ *//' | sed 's/ *$//')
@@ -450,9 +443,7 @@ validate_arch() {
 
 clone_repo() {
 
-if [ "$rerun_tests" = 'true' ]; then
-    return 0
-fi
+[ "$rerun_tests" = 'true' ] && return 0
 
 MAX_RETRIES=5
 WAIT_TIME=60
@@ -462,7 +453,7 @@ while $try_reclone
 do
     rm -rf ${HOME}/${PACKAGE}
 # checkout specific branch/tag if defined
-    if [[ ! -z "$project_version" ]]; then
+    if [ ! -z "$project_version" ]; then
 # (tpg) clone only history of 100 commits to reduce bandwith
 	git clone --depth 100 -b $project_version $git_repo ${HOME}/${PACKAGE}
 	pushd ${HOME}/${PACKAGE}
