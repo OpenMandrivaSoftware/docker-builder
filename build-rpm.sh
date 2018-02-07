@@ -223,7 +223,13 @@ test_rpm() {
 		fi
 	    done
 	    cd ..
-	    $MOCK_BIN --init --configdir $config_dir -v --no-cleanup-after
+
+	    if [ "${CACHED_CHROOT_SHA1}" != '' ]; then
+	    	$MOCK_BIN --init --configdir $config_dir -v --no-cleanup-after
+	    else
+	    	$MOCK_BIN --init --configdir $config_dir -v --no-cleanup-after --no-clean
+	    fi
+
 	    OUTPUT_FOLDER="$build_package"
 	fi
 
