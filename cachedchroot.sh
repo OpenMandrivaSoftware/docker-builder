@@ -64,8 +64,8 @@ case "$cpu" in
    ;;
 esac
 
-if [[ "$arch" == "aarch64" ]]; then
-    if [ $cpu != "aarch64" ] ; then
+if [ "$arch" = 'aarch64' ]; then
+    if [ $cpu != 'aarch64' ]; then
 # this string responsible for "cannot execute binary file"
 # hack to copy qemu binary in non-existing path
 	(while [ ! -e  ${chroot_path}/$platform_name-$arch/root/usr/bin/ ]
@@ -77,8 +77,8 @@ if [[ "$arch" == "aarch64" ]]; then
     sudo sh -c "echo '$arch-mandriva-linux-gnueabi' > /etc/rpm/platform"
 fi
 
-if [[ "$arch" == "armv7hl" ]]; then
-    if [ $cpu != "arm" ] ; then
+if [ "$arch" = 'armv7hl' ]; then
+    if [ $cpu != 'arm' ] ; then
 # this string responsible for "cannot execute binary file"
 # change path to qemu
 # hack to copy qemu binary in non-existing path
@@ -127,8 +127,8 @@ for arch in $arches ; do
     fi
 
     # Remove any stray lockfiles and make sure rpmdb is clean...
-    /bin/rm /var/lib/mock-urpm/openmandriva-$arch/root/var/lib/rpm/.RPMLOCK
-    /bin/rm /var/lib/mock-urpm/openmandriva-$arch/root/var/lib/urpmi/.LOCK
+    /bin/rm /var/lib/mock-urpm/openmandriva-"$arch"/root/var/lib/rpm/.RPMLOCK
+    /bin/rm /var/lib/mock-urpm/openmandriva-"$arch"/root/var/lib/urpmi/.LOCK
     $MOCK_BIN --chroot "/usr/bin/db52_recover"
 
     # xz options -7e is 7th extreme level of compression, and -T0 is to use all available threads to speedup compress
@@ -144,7 +144,7 @@ for arch in $arches ; do
 	cleanup
 	exit 1
     fi
-    sudo rm -rf ${chroot_path}/${chroot}
+    sudo rm -rf "${chroot_path}"/"${chroot}"
 done
 
 echo '--> Build has been done successfully!'
