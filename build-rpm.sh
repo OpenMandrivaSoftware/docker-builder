@@ -269,7 +269,7 @@ test_rpm() {
 	if [ $test_code != 0 ]; then
 	    echo '--> Test failed, see: tests.log'
 	    test_code=5
-	    [ "$rerun_tests" = 'true' ] && cleanup
+	    [ "$rerun_tests" = 'true' ] && container_data
 	    exit $test_code
 	else
 	    return $test_code
