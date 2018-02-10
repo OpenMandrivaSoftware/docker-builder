@@ -280,17 +280,17 @@ test_rpm() {
 build_rpm() {
 arm_platform_detector
 
-if [ "$rerun_tests" = 'true' ]; then
-    test_rpm
-    return 0
-fi
-
 # We will rerun the build in case when repository is modified in the middle,
 # but for safety let's limit number of retest attempts
 # (since in case when repository metadata is really broken we can loop here forever)
 MAX_RETRIES=10
 WAIT_TIME=60
 RETRY_GREP_STR="You may need to update your urpmi database\|problem reading synthesis file of medium\|retrieving failed: "
+
+if [ "$rerun_tests" = 'true' ]; then
+    test_rpm
+    return 0
+fi
 
 echo '--> Build src.rpm'
 try_rebuild=true
@@ -302,6 +302,18 @@ do
 	echo "--> Uses cached chroot with sha1 '$CACHED_CHROOT_SHA1'..."
 	$MOCK_BIN --chroot "urpmi.removemedia -a"
 	$MOCK_BIN --readdrepo -v --configdir $config_dir
+# (tpg) catch errors when adding repositories into chroot
+	rc=${PIPESTATUS[0]}
+	try_rebuild=false
+	if [[ $rc != 0 && $retry < $MAX_RETRIES ]]; then
+	    if grep -q "$RETRY_GREP_STR" $OUTPUT_FOLDER/root.log; then
+		try_rebuild=true
+		(( retry=$retry+1 ))
+		echo "--> Repository was changed in the middle, will rerun the build. Next try (${retry} from ${MAX_RETRIES})..."
+		echo "--> Delay ${WAIT_TIME} sec..."
+		sleep ${WAIT_TIME}
+	    fi
+	fi
 	$MOCK_BIN -v --configdir=$config_dir --buildsrpm --spec=$build_package/${PACKAGE}.spec --sources=$build_package --no-cleanup-after --no-clean $extra_build_src_rpm_options --resultdir=$OUTPUT_FOLDER
     else
 	$MOCK_BIN -v --configdir=$config_dir --buildsrpm --spec=$build_package/${PACKAGE}.spec --sources=$build_package --no-cleanup-after $extra_build_src_rpm_options --resultdir=$OUTPUT_FOLDER
