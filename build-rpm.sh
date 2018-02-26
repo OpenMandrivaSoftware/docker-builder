@@ -57,7 +57,7 @@ rerun_tests="$RERUN_TESTS"
 # list of packages for tests relaunch
 packages="$PACKAGES"
 
-if [ "`uname -m`" = "x86_64" ] && echo "$platform_arch" |grep -qE 'i[0-9]86'; then
+if [ "$(uname -a)" = 'x86_64' ] && echo "$platform_arch" |grep -qE 'i[0-9]86'; then
     # Change the kernel personality so build scripts don't think
     # we're building for 64-bit
     MOCK_BIN="/usr/bin/i386 $MOCK_BIN"
@@ -450,8 +450,8 @@ validate_arch() {
 	aarch64)
 		validate_build "armx %armx %{armx} aarch64"
 		;;
-    i386|i586)
-		validate_build "ix86 %ix86 %{ix86} i586 %i586 %{i586} i386 %i386 %{i386}"
+    i386|i586|i686)
+		validate_build "ix86 %ix86 %{ix86} i686 %i686 %{i686} i586 %i586 %{i586} i386 %i386 %{i386}"
 		;;
 	x86_64)
 		validate_build "x86_64 %x86_64 %{x86_64}"
