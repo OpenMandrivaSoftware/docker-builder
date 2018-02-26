@@ -24,7 +24,7 @@ done
 echo '}' >> $default_cfg
 }
 
-if [ "$platform_arch" == 'aarch64' ] ; then
+if [ "$platform_arch" = 'aarch64' ]; then
 cat <<EOF> $default_cfg
 config_opts['target_arch'] = '$platform_arch --without check --without uclibc --without dietlibc'
 config_opts['legal_host_arches'] = ('i586', 'i686', 'x86_64', 'aarch64')
@@ -32,7 +32,7 @@ config_opts['urpmi_options'] = '--no-suggests --no-verify-rpm --ignoresize --ign
 config_opts['urpm_options'] = '--xml-info=never $extra_cfg_urpm_options'
 EOF
 
-elif [ "$platform_arch" == 'armv7hl' ] ; then
+elif [ "$platform_arch" = 'armv7hl' ]; then
 cat <<EOF> $default_cfg
 config_opts['target_arch'] = '$platform_arch --without check --without uclibc'
 config_opts['legal_host_arches'] = ('i586', 'i686', 'x86_64', 'armv7hl', 'armv7l', 'aarch64')
