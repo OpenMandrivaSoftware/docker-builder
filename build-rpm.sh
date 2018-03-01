@@ -57,7 +57,7 @@ rerun_tests="$RERUN_TESTS"
 # list of packages for tests relaunch
 packages="$PACKAGES"
 
-if [ "$(uname -a)" = 'x86_64' ] && echo "$platform_arch" |grep -qE 'i[0-9]86'; then
+if [ "$(uname -m)" = 'x86_64' ] && echo "$platform_arch" |grep -qE 'i[0-9]86'; then
     # Change the kernel personality so build scripts don't think
     # we're building for 64-bit
     MOCK_BIN="/usr/bin/i386 $MOCK_BIN"
@@ -150,7 +150,7 @@ fi
 arm_platform_detector(){
 probe_cpu() {
 # probe cpu type
-cpu=`uname -m`
+cpu="$(uname -m)"
 case "$cpu" in
    i386|i486|i586|i686|i86pc|BePC|x86_64)
       cpu="i386"

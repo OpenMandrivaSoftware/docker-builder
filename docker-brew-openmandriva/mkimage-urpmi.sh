@@ -86,7 +86,7 @@ arm_platform_detector(){
 filestore_url="http://file-store.openmandriva.org/api/v1/file_stores"
 
 probe_cpu() {
-cpu=`uname -m`
+cpu="$(uname -m)"
 case "$cpu" in
    i386|i486|i586|i686|i86pc|BePC|x86_64)
       cpu="i386"
