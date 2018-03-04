@@ -4,8 +4,8 @@ set -x
 cleanup() {
 echo '--> Cleaning up...'
 sudo rm -fv /etc/rpm/platform
-rm -fv /etc/mock-urpm/default.cfg
-sudo rm -rf /var/lib/mock-urpm/*
+rm -fv /etc/mock/default.cfg
+sudo rm -rf /var/lib/mock/*
 
 # unmask/mask both, we need to keep logs
 #rm -rf ${HOME}/output/
@@ -26,8 +26,8 @@ cleanup
 [ -e ~/build_fail_reason.log ] && rm -rf ~/build_fail_reason.log
 [ -e "${HOME}"/output ] && rm -rf "${HOME}"/output
 
-MOCK_BIN="/usr/bin/mock-urpm"
-config_dir=/etc/mock-urpm/
+MOCK_BIN="/usr/bin/mock"
+config_dir=/etc/mock/
 # $PACKAGE same as project name
 # e.g. github.com/OpenMandrivaAssociation/htop
 build_package=${HOME}/"$PACKAGE"
@@ -67,7 +67,7 @@ echo '--> Mounting tmpfs filesystem to builddir'
 sudo mount -a
 
 generate_config() {
-# Change output format for mock-urpm
+# Change output format for mock
 sed '17c/format: %(message)s' $config_dir/logging.ini > ~/logging.ini
 mv -f ~/logging.ini $config_dir/logging.ini
 
@@ -77,7 +77,7 @@ EXTRA_CFG_OPTIONS="$extra_cfg_options" \
   EMAIL=$email \
   PLATFORM_NAME=$platform_name \
   PLATFORM_ARCH=$platform_arch \
-  /bin/bash "/mdv/config-generator.sh"
+  /bin/bash "/omv/config-generator.sh"
 }
 
 container_data() {
@@ -107,7 +107,7 @@ for rpm in ${OUTPUT_FOLDER}/*.rpm; do
 	release=${nevr[3]}
 
 	dep_list=""
-	[[ ! "${fullname}" =~ ".*src.rpm$" ]] && dep_list=`urpmq --whatrequires ${name} | sort -u | xargs urpmq --sourcerpm | cut -d\  -f2 | rev | cut -f3- -d- | rev | sort -u | grep -v "^${project_name}$" | xargs echo`
+	[[ ! "${fullname}" =~ ".*src.rpm$" ]] && dep_list=`dnf repoquery -q --latest-limit=1 --qf "%{NAME}\\n" --whatrequires ${name} | sort -u | xargs dnf repoquery -q --latest-limit=1 --qf "%{SOURCERPM}\\n" | rev | cut -f3- -d- | rev | sort -u | xargs echo`
 	sha1=`sha1sum ${rpm} | awk '{ print $1 }'`
 
 	echo "--> dep_list for '${name}':"
@@ -166,15 +166,12 @@ esac
 if [ "$platform_arch" = 'aarch64' ]; then
     if [ $cpu != "aarch64" ] ; then
 # hack to copy qemu binary in non-existing path
-	(while [ ! -e  /var/lib/mock-urpm/openmandriva-$platform_arch/root/usr/bin/ ]
+	(while [ ! -e  /var/lib/mock/openmandriva-$platform_arch/root/usr/bin/ ]
 	do sleep 1; done
 	# rebuild docker builder with qemu packages
-	sudo cp /usr/bin/qemu-static-aarch64 /var/lib/mock-urpm/openmandriva-$platform_arch/root/usr/bin/) &
+	sudo cp /usr/bin/qemu-static-aarch64 /var/lib/mock/openmandriva-$platform_arch/root/usr/bin/) &
 	subshellpid=$!
     fi
-# remove me in future
-    sudo sh -c "echo '$platform_arch-mandriva-linux-gnueabi' > /etc/rpm/platform"
-fi
 
 if [ "$platform_arch" = 'armv7hl' ]; then
     if [ $cpu != "arm" ] || [ $cpu != "aarch64" ] ; then
@@ -184,9 +181,6 @@ if [ "$platform_arch" = 'armv7hl' ]; then
 	sudo cp /usr/bin/qemu-static-arm /var/lib/mock-urpm/openmandriva-$platform_arch/root/usr/bin/) &
 	subshellpid=$!
     fi
-# remove me in future
-    sudo sh -c "echo '$platform_arch-mandriva-linux-gnueabi' > /etc/rpm/platform"
-fi
 
 }
 probe_cpu
@@ -223,14 +217,7 @@ test_rpm() {
 		fi
 	    done
 	    cd ..
-# (tpg) TODO fix running tests with cached-chroot
-#	    if [ "${CACHED_CHROOT_SHA1}" != '' ]; then
-#	    	echo "--> Uses cached chroot with sha1 '$CACHED_CHROOT_SHA1'..." >> $test_log
-#	    	$MOCK_BIN --chroot "urpmi.removemedia -a"
-#		$MOCK_BIN --readdrepo -v --configdir $config_dir --no-cleanup-after --no-clean --update
-#	    else
-	    	$MOCK_BIN --init --configdir $config_dir -v --no-cleanup-after
-#	    fi
+	    $MOCK_BIN --init --configdir $config_dir -v --no-cleanup-after
 
 	    OUTPUT_FOLDER="$build_package"
 	fi
@@ -244,14 +231,15 @@ test_rpm() {
 	retry=0
 	while $try_retest
 	do
-	    sudo chroot "${TEST_CHROOT_PATH}" urpmi --split-length 0 --downloader wget --wget-options --auth-no-challenge -v --debug --no-verify-rpm --fastunsafe --no-suggests --buildrequires --test `ls  $TEST_CHROOT_PATH | grep rpm` --root test_root --auto > $test_log.tmp 2>&1
+	    sudo dnf --installroot="${TEST_CHROOT_PATH}/test_root" --assumeyes --nogpgcheck --setopt=install_weak_deps=False --setopt=tsflags=test builddep `ls  $TEST_CHROOT_PATH | grep rpm` > $test_log.tmp 2>&1
 	    test_code=$?
 	    try_retest=false
 	    if [[ $test_code != 0 && $retry < $MAX_RETRIES ]] ; then
 		if grep -q "$RETRY_GREP_STR" $test_log.tmp; then
 		    echo '--> Repository was changed in the middle, will rerun the tests' >> $test_log
 		    sleep ${WAIT_TIME}
-		    sudo chroot "${TEST_CHROOT_PATH}" urpmi.update -a >> $test_log 2>&1
+		    sudo rm -rf ${TEST_CHROOT_PATH}/test_root/var/cache/dnf/* >> $test_log 2>&1
+		    sudo dnf --installroot="${TEST_CHROOT_PATH}/test_root/" makecache >> $test_log 2>&1
 		    try_retest=true
 		    (( retry=$retry+1 ))
 		fi
@@ -300,8 +288,6 @@ do
     rm -rf "$OUTPUT_FOLDER"
     if [ "${CACHED_CHROOT_SHA1}" != '' ]; then
 	echo "--> Uses cached chroot with sha1 '$CACHED_CHROOT_SHA1'..."
-	$MOCK_BIN --chroot "urpmi.removemedia -a"
-	$MOCK_BIN --readdrepo -v --configdir $config_dir
 # (tpg) catch errors when adding repositories into chroot
 	rc=${PIPESTATUS[0]}
 	try_rebuild=false
@@ -500,7 +486,7 @@ find_spec
 # check for excludearch or exclusivearch
 validate_arch
 # download sources from .abf.yml
-/bin/bash /mdv/download_sources.sh
+/bin/bash /omv/download_sources.sh
 popd
 
 # build package
