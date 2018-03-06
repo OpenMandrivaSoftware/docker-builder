@@ -251,6 +251,36 @@ test_rpm() {
 	cat $test_log.tmp >> $test_log
 	echo "--> Tests finished at `date -u`" >> $test_log
 	echo 'Test code output: ' $test_code >> $test_log 2>&1
+	if [ "$test_code" = '0' ] && [ "$use_extra_tests" = 'true' ] ; then
+		echo '--> Checking if same or newer version of the package already exists in repositories' >> $test_log
+		
+		for i in $(ls  $TEST_CHROOT_PATH | grep rpm); do
+			RPM_NAME=$(rpm -qp --qf "%{NAME}" "${TEST_CHROOT_PATH}"/"$i")
+			RPM_EPOCH=$(rpm -qp --qf "%{EPOCH}" "${TEST_CHROOT_PATH}"/"$i")
+		
+			[ "${RPM_EPOCH}" = "(none)" ] && RPM_EPOCH="0"
+			RPM_VERREL=$(rpm -qp --qf "%{VERSION}-%{RELEASE}" "${TEST_CHROOT_PATH}"/"$i")
+			RPM_EVR="${RPM_EPOCH}:${RPM_VERREL}"
+			REPO_EVR=$(dnf repoquery -qp --qf "%{EPOCH}:%{VERSION}-%{RELEASE}" --latest-limit=1 "${RPM_NAME}")
+
+			if [ ! -z "${REPO_EVR}" ]; then
+				rpmdev-vercmp "${RPM_EVR}" "${REPO_EVR}"
+				VERCMP_STATUS="$?"
+				if [ ${VERCMP_STATUS} -eq 11 ]; then
+					# Proposed rpm is newer than what's in the repo
+					echo "Package $RPM_NAME is newer than what's in the repo. Extra tests passed: ' $test_code >> $test_log
+					return 0
+				else
+					# Proposed rpm is either the same, older, or another problem
+					echo "Package $RPM_NAME is either the same, older, or another problem. Extra tests failed: ' $test_code >> $test_log
+					return 5
+				fi
+			else
+				# It does not exist in the repo, so it's okay to go in
+				return 0
+			fi
+		done
+	fi
 	sudo rm -f  "${TEST_CHROOT_PATH}"/*.rpm
 	sudo rm -rf "${TEST_CHROOT_PATH}"/test_root
 	rm -f $test_log.tmp
