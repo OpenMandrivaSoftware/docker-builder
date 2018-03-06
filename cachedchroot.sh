@@ -2,8 +2,8 @@
 set -x
 echo '--> docker-builder/cachedchroot.sh'
 
-MOCK_BIN=/usr/bin/mock-urpm
-config_dir=/etc/mock-urpm/
+MOCK_BIN=/usr/bin/mock
+config_dir=/etc/mock/
 OUTPUT_FOLDER=/home/omv/iso_builder/results
 filestore_url="http://file-store.openmandriva.org/api/v1/file_stores"
 distro_release=${DISTRO_RELEASE:-"cooker"}
@@ -11,12 +11,12 @@ platform_name=${PLATFORM_NAME:-"openmandriva"}
 token="$TOKEN"
 arches=${ARCHES:-"i586 i686 x86_64 aarch64 armv7hl"}
 
-chroot_path="/var/lib/mock-urpm"
+chroot_path="/var/lib/mock"
 
 cleanup() {
     echo '--> Cleaning up...'
     sudo rm -fv /etc/rpm/platform
-    rm -fv /etc/mock-urpm/default.cfg
+    rm -fv /etc/mock/default.cfg
     sudo rm -rf ${chroot_path}/*
 }
 
@@ -30,7 +30,7 @@ if [ "$(uname -m)" = 'x86_64' ] && echo "$platform_arch" |grep -qE 'i[0-9]86'; t
 fi
 
 generate_config() {
-# Change output format for mock-urpm
+# Change output format for mock
 sed '17c/format: %(message)s' $config_dir/logging.ini > ~/logging.ini
 mv -f ~/logging.ini $config_dir/logging.ini
 
@@ -102,7 +102,7 @@ else
 fi
 
 for arch in $arches ; do
-    # init mock-urpm config
+    # init mock config
     generate_config
     arm_platform_detector
 
@@ -113,7 +113,7 @@ for arch in $arches ; do
 
     # Check exit code after build
     if [ $rc != 0 ] ; then
-	echo '--> Build failed: mock-urpm encountered a problem.'
+	echo '--> Build failed: mock encountered a problem.'
 	cleanup
 	exit 1
     fi
@@ -127,8 +127,7 @@ for arch in $arches ; do
     fi
 
     # Remove any stray lockfiles and make sure rpmdb is clean...
-    /bin/rm /var/lib/mock-urpm/openmandriva-"$arch"/root/var/lib/rpm/.RPMLOCK
-    /bin/rm /var/lib/mock-urpm/openmandriva-"$arch"/root/var/lib/urpmi/.LOCK
+    /bin/rm /var/lib/mock/openmandriva-"$arch"/root/var/lib/rpm/.RPMLOCK
     $MOCK_BIN --chroot "/usr/bin/db52_recover"
 
     # xz options -7e is 7th extreme level of compression, and -T0 is to use all available threads to speedup compress
