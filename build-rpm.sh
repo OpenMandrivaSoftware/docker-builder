@@ -172,6 +172,7 @@ if [ "$platform_arch" = 'aarch64' ]; then
 	sudo cp /usr/bin/qemu-static-aarch64 /var/lib/mock/openmandriva-$platform_arch/root/usr/bin/) &
 	subshellpid=$!
     fi
+fi
 
 if [ "$platform_arch" = 'armv7hl' ]; then
     if [ $cpu != "arm" ] || [ $cpu != "aarch64" ] ; then
