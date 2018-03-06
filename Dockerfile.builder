@@ -1,4 +1,4 @@
-FROM openmandriva/cooker
+FROM openmandriva/3.0
 #FROM openmandriva/cooker-aarch64
 #FROM openmandriva/cooker-armv7hl
 # replace me with armv7hl, aarch64
