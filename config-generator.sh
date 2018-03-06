@@ -44,7 +44,7 @@ fi
 
 cat <<EOF>> $default_cfg
 config_opts['root'] = '$platform_name-$platform_arch'
-config_opts['chroot_setup_cmd'] = ('install', 'basesystem-minimal', 'locales', 'locales-en', 'distro-release-OpenMandriva', 'gnupg', 'rpm-build', 'wget', 'task-devel', 'clang', 'openmandriva-repos-pkgprefs')
+config_opts['chroot_setup_cmd'] = ('install', 'basesystem-minimal', 'locales', 'locales-en', 'distro-release-OpenMandriva', 'gnupg', 'rpm-build', 'wget', 'task-devel', 'clang', 'openmandriva-repos-pkgprefs', 'rpmlint')
 config_opts['package_manager'] = 'dnf'
 config_opts['dnf_common_opts'] = ['--disableplugin=local', '--setopt=deltarpm=False', '--forcearch=$platform_arch']
 config_opts['useradd'] = '/usr/sbin/useradd -o -m -u %(uid)s -g %(gid)s -d %(home)s %(user)s'
