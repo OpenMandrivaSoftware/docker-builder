@@ -77,7 +77,7 @@ EXTRA_CFG_OPTIONS="$extra_cfg_options" \
   EMAIL=$email \
   PLATFORM_NAME=$platform_name \
   PLATFORM_ARCH=$platform_arch \
-  /bin/bash "/omv/config-generator.sh"
+  /bin/bash "/mdv/config-generator.sh"
 }
 
 container_data() {
