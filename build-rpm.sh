@@ -176,9 +176,9 @@ if [ "$platform_arch" = 'aarch64' ]; then
 if [ "$platform_arch" = 'armv7hl' ]; then
     if [ $cpu != "arm" ] || [ $cpu != "aarch64" ] ; then
 # hack to copy qemu binary in non-existing path
-	(while [ ! -e  /var/lib/mock-urpm/openmandriva-$platform_arch/root/usr/bin/ ]
+	(while [ ! -e  /var/lib/mock/openmandriva-$platform_arch/root/usr/bin/ ]
 	do sleep 1; done
-	sudo cp /usr/bin/qemu-static-arm /var/lib/mock-urpm/openmandriva-$platform_arch/root/usr/bin/) &
+	sudo cp /usr/bin/qemu-static-arm /var/lib/mock/openmandriva-$platform_arch/root/usr/bin/) &
 	subshellpid=$!
     fi
 
@@ -273,7 +273,7 @@ arm_platform_detector
 # (since in case when repository metadata is really broken we can loop here forever)
 MAX_RETRIES=10
 WAIT_TIME=60
-RETRY_GREP_STR="You may need to update your urpmi database\|problem reading synthesis file of medium\|retrieving failed: "
+RETRY_GREP_STR="You may need to update your RPM database\|problem reading synthesis file of medium\|retrieving failed: "
 
 if [ "$rerun_tests" = 'true' ]; then
     test_rpm
@@ -320,7 +320,7 @@ done
 
 # Check exit code after build
 if [ $rc != 0 ] || [ ! -e $OUTPUT_FOLDER/*.src.rpm ]; then
-    echo '--> Build failed: mock-urpm encountered a problem.'
+    echo '--> Build failed: mock encountered a problem.'
     # 99% of all build failures at src.rpm creation is broken deps
     # m1 show only first match -oP show only matching
     grep -m1 -oP "\(due to unsatisfied(.*)$" $OUTPUT_FOLDER/root.log >> ~/build_fail_reason.log
@@ -352,7 +352,7 @@ done
 
 # Check exit code after build
 if [ $rc != 0 ]; then
-    echo '--> Build failed: mock-urpm encountered a problem.'
+    echo '--> Build failed: mock encountered a problem.'
 # clean all the rpm files because build was not completed
     grep -m1 -i -oP "$GREP_PATTERN" $OUTPUT_FOLDER/root.log >> ~/build_fail_reason.log
     rm -rf $OUTPUT_FOLDER/*.rpm
@@ -366,11 +366,11 @@ echo '--> Done.'
 echo "--> Grepping rpmlint logs from $OUTPUT_FOLDER/build.log to $OUTPUT_FOLDER/rpmlint.log"
 sed -n "/Executing \"\/usr\/bin\/rpmlint/,/packages and.*specfiles checked/p" $OUTPUT_FOLDER/build.log > $OUTPUT_FOLDER/rpmlint.log
 echo '--> Create rpm -qa list'
-rpm --root=/var/lib/mock-urpm/openmandriva-$platform_arch/root/ -qa >> $OUTPUT_FOLDER/rpm-qa.log
+rpm --root=/var/lib/mock/openmandriva-$platform_arch/root/ -qa >> $OUTPUT_FOLDER/rpm-qa.log
 
 # (tpg) Save build chroot
 if [ "${rc}" != 0 ] && [ "${save_buildroot}" = 'true' ]; then
-    sudo tar --exclude=root/dev -zcvf "${OUTPUT_FOLDER}"/rpm-buildroot.tar.gz /var/lib/mock-urpm/openmandriva-$platform_arch/root/
+    sudo tar --exclude=root/dev -zcvf "${OUTPUT_FOLDER}"/rpm-buildroot.tar.gz /var/lib/mock/openmandriva-$platform_arch/root/
 fi
 
 # Test RPM files
