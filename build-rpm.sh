@@ -253,11 +253,11 @@ test_rpm() {
 	echo 'Test code output: ' $test_code >> $test_log 2>&1
 	if [ "$test_code" = '0' ] && [ "$use_extra_tests" = 'true' ] ; then
 		echo '--> Checking if same or newer version of the package already exists in repositories' >> $test_log
-		
+
 		for i in $(ls  $TEST_CHROOT_PATH | grep rpm); do
 			RPM_NAME=$(rpm -qp --qf "%{NAME}" "${TEST_CHROOT_PATH}"/"$i")
 			RPM_EPOCH=$(rpm -qp --qf "%{EPOCH}" "${TEST_CHROOT_PATH}"/"$i")
-		
+
 			[ "${RPM_EPOCH}" = "(none)" ] && RPM_EPOCH="0"
 			RPM_VERREL=$(rpm -qp --qf "%{VERSION}-%{RELEASE}" "${TEST_CHROOT_PATH}"/"$i")
 			RPM_EVR="${RPM_EPOCH}:${RPM_VERREL}"
@@ -518,7 +518,7 @@ find_spec
 # check for excludearch or exclusivearch
 validate_arch
 # download sources from .abf.yml
-/bin/bash /omv/download_sources.sh
+/bin/bash /mdv/download_sources.sh
 popd
 
 # build package
