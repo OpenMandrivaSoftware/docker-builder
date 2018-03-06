@@ -181,6 +181,7 @@ if [ "$platform_arch" = 'armv7hl' ]; then
 	sudo cp /usr/bin/qemu-static-arm /var/lib/mock/openmandriva-$platform_arch/root/usr/bin/) &
 	subshellpid=$!
     fi
+fi
 
 }
 probe_cpu
