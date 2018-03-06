@@ -44,12 +44,13 @@ fi
 
 cat <<EOF>> $default_cfg
 config_opts['root'] = '$platform_name-$platform_arch'
-config_opts['chroot_setup_cmd'] = ('install', 'basesystem-minimal', 'locales', 'locales-en', 'distro-release-OpenMandriva', 'gnupg', 'rpm-build', 'wget', 'task-devel', 'clang', 'openmandriva-repos-pkgprefs', 'rpmlint')
+config_opts['chroot_setup_cmd'] = ('install', 'basesystem-minimal', 'locales', 'locales-en', 'distro-release-OpenMandriva', 'gnupg', 'rpm-build', 'wget', 'task-devel', 'clang', 'openmandriva-repos-pkgprefs', 'rpmlint', 'dwz')
 config_opts['package_manager'] = 'dnf'
 config_opts['dnf_common_opts'] = ['--disableplugin=local', '--setopt=deltarpm=False', '--forcearch=$platform_arch']
 config_opts['useradd'] = '/usr/sbin/useradd -o -m -u %(uid)s -g %(gid)s -d %(home)s %(user)s'
 config_opts['releasever'] = '0' # at some point, this should be set by ABF
 config_opts['use_nspawn'] = False
+config_opts['rpm_command'] = '/usr/bin/rpm'
 
 config_opts['basedir'] = '/var/lib/mock/'
 config_opts['cache_topdir'] = '/var/cache/mock/'
