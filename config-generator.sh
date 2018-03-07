@@ -44,7 +44,7 @@ fi
 
 cat <<EOF>> $default_cfg
 config_opts['root'] = '$platform_name-$platform_arch'
-config_opts['chroot_setup_cmd'] = ('install', 'basesystem-minimal', 'locales', 'locales-en', 'distro-release-OpenMandriva', 'gnupg', 'rpm-build', 'wget', 'task-devel', 'clang', 'openmandriva-repos-pkgprefs', 'rpmlint', 'dwz')
+config_opts['chroot_setup_cmd'] = ('install', 'basesystem-minimal', 'locales', 'locales-en', 'distro-release-OpenMandriva', 'gnupg', 'rpm-build', 'wget', 'task-devel', 'clang', 'openmandriva-repos-pkgprefs', 'rpmlint-distro-policy', 'dwz')
 config_opts['package_manager'] = 'dnf'
 config_opts['dnf_common_opts'] = ['--disableplugin=local', '--setopt=deltarpm=False', '--forcearch=$platform_arch']
 config_opts['useradd'] = '/usr/sbin/useradd -o -m -u %(uid)s -g %(gid)s -d %(home)s %(user)s'
@@ -58,6 +58,8 @@ config_opts['cache_topdir'] = '/var/cache/mock/'
 config_opts['dist'] = 'cooker'  # only useful for --resultdir variable subst
 config_opts['macros']['%packager'] = '$uname <$email>'
 config_opts['macros'] = { '%_topdir': '%s/build' % config_opts['chroothome'], }
+config_opts['plugin_conf']['root_cache_opts']['compress_program'] = ""
+config_opts['plugin_conf']['root_cache_opts']['extension'] = ""
 config_opts['yum.conf'] = """
 [main]
 keepcache=1
