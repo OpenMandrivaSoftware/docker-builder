@@ -224,7 +224,7 @@ test_rpm() {
 	try_retest=true
 	retry=0
 	while $try_retest; do
-		sudo dnf --installroot="${TEST_CHROOT_PATH}/test_root" --assumeyes --nogpgcheck --setopt=install_weak_deps=False --setopt=tsflags=test builddep `ls  $TEST_CHROOT_PATH | grep rpm` > $test_log.tmp 2>&1
+		sudo dnf --installroot="${TEST_CHROOT_PATH}/test_root" --assumeyes --nogpgcheck --setopt=install_weak_deps=False --setopt=tsflags=test builddep $(ls  "$TEST_CHROOT_PATH" | grep rpm) > $test_log.tmp 2>&1
 		test_code=$?
 		try_retest=false
 		if [[ $test_code != 0 && $retry < $MAX_RETRIES ]] ; then
@@ -245,7 +245,7 @@ test_rpm() {
 	if [ "$test_code" = '0' ] && [ "$use_extra_tests" = 'true' ] ; then
 		echo '--> Checking if same or newer version of the package already exists in repositories' >> $test_log
 
-		for i in $(ls  $TEST_CHROOT_PATH | grep rpm); do
+		for i in $(ls "$TEST_CHROOT_PATH" | grep rpm); do
 			RPM_NAME=$(rpm -qp --qf "%{NAME}" "${TEST_CHROOT_PATH}"/"$i")
 			RPM_EPOCH=$(rpm -qp --qf "%{EPOCH}" "${TEST_CHROOT_PATH}"/"$i")
 
@@ -310,18 +310,7 @@ build_rpm() {
 		rm -rf "$OUTPUT_FOLDER"
 		if [ "${CACHED_CHROOT_SHA1}" != '' ]; then
 			echo "--> Uses cached chroot with sha1 '$CACHED_CHROOT_SHA1'..."
-			# (tpg) catch errors when adding repositories into chroot
-			rc=${PIPESTATUS[0]}
-			try_rebuild=false
-			if [[ $rc != 0 && $retry < $MAX_RETRIES ]]; then
-				if grep -q "$RETRY_GREP_STR" $OUTPUT_FOLDER/root.log; then
-					try_rebuild=true
-					(( retry=$retry+1 ))
-					echo "--> Repository was changed in the middle, will rerun the build. Next try (${retry} from ${MAX_RETRIES})..."
-					echo "--> Delay ${WAIT_TIME} sec..."
-					sleep ${WAIT_TIME}
-				fi
-			fi
+			$MOCK_BIN -v --configdir=$config_dir --update
 			$MOCK_BIN -v --configdir=$config_dir --buildsrpm --spec=$build_package/${PACKAGE}.spec --sources=$build_package --no-cleanup-after --no-clean $extra_build_src_rpm_options --resultdir=$OUTPUT_FOLDER
 		else
 			$MOCK_BIN -v --configdir=$config_dir --buildsrpm --spec=$build_package/${PACKAGE}.spec --sources=$build_package --no-cleanup-after $extra_build_src_rpm_options --resultdir=$OUTPUT_FOLDER
