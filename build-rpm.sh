@@ -134,7 +134,7 @@ download_cache() {
 		# unpack in root
 		echo "Extracting chroot $CACHED_CHROOT_SHA1"
 		if echo "${CACHED_CHROOT_SHA1} ${HOME}/${CACHED_CHROOT_SHA1}.tar.xz" | sha1sum -c --status &> /dev/null; then
-			sudo tar -xf ${HOME}/${CACHED_CHROOT_SHA1}.tar.xz -C /
+			sudo mv -f ${HOME}/${CACHED_CHROOT_SHA1}.tar.xz /var/cache/mock/openmandriva-"$platform_arch"/root_cache/cache.tar.xz
 		else
 			echo '--> Building without cached chroot, becasue SHA1 is wrong.'
 			export CACHED_CHROOT_SHA1=""
@@ -310,9 +310,9 @@ build_rpm() {
 		rm -rf "$OUTPUT_FOLDER"
 		if [ "${CACHED_CHROOT_SHA1}" != '' ]; then
 			echo "--> Uses cached chroot with sha1 '$CACHED_CHROOT_SHA1'..."
-			$MOCK_BIN -v --configdir=$config_dir --update
 			$MOCK_BIN -v --configdir=$config_dir --buildsrpm --spec=$build_package/${PACKAGE}.spec --sources=$build_package --no-cleanup-after --no-clean $extra_build_src_rpm_options --resultdir=$OUTPUT_FOLDER
 		else
+			sudo rm -rf /var/cache/mock/openmandriva-"$platform_arch"/root_cache/cache.tar.xz ||:
 			$MOCK_BIN -v --configdir=$config_dir --buildsrpm --spec=$build_package/${PACKAGE}.spec --sources=$build_package --no-cleanup-after $extra_build_src_rpm_options --resultdir=$OUTPUT_FOLDER
 		fi
 
