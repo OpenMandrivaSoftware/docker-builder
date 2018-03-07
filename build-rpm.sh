@@ -105,7 +105,7 @@ container_data() {
 			release=${nevr[3]}
 
 			dep_list=""
-			[[ ! "${fullname}" =~ ".*src.rpm$" ]] && dep_list=`dnf repoquery -q --latest-limit=1 --qf "%{NAME}\\n" --whatrequires ${name} | sort -u | xargs dnf repoquery -q --latest-limit=1 --qf "%{SOURCERPM}\\n" | rev | cut -f3- -d- | rev | sort -u | xargs echo`
+			[[ ! "${fullname}" =~ ".*src.rpm$" ]] && dep_list=`if [[ $(dnf repoquery -q --latest-limit=1 --qf "%{NAME}\\n" --whatrequires ${name}) -ne 0 ]];then sort -u | xargs dnf repoquery -q --latest-limit=1 --qf "%{SOURCERPM}\\n" | rev | cut -f3- -d- | rev | sort -u | xargs echo`
 			sha1=`sha1sum ${rpm} | awk '{ print $1 }'`
 
 			echo "--> dep_list for '${name}':"
