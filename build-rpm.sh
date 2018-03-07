@@ -223,7 +223,7 @@ test_rpm() {
 	retry=0
 	while $try_retest; do
 		sudo dnf --installroot="${TEST_CHROOT_PATH}" --assumeyes --nogpgcheck --setopt=install_weak_deps=False --setopt=tsflags=test builddep "$OUTPUT_FOLDER"/*.src.rpm > $test_log.tmp 2>&1
-		sudo dnf --installroot="${TEST_CHROOT_PATH}" --assumeyes --nogpgcheck --setopt=install_weak_deps=False --setopt=tsflags=test $(ls "$OUTPUT_FOLDER"/*.rpm | grep -v .src.rpm) > $test_log.tmp 2>&1
+		sudo dnf --installroot="${TEST_CHROOT_PATH}" --assumeyes --nogpgcheck --setopt=install_weak_deps=False --setopt=tsflags=test install $(ls "$OUTPUT_FOLDER"/*.rpm | grep -v .src.rpm) > $test_log.tmp 2>&1
 		test_code=$?
 		try_retest=false
 		if [[ $test_code != 0 && $retry < $MAX_RETRIES ]] ; then
