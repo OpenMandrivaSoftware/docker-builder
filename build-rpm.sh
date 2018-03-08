@@ -242,7 +242,7 @@ test_rpm() {
 	echo "--> Tests finished at `date -u`" >> $test_log
 	echo 'Test code output: ' $test_code >> $test_log 2>&1
 	if [ "$test_code" = '0' ] && [ "$use_extra_tests" = 'true' ] ; then
-		echo '--> Checking if same or newer version of the package already exists in repositories' >> $test_log
+		echo '--> Checking if same or older version of the package already exists in repositories' >> $test_log
 
 		for i in $(ls "$TEST_CHROOT_PATH" | grep rpm); do
 			RPM_NAME=$(rpm -qp --qf "%{NAME}" "${TEST_CHROOT_PATH}"/"$i")
