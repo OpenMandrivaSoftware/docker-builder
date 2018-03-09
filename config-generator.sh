@@ -1,5 +1,5 @@
 #!/bin/bash
-echo 'OpenMandriva platform config generator'
+printf '%s\n' '--> OpenMandriva platform config generator.'
 
 extra_cfg_options="$EXTRA_CFG_OPTIONS"
 uname="$UNAME"
@@ -12,24 +12,25 @@ repo_names="$REPO_NAMES"
 default_cfg=/etc/mock/default.cfg
 gen_included_repos() {
 
-names_arr=($repo_names)
-urls_arr=($repo_url)
+    names_arr=($repo_names)
+    urls_arr=($repo_url)
 
-for (( i=0; i<${#names_arr[@]}; i++ ));
-do
-	printf "[${names_arr[i]}]\nname=${names_arr[i]}\nbaseurl=${urls_arr[i]}\ngpgcheck=0\nenabled=1\n\n" >> $default_cfg
-done
-# close dnf repos section
-echo '"""' >> $default_cfg
+    for (( i=0; i<${#names_arr[@]}; i++ ));
+	do
+	    printf "[${names_arr[i]}]\nname=${names_arr[i]}\nbaseurl=${urls_arr[i]}\ngpgcheck=0\nenabled=1\n\n" >> "${default_cfg}"
+    done
+
+    # close dnf repos section
+    printf '%s\n' '"""' >> "${default_cfg}"
 }
 
-if [ "$platform_arch" = 'aarch64' ]; then
+if [ "${platform_arch}" = 'aarch64' ]; then
 cat <<EOF> $default_cfg
 config_opts['target_arch'] = '$platform_arch'
 config_opts['legal_host_arches'] = ('i586', 'i686', 'x86_64', 'aarch64')
 EOF
 
-elif [ "$platform_arch" = 'armv7hl' ]; then
+elif [ "${platform_arch}" = 'armv7hl' ]; then
 cat <<EOF> $default_cfg
 config_opts['target_arch'] = '$platform_arch'
 config_opts['legal_host_arches'] = ('i586', 'i686', 'x86_64', 'armv7hl', 'armv7l', 'aarch64')
