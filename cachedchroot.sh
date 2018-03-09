@@ -130,9 +130,9 @@ for arch in $arches ; do
     /bin/rm /var/lib/mock/openmandriva-"$arch"/root/var/lib/rpm/.RPMLOCK
     $MOCK_BIN --chroot "/usr/bin/db52_recover"
 
-    # xz options -7e is 7th extreme level of compression, and -T0 is to use all available threads to speedup compress
+    # xz options -7 is 7th level of compression, and -T0 is to use all available threads to speedup compress
     # need sudo to pack root:root dirs
-    sudo XZ_OPT="-7e -T0" tar --format=gnutar --no-xattrs --no-acls --absolute-paths -Jcvf "${OUTPUT_FOLDER}"/"${chroot}".tar.xz "${chroot_path}"/"${chroot}"
+    sudo XZ_OPT="-7 -T0" tar --format=gnutar --no-xattrs --no-acls --absolute-paths -Jcvf "${OUTPUT_FOLDER}"/"${chroot}".tar.xz "${chroot_path}"/"${chroot}"
 
     # Save exit code
     rc=$?
