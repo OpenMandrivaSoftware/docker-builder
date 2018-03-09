@@ -27,7 +27,7 @@ while true; do
 	-a|--arch) arch="$2" ; shift 2 ;;
 	-s|--with-systemd) systemd=systemd ; shift ;;
 	-u|--with-updates) updates=true ; shift ;;
-	-u|--with-passwd) passwd=true ; shift ;;
+	-p|--with-passwd) passwd=true ; shift ;;
 	-U|--without-user) without_user=true ; shift ;;
 	-h|--help) usage ;;
 	-x|--extra-package) extra_packages="$extra_packages $2" ; shift 2 ;;
@@ -35,17 +35,17 @@ while true; do
     esac
 done
 
-target_dir="$rootfsdir/rootfs"
+target_dir="${rootfsdir}/rootfs"
 
 errorCatch() {
     echo "Error catched. Exiting"
-    rm -rf $target_dir
+    rm -rf "${target_dir}"
     exit 1
 }
 
 trap errorCatch ERR SIGHUP SIGINT SIGTERM
 
-if [ -z $installversion ]; then
+if [ -z "${installversion}" ]; then
 # Attempt to match host version
     if [ -r /etc/distro-release ]; then
 	installversion="$(rpm --eval %distro_release)"
@@ -55,27 +55,28 @@ if [ -z $installversion ]; then
     fi
 fi
 
-if [ -z $mirror ]; then
+if [ -z "${mirror}" ]; then
 # No repo provided, use main
-    mirror=http://abf-downloads.openmandriva.org/$installversion/repository/$arch/main/release/
-    update_mirror=http://abf-downloads.openmandriva.org/$installversion/repository/$arch/main/updates/
+    mirror=http://abf-downloads.openmandriva.org/"${installversion}"/repository/"${arch}"/main/release/
+    update_mirror=http://abf-downloads.openmandriva.org/"${installversion}"/repository/"${arch}"/main/updates/
 fi
 
 
 # run me here
 install_chroot(){
-    urpmi.addmedia main_release $mirror --urpmi-root "$target_dir";
-if [ ! -z $updates ]; then
-    urpmi.addmedia main_updates $update_mirror --urpmi-root "$target_dir";
-fi
-    urpmi basesystem-minimal passwd urpmi distro-release-OpenMandriva locales locales-en $systemd \
+    urpmi.addmedia main_release "${mirror}" --urpmi-root "${target_dir}";
+
+    if [ ! -z "${updates}" ]; then
+	urpmi.addmedia main_updates "${update_mirror}" --urpmi-root "${target_dir}";
+    fi
+    urpmi basesystem-minimal passwd urpmi distro-release-OpenMandriva locales locales-en "${systemd}" \
 	--auto \
 	--no-suggests \
 	--no-verify-rpm \
-	--urpmi-root "$target_dir" \
-	--root "$target_dir"
+	--urpmi-root "${target_dir}" \
+	--root "${target_dir}"
 
-    if [[ $? != 0 ]]; then
+    if [ $? != 0 ]; then
 	echo "Creating urpmi chroot failed."
 	errorCatch
     fi
@@ -83,11 +84,9 @@ fi
 
 arm_platform_detector(){
 
-filestore_url="http://file-store.openmandriva.org/api/v1/file_stores"
-
 probe_cpu() {
 cpu="$(uname -m)"
-case "$cpu" in
+case "${cpu}" in
    i386|i486|i586|i686|i86pc|BePC|x86_64)
       cpu="i386"
    ;;
@@ -100,19 +99,19 @@ case "$cpu" in
 esac
 
 # create path
-if [[ "$arch" == "aarch64" ]]; then
-    if [ $cpu != "aarch64" ] ; then
-	mkdir -p $target_dir/usr/bin/
-        sudo sh -c "echo '$arch-mandriva-linux-gnueabi' > /etc/rpm/platform"
-	cp /usr/bin/qemu-static-aarch64 $target_dir/usr/bin/
+if [ "${arch}" = 'aarch64' ]; then
+    if [ "${cpu}" != 'aarch64' ]; then
+	mkdir -p "${target_dir}"/usr/bin/
+	sudo sh -c "echo '${arch}-mandriva-linux-gnueabi' > /etc/rpm/platform"
+	cp /usr/bin/qemu-static-aarch64 "${target_dir}"/usr/bin/
     fi
 fi
 
-if [[ "$arch" == "armv7hl" ]]; then
-    if [ $cpu != "arm" ] ; then
-	mkdir -p $target_dir/usr/bin/
-        sudo sh -c "echo '$arch-mandriva-linux-gnueabi' > /etc/rpm/platform"
-	cp /usr/bin/qemu-static-arm $target_dir/usr/bin/
+if [ "${arch}" = 'armv7hl' ]; then
+    if [ "${cpu}" != 'arm' ] ; then
+	mkdir -p "${target_dir}"/usr/bin/
+	sudo sh -c "echo '${arch}-mandriva-linux-gnueabi' > /etc/rpm/platform"
+	cp /usr/bin/qemu-static-arm "${target_dir}"/usr/bin/
     fi
 fi
 }
@@ -122,66 +121,66 @@ probe_cpu
 arm_platform_detector
 install_chroot
 
-if [ ! -z $systemd ]; then
-    echo -e "--------------------------------------"
-    echo -e "Creating image with systemd support."
-    echo -e "--------------------------------------\n"
+if [ ! -z "${systemd}" ]; then
+    printf '%b\n' '--------------------------------------'
+    printf '%b\n' 'Creating image with systemd support.'
+    printf '%b\n' '--------------------------------------'
     systemd="systemd"
 fi
 
-if [ ! -z $systemd ]; then
+if [ ! -z "${systemd}" ]; then
 # Prevent systemd from starting unneeded services
-    (cd $target_dir/lib/systemd/system/sysinit.target.wants/; for i in *; do [ $i == systemd-tmpfiles-setup.service ] || rm -f $i; done); \
-	rm -f $target_dir/lib/systemd/system/multi-user.target.wants/*;\
-	rm -f $target_dir/etc/systemd/system/*.wants/*;\
-	rm -f $target_dir/lib/systemd/system/local-fs.target.wants/*; \
-	rm -f $target_dir/lib/systemd/system/sockets.target.wants/*udev*; \
-	rm -f $target_dir/lib/systemd/system/sockets.target.wants/*initctl*; \
-	rm -f $target_dir/lib/systemd/system/basic.target.wants/*;\
-	rm -f $target_dir/lib/systemd/system/anaconda.target.wants/*;
+    (cd "${target_dir}"/lib/systemd/system/sysinit.target.wants/; for i in *; do [ "$i" = 'systemd-tmpfiles-setup.service' ] || rm -f "${i}"; done); \
+	rm -f "${target_dir}"/lib/systemd/system/multi-user.target.wants/*;\
+	rm -f "${target_dir}"/etc/systemd/system/*.wants/*;\
+	rm -f "${target_dir}"/lib/systemd/system/local-fs.target.wants/*; \
+	rm -f "${target_dir}"/lib/systemd/system/sockets.target.wants/*udev*; \
+	rm -f "${target_dir}"/lib/systemd/system/sockets.target.wants/*initctl*; \
+	rm -f "${target_dir}"/lib/systemd/system/basic.target.wants/*;\
+	rm -f "${target_dir}"/lib/systemd/system/anaconda.target.wants/*;
 fi
 
-if [ -d "$target_dir/etc/sysconfig" ]; then
+if [ -d "${target_dir}"/etc/sysconfig ]; then
 # allow networking init scripts inside the container to work without extra steps
-    echo 'NETWORKING=yes' > "$target_dir/etc/sysconfig/network"
+    echo 'NETWORKING=yes' > "${target_dir}"/etc/sysconfig/network
 fi
 
 # make sure /etc/resolv.conf has something useful in it
-mkdir -p "$target_dir/etc"
-cat > "$target_dir/etc/resolv.conf" <<'EOF'
+mkdir -p "${target_dir}"/etc
+cat > "${target_dir}"/etc/resolv.conf <<'EOF'
 nameserver 8.8.8.8
 nameserver 8.8.4.4
 EOF
 
-if [ ! -z "$without_user" ]; then
+if [ ! -z "${without_user}" ]; then
 	# Create user omv, password omv
-	echo 'omv:x:1001:1001::/home/omv:/bin/bash' >>"$target_dir"/etc/passwd
-	echo 'omv:$6$rG3bQ92hkTNubV1p$5qPB9FoXBhNcSE1FOklCoEDowveAgjSf2cHYVwCENZaWtgpFQaRRRN5Ihwd8nuaKMdA1R1XouOasJ7u5dbiGt0:17302:0:99999:7:::' >>"$target_dir"/etc/shadow
-	echo 'omv:x:1001:' >>"$target_dir"/etc/group
-	sed -i -e 's,wheel:x:10:$,wheel:x:10:omv,' "$target_dir"/etc/group
+	echo 'omv:x:1001:1001::/home/omv:/bin/bash' >>"${target_dir}"/etc/passwd
+	echo 'omv:$6$rG3bQ92hkTNubV1p$5qPB9FoXBhNcSE1FOklCoEDowveAgjSf2cHYVwCENZaWtgpFQaRRRN5Ihwd8nuaKMdA1R1XouOasJ7u5dbiGt0:17302:0:99999:7:::' >> "${target_dir}"/etc/shadow
+	echo 'omv:x:1001:' >>"${target_dir}"/etc/group
+	sed -i -e 's,wheel:x:10:$,wheel:x:10:omv,' "${target_dir}"/etc/group
 fi
 
-if [ ! -z "$passwd" ]; then
+if [ ! -z "${passwd}" ]; then
 	ROOT_PASSWD="root"
-	echo "change password to $ROOT_PASSWD"
-	sudo chroot $target_dir /bin/bash -c "echo '$ROOT_PASSWD' |passwd root --stdin"
+	echo "change password to ${ROOT_PASSWD}"
+	sudo chroot "${target_dir}" /bin/bash -c "echo '${ROOT_PASSWD}' |passwd root --stdin"
 
-	cat << EOF > "$target_dir"/README.omv
+	cat << EOF > "${target_dir}"/README.omv
 OpenMandriva $installversion distro
-default login\password is root:root
+default login and password is root:root
 You must change it!
 EOF
 fi
 
-if [ ! -z $systemd ]; then
-    tarFile="$rootfsdir/rootfs-${arch}-systemd.tar.xz"
+if [ ! -z "${systemd}" ]; then
+    tarFile="${rootfsdir}"/rootfs-"${arch}"-systemd.tar.xz
 else
-    tarFile="$rootfsdir/rootfs-${arch}.tar.xz"
+    tarFile="${rootfsdir}"/rootfs-"${arch}".tar.xz
 fi
 
-pushd $target_dir
+cd "${target_dir}"
 rm -fv usr/bin/qemu-*
-tar --numeric-owner -caf $tarFile -c .
-popd
-rm -rf $target_dir
+tar --numeric-owner -caf "${tarFile}" -c .
+cd ..
+rm -rf "${target_dir}"
 rm -fv /etc/rpm/platform

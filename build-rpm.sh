@@ -2,7 +2,7 @@
 set -x
 
 cleanup() {
-	echo '--> Cleaning up...'
+	printf '%s\n' '--> Cleaning up...'
 	sudo rm -fv /etc/rpm/platform
 	rm -fv /etc/mock/default.cfg
 	sudo rm -rf /var/lib/mock/*
@@ -12,11 +12,11 @@ cleanup() {
 	#rm -fv ~/build_fail_reason.log
 
 	# (tpg) remove package
-	rm -rf "${HOME}/${PACKAGE}"
+	rm -rf "${HOME}"/"${PACKAGE}"
 	# (tpg) remove old files
 	# in many cases these are leftovers when build fails
 	# would be nice to remove them to free disk space
-	find ${HOME} -maxdepth 1 ! -name 'qemu-a*' ! -name 'docker-worker' ! -name '.gem' ! -name 'envfile' -mmin +1500 -exec rm -rf '{}' \;  &> /dev/null
+	find "${HOME}" -maxdepth 1 ! -name 'qemu-a*' ! -name 'docker-worker' ! -name '.gem' ! -name 'envfile' -mmin +1500 -exec rm -rf '{}' \;  &> /dev/null
 }
 
 # (tpg) Clean build environment
@@ -30,8 +30,8 @@ MOCK_BIN="/usr/bin/mock"
 config_dir=/etc/mock/
 # $PACKAGE same as project name
 # e.g. github.com/OpenMandrivaAssociation/htop
-build_package=${HOME}/"$PACKAGE"
-OUTPUT_FOLDER=${HOME}/output
+build_package="${HOME}"/"$PACKAGE"
+OUTPUT_FOLDER="${HOME}"/output
 # Qemu ARM binaries
 QEMU_ARM_SHA="9c7e32080fab6751a773f363bfebab8ac8cb9f4a"
 QEMU_ARM_BINFMT_SHA="10131ee0db7a486186c32e0cb7229f4368d0d28b"
@@ -57,27 +57,27 @@ rerun_tests="$RERUN_TESTS"
 # list of packages for tests relaunch
 packages="$PACKAGES"
 
-if [ "$(uname -m)" = 'x86_64' ] && echo "$platform_arch" |grep -qE 'i[0-9]86'; then
+if [ "$(uname -m)" = 'x86_64' ] && printf '%s\n' "${arch}" | grep -qE 'i[0-9]86'; then
 	# Change the kernel personality so build scripts don't think
 	# we're building for 64-bit
 	MOCK_BIN="/usr/bin/i386 $MOCK_BIN"
 fi
 
-echo '--> Mounting tmpfs filesystem to builddir'
+printf '%s\n' '--> Mounting tmpfs filesystem to builddir'
 sudo mount -a
 
 generate_config() {
 	# Change output format for mock
-	sed '17c/format: %(message)s' $config_dir/logging.ini > ~/logging.ini
-	mv -f ~/logging.ini $config_dir/logging.ini
+	sed '17c/format: %(message)s' "${config_dir}"/logging.ini > ~/logging.ini
+	mv -f ~/logging.ini "${config_dir}"/logging.ini
 
 	EXTRA_CFG_OPTIONS="$extra_cfg_options" \
 		EXTRA_CFG_URPM_OPTIONS="$extra_cfg_urpm_options" \
-		UNAME=$uname \
-		EMAIL=$email \
-		PLATFORM_NAME=$platform_name \
-		PLATFORM_ARCH=$platform_arch \
-		/bin/bash "/mdv/config-generator.sh"
+		UNAME="$uname" \
+		EMAIL="$email" \
+		PLATFORM_NAME="$platform_name" \
+		PLATFORM_ARCH="$platform_arch" \
+		/bin/sh "/mdv/config-generator.sh"
 }
 
 container_data() {
@@ -85,7 +85,7 @@ container_data() {
 
 	[ "$rerun_tests" = 'true' ] && return 0
 
-	c_data=$OUTPUT_FOLDER/container_data.json
+	c_data="$OUTPUT_FOLDER"/container_data.json
 	project_name=`echo ${git_repo} | sed s%.*/%% | sed s/.git$//`
 	echo '[' > ${c_data}
 	comma=0
@@ -128,15 +128,15 @@ container_data() {
 download_cache() {
 	if [ "${CACHED_CHROOT_SHA1}" != '' ]; then
 		# if chroot not exist download it
-		if [ ! -f ${HOME}/${CACHED_CHROOT_SHA1}.tar.xz ]; then
+		if [ ! -f "${HOME}"/"${CACHED_CHROOT_SHA1}".tar.xz ]; then
 			curl -L "${filestore_url}/${CACHED_CHROOT_SHA1}" -o "${HOME}/${CACHED_CHROOT_SHA1}.tar.xz"
 		fi
 		# unpack in root
-		echo "Extracting chroot $CACHED_CHROOT_SHA1"
+		printf '%s\n' "Extracting chroot $CACHED_CHROOT_SHA1"
 		if echo "${CACHED_CHROOT_SHA1} ${HOME}/${CACHED_CHROOT_SHA1}.tar.xz" | sha1sum -c --status &> /dev/null; then
 			sudo mv -f ${HOME}/${CACHED_CHROOT_SHA1}.tar.xz /var/cache/mock/openmandriva-"$platform_arch"/root_cache/cache.tar.xz
 		else
-			echo '--> Building without cached chroot, becasue SHA1 is wrong.'
+			printf '%s\n' '--> Building without cached chroot, becasue SHA1 is wrong.'
 			export CACHED_CHROOT_SHA1=""
 		fi
 	fi
@@ -159,7 +159,7 @@ arm_platform_detector(){
 		esac
 
 		if [ "$platform_arch" = 'aarch64' ]; then
-			if [ $cpu != "aarch64" ] ; then
+			if [ "$cpu" != 'aarch64' ]; then
 				# hack to copy qemu binary in non-existing path
 				(while [ ! -e  /var/lib/mock/openmandriva-$platform_arch/root/usr/bin/ ]; do sleep 1; done
 				# rebuild docker builder with qemu packages
@@ -169,7 +169,7 @@ arm_platform_detector(){
 		fi
 
 		if [ "$platform_arch" = 'armv7hl' ]; then
-			if [ $cpu != "arm" ] || [ $cpu != "aarch64" ] ; then
+			if [ "$cpu" != 'arm' ] || [ $cpu != "aarch64" ] ; then
 				# hack to copy qemu binary in non-existing path
 				(while [ ! -e  /var/lib/mock/openmandriva-$platform_arch/root/usr/bin/ ]; do sleep 1; done
 				sudo cp /usr/bin/qemu-static-arm /var/lib/mock/openmandriva-$platform_arch/root/usr/bin/) &
@@ -191,21 +191,21 @@ test_rpm() {
 	echo '--> Starting RPM tests.'
 
 	if [ "$rerun_tests" = 'true' ]; then
-		[ "$packages" = '' ] && echo '--> No packages for testing. Something is wrong. Exiting. !!!' && exit 1
+		[ "$packages" = '' ] && printf '%s\n' '--> No packages for testing. Something is wrong. Exiting. !!!' && exit 1
 
 		[ ! -e "$OUTPUT_FOLDER" ] && mkdir -p "$OUTPUT_FOLDER"
 		[ ! -e "$build_package" ] && mkdir -p "$build_package"
 
-		test_log="$OUTPUT_FOLDER"/tests-`printf '%(%F-%R)T'.log`
-		echo "--> Re-running tests on `date -u`" >> $test_log
+		test_log="${OUTPUT_FOLDER}"/tests-"$(printf '%(%F-%R)T')".log
+		printf '%s\n' "--> Re-running tests on `date -u`" >> $test_log
 		prefix='rerun-tests-'
 		arr=($packages)
 		cd "$build_package"
 		for package in ${arr[@]} ; do
 			echo "--> Downloading '$package'..." >> $test_log
-			wget http://file-store.openmandriva.org/api/v1/file_stores/$package --content-disposition --no-check-certificate
+			wget http://file-store.openmandriva.org/api/v1/file_stores/"$package" --content-disposition --no-check-certificate
 			rc=$?
-			if [ $rc != 0 ]; then
+			if [ "${rc}" != '0' ]; then
 				echo "--> Error on extracting package with sha1 '$package'!!!"
 				exit $rc
 			fi
@@ -216,7 +216,7 @@ test_rpm() {
 		OUTPUT_FOLDER="$build_package"
 	fi
 
-	echo '--> Checking if rpm packages can be installed.' >> $test_log
+	printf '%s\n' '--> Checking if rpm packages can be installed.' >> $test_log
 	TEST_CHROOT_PATH=$($MOCK_BIN --configdir=$config_dir --print-root-path)
 
 	try_retest=true
@@ -228,9 +228,9 @@ test_rpm() {
 		try_retest=false
 		if [[ $test_code != 0 && $retry < $MAX_RETRIES ]] ; then
 			if grep -q "$RETRY_GREP_STR" $test_log.tmp; then
-				echo '--> Repository was changed in the middle, will rerun the tests' >> $test_log
+				printf '%s\n' '--> Repository was changed in the middle, will rerun the tests' >> $test_log
 				sleep ${WAIT_TIME}
-				sudo rm -rf ${TEST_CHROOT_PATH}/test_root/var/cache/dnf/* >> $test_log 2>&1
+				sudo rm -rf "${TEST_CHROOT_PATH}"/test_root/var/cache/dnf/* >> $test_log 2>&1
 				sudo dnf --installroot="${TEST_CHROOT_PATH}/test_root/" makecache >> $test_log 2>&1
 				try_retest=true
 				(( retry=$retry+1 ))
@@ -240,9 +240,9 @@ test_rpm() {
 
 	cat $test_log.tmp >> $test_log
 	echo "--> Tests finished at `date -u`" >> $test_log
-	echo 'Test code output: ' $test_code >> $test_log 2>&1
+	printf '%s\n' 'Test code output: ' $test_code >> $test_log 2>&1
 	if [ "$test_code" = '0' ] && [ "$use_extra_tests" = 'true' ] ; then
-		echo '--> Checking if same or older version of the package already exists in repositories' >> $test_log
+		printf '%s\n' '--> Checking if same or older version of the package already exists in repositories' >> $test_log
 
 		for i in $(ls "$TEST_CHROOT_PATH" | grep rpm); do
 			RPM_NAME=$(rpm -qp --qf "%{NAME}" "${TEST_CHROOT_PATH}"/"$i")
@@ -271,19 +271,19 @@ test_rpm() {
 			fi
 		done
 	fi
-	sudo rm -f  "${TEST_CHROOT_PATH}"/*.rpm
+	sudo rm -f "${TEST_CHROOT_PATH}"/*.rpm
 	sudo rm -rf "${TEST_CHROOT_PATH}"/test_root
 	rm -f $test_log.tmp
 
 	# Check exit code after testing
-	if [ $test_code != 0 ]; then
-		echo '--> Test failed, see: tests.log'
+	if [ $test_code != '0' ]; then
+		printf '%s\n' '--> Test failed, see: tests.log'
 		test_code=5
 		[ "$rerun_tests" = '' ] && container_data
 		[ "$rerun_tests" = 'true' ] && cleanup
 		exit $test_code
 	else
-		return $test_code
+		return "${test_code}"
 	fi
 }
 
@@ -329,7 +329,7 @@ build_rpm() {
 	done
 
 	# Check exit code after build
-	if [ $rc != 0 ] || [ ! -e $OUTPUT_FOLDER/*.src.rpm ]; then
+	if [ "${rc}" != 0 ] || [ ! -e "${OUTPUT_FOLDER}"/*.src.rpm ]; then
 		echo '--> Build failed: mock encountered a problem.'
 		# 99% of all build failures at src.rpm creation is broken deps
 		# m1 show only first match -oP show only matching
@@ -339,9 +339,9 @@ build_rpm() {
 		exit 1
 	fi
 
-	echo '--> src.rpm build has been done successfully.'
+	printf '%s\n' '--> src.rpm build has been done successfully.'
 
-	echo '--> Building rpm'
+	printf '%s\n' '--> Building rpm'
 	try_rebuild=true
 	retry=0
 	while $try_rebuild; do
@@ -360,25 +360,25 @@ build_rpm() {
 	done
 
 	# Check exit code after build
-	if [ $rc != 0 ]; then
-		echo '--> Build failed: mock encountered a problem.'
+	if [ "${rc}" != '0' ]; then
+		printf '%s\n' '--> Build failed: mock encountered a problem.'
 		# clean all the rpm files because build was not completed
 		grep -m1 -i -oP "$GREP_PATTERN" $OUTPUT_FOLDER/root.log >> ~/build_fail_reason.log
-		rm -rf $OUTPUT_FOLDER/*.rpm
+		rm -rf "${OUTPUT_FOLDER}"/*.rpm
 		[ -n $subshellpid ] && kill $subshellpid
 		cleanup
 		exit 1
 	fi
-	echo '--> Done.'
+	printf '%s\n' '--> Done.'
 
 	# Extract rpmlint logs into separate file
 	echo "--> Grepping rpmlint logs from $OUTPUT_FOLDER/build.log to $OUTPUT_FOLDER/rpmlint.log"
 	sed -n "/Executing \"\/usr\/bin\/rpmlint/,/packages and.*specfiles checked/p" $OUTPUT_FOLDER/build.log > $OUTPUT_FOLDER/rpmlint.log
-	echo '--> Create rpm -qa list'
+	printf '%s\n' '--> Create rpm -qa list'
 	rpm --root=/var/lib/mock/openmandriva-$platform_arch/root/ -qa >> $OUTPUT_FOLDER/rpm-qa.log
 
 	# (tpg) Save build chroot
-	if [ "${rc}" != 0 ] && [ "${save_buildroot}" = 'true' ]; then
+	if [ "${rc}" != '0' ] && [ "${save_buildroot}" = 'true' ]; then
 		sudo tar --exclude=root/dev -zcvf "${OUTPUT_FOLDER}"/rpm-buildroot.tar.gz /var/lib/mock/openmandriva-$platform_arch/root/
 	fi
 
@@ -393,11 +393,11 @@ find_spec() {
 	# Check count of *.spec files (should be one)
 	x=$(ls -1 | grep -c '.spec$' | sed 's/^ *//' | sed 's/ *$//')
 	if [ "$x" -eq "0" ] ; then
-		echo '--> There are no spec files in repository.'
+		printf '%s\n' '--> There are no spec files in repository.'
 		exit 1
 	else
 		if [ "$x" -ne "1" ] ; then
-			echo '--> There are more than one spec file in repository.'
+			printf '%s\n' '--> There are more than one spec file in repository.'
 			exit 1
 		fi
 	fi
@@ -405,10 +405,10 @@ find_spec() {
 
 validate_arch() {
 	# check if spec file have set ExcludeArch or ExclusiveArch against build arch target
-	BUILD_TYPE=`grep -i '^excludearch:.*$\|^exclusivearch:.*$' *.spec | awk -F'[:]' '{print $1}'`
+	BUILD_TYPE="$(grep -i '^excludearch:.*$\|^exclusivearch:.*$' *.spec | awk -F'[:]' '{print $1}')"
 
 	# check if spec file have both ExcludeArch and ExclusiveArch set up
-	[[ ${#BUILD_TYPE} -gt 15 ]] && echo "Spec file has set ExcludeArch and ExclusiveArch. Exiting!" && exit 1
+	[[ ${#BUILD_TYPE} -gt 15 ]] && printf '%s\n' "Spec file has set ExcludeArch and ExclusiveArch. Exiting!" && exit 1
 
 	SPEC_ARCH=(`grep -i '^excludearch:.*$\|^exclusivearch:.*$' *.spec | awk -F'[[:blank:]]' '{$1="";print $0}' | sort -u`)
 
@@ -423,14 +423,14 @@ validate_arch() {
 			fi
 		done
 
-		if [ -n "${FOUND_MATCH}" -a "${BUILD_TYPE,,}" = "excludearch" ]; then
+		if [ -n "${FOUND_MATCH}" ] && [ "${BUILD_TYPE,,}" = 'excludearch' ]; then
 			echo "--> Build for this architecture is forbidden because of ${BUILD_TYPE} set in spec file!"
 			exit 6
-		elif [ -z "${FOUND_MATCH}" -a "${BUILD_TYPE,,}" = "exclusivearch" ]; then
+		elif [ -z "${FOUND_MATCH}" ] && [ "${BUILD_TYPE,,}" = 'exclusivearch' ]; then
 			echo "--> Build for this architecture is forbidden because of ${BUILD_TYPE} set in spec file!"
 			exit 6
 		else
-			echo "--> Spec validated for ExcludeArch and ExclusiveArch. Continue building."
+			printf '%s\n' "--> Spec validated for ExcludeArch and ExclusiveArch. Continue building."
 		fi
 	}
 
@@ -466,12 +466,12 @@ clone_repo() {
 		# checkout specific branch/tag if defined
 		if [ ! -z "$project_version" ]; then
 			# (tpg) clone only history of 100 commits to reduce bandwith
-			git clone --depth 100 -b $project_version $git_repo ${HOME}/${PACKAGE}
-			pushd "${HOME}/${PACKAGE}"
-			git rev-parse HEAD > ${HOME}/commit_hash
-			popd
+			git clone --depth 100 -b "$project_version" "$git_repo" "${HOME}"/"${PACKAGE}"
+			cd "${HOME}/${PACKAGE}"
+			git rev-parse HEAD > "${HOME}"/commit_hash
+			cd -
 		else
-			git clone --depth 100 $git_repo ${HOME}/${PACKAGE}
+			git clone --depth 100 "$git_repo" "${HOME}"/"${PACKAGE}"
 		fi
 		rc=$?
 		try_reclone=false
@@ -484,14 +484,14 @@ clone_repo() {
 		fi
 	done
 
-	pushd ${HOME}/${PACKAGE}
+	cd "${HOME}"/"${PACKAGE}"
 	# count number of specs (should be 1)
 	find_spec
 	# check for excludearch or exclusivearch
 	validate_arch
 	# download sources from .abf.yml
-	/bin/bash /mdv/download_sources.sh
-	popd
+	/bin/sh /mdv/download_sources.sh
+	cd -
 
 	# build package
 }
@@ -502,4 +502,4 @@ download_cache
 build_rpm
 container_data
 # wipe package
-rm -rf ${HOME}/${PACKAGE}
+rm -rf "${HOME}"/"${PACKAGE}"
