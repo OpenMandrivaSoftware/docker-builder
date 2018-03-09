@@ -300,7 +300,7 @@ do
     rm -rf "$OUTPUT_FOLDER"
     if [ "${CACHED_CHROOT_SHA1}" != '' ]; then
 	echo "--> Uses cached chroot with sha1 '$CACHED_CHROOT_SHA1'..."
-	/usr/sbin/urpmi.removemedia -a --urpmi-root $($MOCK_BIN --configdir=$config_dir --print-root-path)
+	$MOCK_BIN --chroot "urpmi.removemedia -a"
 	$MOCK_BIN --readdrepo -v --configdir $config_dir
 # (tpg) catch errors when adding repositories into chroot
 	rc=${PIPESTATUS[0]}
