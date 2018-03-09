@@ -51,7 +51,7 @@ fi
 
 cat <<EOF>> $default_cfg
 config_opts['root'] = '$platform_name-$platform_arch'
-config_opts['chroot_setup'] = 'basesystem-minimal locales locales-en distro-release-OpenMandriva gnupg rpm-build wget task-devel clang urpmi'
+config_opts['chroot_setup'] = 'basesystem-minimal locales locales-en distro-release-OpenMandriva gnupg rpm-build urpmi wget meta-task task-devel clang'
 #config_opts['urpm_options'] = '--xml-info=never $extra_cfg_urpm_options'
 
 # If it's True - current urpmi configs will be copied to the chroot.
@@ -66,7 +66,6 @@ config_opts['cache_topdir'] = '/var/cache/mock-urpm/'
 
 config_opts['dist'] = 'cooker'  # only useful for --resultdir variable subst
 config_opts['macros']['%packager'] = '$uname <$email>'
-config_opts['macros'] = { '%_topdir': '%s/build' % config_opts['chroothome'], }
 config_opts["urpmi_media"] = {
 EOF
 
