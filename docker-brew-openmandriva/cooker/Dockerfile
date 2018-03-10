@@ -1,5 +1,5 @@
-# Dockerfile to create OpenMandriva linux 2014/cooker base images
-# Create base image with mkimage-urpmi.sh script
+# Dockerfile to create OpenMandriva Lx 4.0/cooker base images
+# Create base image with mkimage-dnf.sh script
 #
 
 FROM scratch
