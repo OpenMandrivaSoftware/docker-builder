@@ -295,7 +295,7 @@ build_rpm() {
 	# (since in case when repository metadata is really broken we can loop here forever)
 	MAX_RETRIES=10
 	WAIT_TIME=60
-	RETRY_GREP_STR="You may need to update your RPM database\|problem reading synthesis file of medium\|retrieving failed: "
+	RETRY_GREP_STR="Error downloading packages\|All mirrors were already tried without success\|Cannot download "
 
 	if [ "$rerun_tests" = 'true' ]; then
 		test_rpm
