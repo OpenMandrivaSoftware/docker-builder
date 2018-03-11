@@ -94,7 +94,7 @@ fi
 
 (
         dnf \
-            "${reposetup}" \
+            ${reposetup} \
             --installroot="${rootfsDir}" \
             --releasever="${installversion}" \
             --setopt=install_weak_deps=False \
