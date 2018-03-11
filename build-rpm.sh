@@ -239,18 +239,18 @@ test_rpm() {
 		fi
 	done
 
-	cat $test_log.tmp >> $test_log
-	printf '%s\n' "--> Tests finished at $(date -u)" >> $test_log
-	printf '%s\n' 'Test code output: ' $test_code >> $test_log 2>&1
+	cat "$test_log".tmp >> "$test_log"
+	printf '%s\n' "--> Tests finished at $(date -u)" >> "$test_log"
+	printf '%s\n' "Test code output: $test_code" >> "$test_log" 2>&1
 	if [ "$test_code" = '0' ] && [ "$use_extra_tests" = 'true' ]; then
 		printf '%s\n' '--> Checking if same or older version of the package already exists in repositories' >> $test_log
 
-		for i in $(ls "$TEST_CHROOT_PATH" | grep rpm); do
-			RPM_NAME=$(rpm -qp --qf "%{NAME}" "${TEST_CHROOT_PATH}"/"$i")
-			RPM_EPOCH=$(rpm -qp --qf "%{EPOCH}" "${TEST_CHROOT_PATH}"/"$i")
+		for i in $(ls "${OUTPUT_FOLDER}" | grep rpm); do
+			RPM_NAME=$(rpm -qp --qf "%{NAME}" "${OUTPUT_FOLDER}"/"$i")
+			RPM_EPOCH=$(rpm -qp --qf "%{EPOCH}" "${OUTPUT_FOLDER}"/"$i")
 
 			[ "${RPM_EPOCH}" = "(none)" ] && RPM_EPOCH="0"
-			RPM_VERREL=$(rpm -qp --qf "%{VERSION}-%{RELEASE}" "${TEST_CHROOT_PATH}"/"$i")
+			RPM_VERREL=$(rpm -qp --qf "%{VERSION}-%{RELEASE}" "${OUTPUT_FOLDER}"/"$i")
 			RPM_EVR="${RPM_EPOCH}:${RPM_VERREL}"
 			REPO_EVR=$(dnf repoquery -qp --qf "%{EPOCH}:%{VERSION}-%{RELEASE}" --latest-limit=1 "${RPM_NAME}")
 
