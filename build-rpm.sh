@@ -89,7 +89,8 @@ container_data() {
 	project_name=`echo ${git_repo} | sed s%.*/%% | sed s/.git$//`
 	echo '[' > ${c_data}
 	comma=0
-	for rpm in ${OUTPUT_FOLDER}/*.rpm; do
+	
+	for rpm in "${OUTPUT_FOLDER}"/*.rpm; do
 		nevr=(`rpm -qp --queryformat "%{NAME} %{EPOCH} %{VERSION} %{RELEASE}" ${rpm}`)
 		name=${nevr[0]}
 		if [ "${name}" != '' ] ; then
@@ -188,7 +189,7 @@ test_rpm() {
 
 	test_code=0
 	test_log="$OUTPUT_FOLDER"/tests.log
-	echo '--> Starting RPM tests.'
+	printf '%s\n' '--> Starting RPM tests.'
 
 	if [ "$rerun_tests" = 'true' ]; then
 		[ "$packages" = '' ] && printf '%s\n' '--> No packages for testing. Something is wrong. Exiting. !!!' && exit 1
@@ -197,20 +198,20 @@ test_rpm() {
 		[ ! -e "$build_package" ] && mkdir -p "$build_package"
 
 		test_log="${OUTPUT_FOLDER}"/tests-"$(printf '%(%F-%R)T')".log
-		printf '%s\n' "--> Re-running tests on `date -u`" >> $test_log
+		printf '%s\n' "--> Re-running tests on $(date -u)" >> $test_log
 		prefix='rerun-tests-'
 		arr=($packages)
 		cd "$build_package"
 		for package in ${arr[@]} ; do
-			echo "--> Downloading '$package'..." >> $test_log
+			printf '%s\n' "--> Downloading '$package'..." >> $test_log
 			wget http://file-store.openmandriva.org/api/v1/file_stores/"$package" --content-disposition --no-check-certificate
 			rc=$?
 			if [ "${rc}" != '0' ]; then
-				echo "--> Error on extracting package with sha1 '$package'!!!"
-				exit $rc
+				printf '%s\n' "--> Error on extracting package with sha1 '$package'!!!"
+				exit "${rc}"
 			fi
 		done
-		cd ..
+		cd -
 		$MOCK_BIN --init --configdir $config_dir -v --no-cleanup-after
 
 		OUTPUT_FOLDER="$build_package"
@@ -222,11 +223,11 @@ test_rpm() {
 	try_retest=true
 	retry=0
 	while $try_retest; do
-		sudo dnf --installroot="${TEST_CHROOT_PATH}" --assumeyes --nogpgcheck --setopt=install_weak_deps=False --setopt=tsflags=test builddep "$OUTPUT_FOLDER"/*.src.rpm > $test_log.tmp 2>&1
-		sudo dnf --installroot="${TEST_CHROOT_PATH}" --assumeyes --nogpgcheck --setopt=install_weak_deps=False --setopt=tsflags=test install $(ls "$OUTPUT_FOLDER"/*.rpm | grep -v .src.rpm) > $test_log.tmp 2>&1
+		sudo dnf --installroot="${TEST_CHROOT_PATH}" --assumeyes --nogpgcheck --setopt=install_weak_deps=False --setopt=tsflags=test builddep "$OUTPUT_FOLDER"/*.src.rpm >> $test_log.tmp 2>&1
+		sudo dnf --installroot="${TEST_CHROOT_PATH}" --assumeyes --nogpgcheck --setopt=install_weak_deps=False --setopt=tsflags=test install $(ls "$OUTPUT_FOLDER"/*.rpm | grep -v .src.rpm) >> $test_log.tmp 2>&1
 		test_code=$?
 		try_retest=false
-		if [[ $test_code != 0 && $retry < $MAX_RETRIES ]] ; then
+		if [[ $test_code != 0 && $retry < $MAX_RETRIES ]]; then
 			if grep -q "$RETRY_GREP_STR" $test_log.tmp; then
 				printf '%s\n' '--> Repository was changed in the middle, will rerun the tests' >> $test_log
 				sleep ${WAIT_TIME}
@@ -239,9 +240,9 @@ test_rpm() {
 	done
 
 	cat $test_log.tmp >> $test_log
-	echo "--> Tests finished at `date -u`" >> $test_log
+	printf '%s\n' "--> Tests finished at $(date -u)" >> $test_log
 	printf '%s\n' 'Test code output: ' $test_code >> $test_log 2>&1
-	if [ "$test_code" = '0' ] && [ "$use_extra_tests" = 'true' ] ; then
+	if [ "$test_code" = '0' ] && [ "$use_extra_tests" = 'true' ]; then
 		printf '%s\n' '--> Checking if same or older version of the package already exists in repositories' >> $test_log
 
 		for i in $(ls "$TEST_CHROOT_PATH" | grep rpm); do
@@ -330,7 +331,7 @@ build_rpm() {
 
 	# Check exit code after build
 	if [ "${rc}" != 0 ] || [ ! -e "${OUTPUT_FOLDER}"/*.src.rpm ]; then
-		echo '--> Build failed: mock encountered a problem.'
+		printf '%s\n' '--> Build failed: mock encountered a problem.'
 		# 99% of all build failures at src.rpm creation is broken deps
 		# m1 show only first match -oP show only matching
 		grep -m1 -oP "\(due to unsatisfied(.*)$" $OUTPUT_FOLDER/root.log >> ~/build_fail_reason.log
@@ -340,8 +341,7 @@ build_rpm() {
 	fi
 
 	printf '%s\n' '--> src.rpm build has been done successfully.'
-
-	printf '%s\n' '--> Building rpm'
+	printf '%s\n' '--> Building rpm.'
 	try_rebuild=true
 	retry=0
 	while $try_rebuild; do
@@ -372,7 +372,7 @@ build_rpm() {
 	printf '%s\n' '--> Done.'
 
 	# Extract rpmlint logs into separate file
-	echo "--> Grepping rpmlint logs from $OUTPUT_FOLDER/build.log to $OUTPUT_FOLDER/rpmlint.log"
+	printf '%s\n' "--> Grepping rpmlint logs from $OUTPUT_FOLDER/build.log to $OUTPUT_FOLDER/rpmlint.log"
 	sed -n "/Executing \"\/usr\/bin\/rpmlint/,/packages and.*specfiles checked/p" $OUTPUT_FOLDER/build.log > $OUTPUT_FOLDER/rpmlint.log
 	printf '%s\n' '--> Create rpm -qa list'
 	rpm --root=/var/lib/mock/openmandriva-$platform_arch/root/ -qa >> $OUTPUT_FOLDER/rpm-qa.log
@@ -385,6 +385,11 @@ build_rpm() {
 	# Test RPM files
 	test_rpm
 	# End tests
+	# check if RPM files are not vanished
+	if [ -n "$(ls -lA *.rpm | grep -v *.src.rpm)" ]; then
+	    printf '%s\n' "RPM files are missing. Something went terribly wrong. Exiting!"
+	    exit 1
+	fi
 }
 
 find_spec() {
@@ -392,7 +397,7 @@ find_spec() {
 
 	# Check count of *.spec files (should be one)
 	x=$(ls -1 | grep -c '.spec$' | sed 's/^ *//' | sed 's/ *$//')
-	if [ "$x" -eq "0" ] ; then
+	if [ "$x" -eq "0" ]; then
 		printf '%s\n' '--> There are no spec files in repository.'
 		exit 1
 	else
@@ -449,7 +454,7 @@ validate_arch() {
 		validate_build "x86_64 %x86_64 %{x86_64}"
 		;;
 	*)
-		echo "--> ${BUILD_TYPE} validated."
+		printf '%s\n' "--> ${BUILD_TYPE} validated."
 		;;
 	esac
 }
@@ -492,7 +497,6 @@ clone_repo() {
 	# download sources from .abf.yml
 	/bin/sh /mdv/download_sources.sh
 	cd -
-
 	# build package
 }
 
