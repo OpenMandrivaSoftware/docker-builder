@@ -6,6 +6,7 @@ cleanup() {
 	sudo rm -fv /etc/rpm/platform
 	rm -fv /etc/mock/default.cfg
 	sudo rm -rf /var/lib/mock/*
+	sudo rm -rf /var/cache/dnf/*
 
 	# unmask/mask both, we need to keep logs
 	#rm -rf ${HOME}/output/
@@ -310,6 +311,8 @@ build_rpm() {
 		rm -rf "$OUTPUT_FOLDER"
 		if [ "${CACHED_CHROOT_SHA1}" != '' ]; then
 			echo "--> Uses cached chroot with sha1 '$CACHED_CHROOT_SHA1'..."
+			sudo rm -rf /var/cache/dnf/*
+			sudo rm -rf /var/lib/mock/openmandriva-$platform_arch/root/var/cache/dnf/*
 			$MOCK_BIN -v --configdir=$config_dir --buildsrpm --spec=$build_package/${PACKAGE}.spec --sources=$build_package --no-cleanup-after --no-clean $extra_build_src_rpm_options --resultdir=$OUTPUT_FOLDER
 		else
 			sudo rm -rf /var/cache/mock/openmandriva-"$platform_arch"/root_cache/cache.tar.xz ||:
