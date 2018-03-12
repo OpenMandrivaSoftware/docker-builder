@@ -224,6 +224,8 @@ test_rpm() {
 	try_retest=true
 	retry=0
 	while $try_retest; do
+		sudo rm -rf /var/cache/dnf/*
+		sudo rm -rf /var/lib/mock/openmandriva-$platform_arch/root/var/cache/dnf/*
 		sudo dnf --installroot="${TEST_CHROOT_PATH}" --assumeyes --nogpgcheck --setopt=install_weak_deps=False --setopt=tsflags=test builddep "$OUTPUT_FOLDER"/*.src.rpm >> $test_log.tmp 2>&1
 		sudo dnf --installroot="${TEST_CHROOT_PATH}" --assumeyes --nogpgcheck --setopt=install_weak_deps=False --setopt=tsflags=test install $(ls "$OUTPUT_FOLDER"/*.rpm | grep -v .src.rpm) >> $test_log.tmp 2>&1
 		test_code=$?
@@ -309,10 +311,11 @@ build_rpm() {
 	retry=0
 	while $try_rebuild; do
 		rm -rf "$OUTPUT_FOLDER"
+		sudo rm -rf /var/cache/dnf/*
+		sudo rm -rf /var/lib/mock/openmandriva-$platform_arch/root/var/cache/dnf/*
 		if [ "${CACHED_CHROOT_SHA1}" != '' ]; then
 			echo "--> Uses cached chroot with sha1 '$CACHED_CHROOT_SHA1'..."
-			sudo rm -rf /var/cache/dnf/*
-			sudo rm -rf /var/lib/mock/openmandriva-$platform_arch/root/var/cache/dnf/*
+
 			$MOCK_BIN -v --configdir=$config_dir --buildsrpm --spec=$build_package/${PACKAGE}.spec --sources=$build_package --no-cleanup-after --no-clean $extra_build_src_rpm_options --resultdir=$OUTPUT_FOLDER
 		else
 			sudo rm -rf /var/cache/mock/openmandriva-"$platform_arch"/root_cache/cache.tar.xz ||:
@@ -348,6 +351,8 @@ build_rpm() {
 	try_rebuild=true
 	retry=0
 	while $try_rebuild; do
+		sudo rm -rf /var/cache/dnf/*
+		sudo rm -rf /var/lib/mock/openmandriva-$platform_arch/root/var/cache/dnf/*
 		$MOCK_BIN -v --configdir=$config_dir --rebuild $OUTPUT_FOLDER/*.src.rpm --no-cleanup-after --no-clean $extra_build_rpm_options --resultdir=$OUTPUT_FOLDER
 		rc=${PIPESTATUS[0]}
 		try_rebuild=false
