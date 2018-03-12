@@ -89,7 +89,7 @@ container_data() {
 	project_name=`echo ${git_repo} | sed s%.*/%% | sed s/.git$//`
 	echo '[' > ${c_data}
 	comma=0
-	
+
 	for rpm in "${OUTPUT_FOLDER}"/*.rpm; do
 		nevr=(`rpm -qp --queryformat "%{NAME} %{EPOCH} %{VERSION} %{RELEASE}" ${rpm}`)
 		name=${nevr[0]}
