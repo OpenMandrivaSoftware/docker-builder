@@ -226,12 +226,12 @@ test_rpm() {
 	while $try_retest; do
 		sudo rm -rf /var/cache/dnf/*
 		sudo rm -rf /var/lib/mock/openmandriva-$platform_arch/root/var/cache/dnf/*
-		sudo dnf --installroot="${TEST_CHROOT_PATH}" --assumeyes --nogpgcheck --setopt=install_weak_deps=False --setopt=tsflags=test builddep "$OUTPUT_FOLDER"/*.src.rpm >> $test_log.tmp 2>&1
-		sudo dnf --installroot="${TEST_CHROOT_PATH}" --assumeyes --nogpgcheck --setopt=install_weak_deps=False --setopt=tsflags=test install $(ls "$OUTPUT_FOLDER"/*.rpm | grep -v .src.rpm) >> $test_log.tmp 2>&1
+		sudo dnf --installroot="${TEST_CHROOT_PATH}" --assumeyes --nogpgcheck --setopt=install_weak_deps=False --setopt=tsflags=test builddep "$OUTPUT_FOLDER"/*.src.rpm >> "${test_log}".tmp 2>&1
+		sudo dnf --installroot="${TEST_CHROOT_PATH}" --assumeyes --nogpgcheck --setopt=install_weak_deps=False --setopt=tsflags=test install $(ls "$OUTPUT_FOLDER"/*.rpm | grep -v .src.rpm) >> "${test_log}".tmp 2>&1
 		test_code=$?
 		try_retest=false
 		if [[ $test_code != 0 && $retry < $MAX_RETRIES ]]; then
-			if grep -q "$RETRY_GREP_STR" $test_log.tmp; then
+			if grep -q "$RETRY_GREP_STR" "${test_log}".tmp; then
 				printf '%s\n' '--> Repository was changed in the middle, will rerun the tests' >> $test_log
 				sleep ${WAIT_TIME}
 				sudo rm -rf "${TEST_CHROOT_PATH}"/test_root/var/cache/dnf/* >> $test_log 2>&1
@@ -242,11 +242,11 @@ test_rpm() {
 		fi
 	done
 
-	cat "$test_log".tmp >> "$test_log"
+	cat "$test_log".tmp >> "${test_log}"
 	printf '%s\n' "--> Tests finished at $(date -u)" >> "$test_log"
 	printf '%s\n' "Test code output: $test_code" >> "$test_log" 2>&1
 	if [ "$test_code" = '0' ] && [ "$use_extra_tests" = 'true' ]; then
-		printf '%s\n' '--> Checking if same or older version of the package already exists in repositories' >> $test_log
+		printf '%s\n' '--> Checking if same or older version of the package already exists in repositories' >> "${test_log}"
 
 		for i in $(ls "${OUTPUT_FOLDER}" | grep rpm); do
 			RPM_NAME=$(rpm -qp --qf "%{NAME}" "${OUTPUT_FOLDER}"/"$i")
@@ -277,7 +277,7 @@ test_rpm() {
 	fi
 	sudo rm -f "${TEST_CHROOT_PATH}"/*.rpm
 	sudo rm -rf "${TEST_CHROOT_PATH}"/test_root
-	rm -f $test_log.tmp
+	rm -f "${test_log}".tmp
 
 	# Check exit code after testing
 	if [ $test_code != '0' ]; then
