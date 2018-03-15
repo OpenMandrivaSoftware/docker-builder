@@ -6,6 +6,7 @@ cleanup() {
 	sudo rm -fv /etc/rpm/platform
 	rm -fv /etc/mock/default.cfg
 	sudo rm -rf /var/lib/mock/*
+	sudo rm -rf /var/cache/mock/*
 	sudo rm -rf /var/cache/dnf/*
 
 	# unmask/mask both, we need to keep logs
