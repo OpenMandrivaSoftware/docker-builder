@@ -231,7 +231,7 @@ test_rpm() {
 		sudo dnf --installroot="${TEST_CHROOT_PATH}" --assumeyes --nogpgcheck --setopt=install_weak_deps=False --setopt=tsflags=test install $(ls "$OUTPUT_FOLDER"/*.rpm | grep -v .src.rpm) >> "${test_log}".tmp 2>&1
 		test_code=$?
 		try_retest=false
-		if [[ $test_code != 0 && $retry < $MAX_RETRIES ]]; then
+		if [[ "${test_code}" != 0 && $retry < $MAX_RETRIES ]]; then
 			if grep -q "$RETRY_GREP_STR" "${test_log}".tmp; then
 				printf '%s\n' '--> Repository was changed in the middle, will rerun the tests' >> $test_log
 				sleep ${WAIT_TIME}
@@ -246,33 +246,33 @@ test_rpm() {
 	cat "$test_log".tmp >> "${test_log}"
 	printf '%s\n' "--> Tests finished at $(date -u)" >> "$test_log"
 	printf '%s\n' "Test code output: $test_code" >> "$test_log" 2>&1
-	if [ "$test_code" = '0' ] && [ "$use_extra_tests" = 'true' ]; then
+	if [ "${test_code}" = '0' ] && [ "$use_extra_tests" = 'true' ]; then
 		printf '%s\n' '--> Checking if same or older version of the package already exists in repositories' >> "${test_log}"
 
 		for i in $(ls "${OUTPUT_FOLDER}" | grep rpm); do
-			RPM_NAME=$(rpm -qp --qf "%{NAME}" "${OUTPUT_FOLDER}"/"$i")
-			RPM_EPOCH=$(rpm -qp --qf "%{EPOCH}" "${OUTPUT_FOLDER}"/"$i")
+			RPM_NAME=$(rpm -qp --qf "%{NAME}" "$i")
+			RPM_EPOCH=$(rpm -qp --qf "%{EPOCH}" "$i")
 
-			[ "${RPM_EPOCH}" = "(none)" ] && RPM_EPOCH="0"
-			RPM_VERREL=$(rpm -qp --qf "%{VERSION}-%{RELEASE}" "${OUTPUT_FOLDER}"/"$i")
+			[ "${RPM_EPOCH}" = '(none)' ] && RPM_EPOCH='0'
+			RPM_VERREL=$(rpm -qp --qf "%{VERSION}-%{RELEASE}" "$i")
 			RPM_EVR="${RPM_EPOCH}:${RPM_VERREL}"
 			REPO_EVR=$(dnf repoquery -qp --qf "%{EPOCH}:%{VERSION}-%{RELEASE}" --latest-limit=1 "${RPM_NAME}")
 
 			if [ ! -z "${REPO_EVR}" ]; then
 				rpmdev-vercmp "${RPM_EVR}" "${REPO_EVR}"
-				VERCMP_STATUS="$?"
-				if [ ${VERCMP_STATUS} -eq 11 ]; then
+				test_code="$?"
+				if [ "${test_code}" -eq 11 ]; then
 					# Proposed rpm is newer than what's in the repo
-					echo "Package $RPM_NAME is newer than what's in the repo. Extra tests passed: $test_code" >> $test_log
-					return 0
+					printf '%s\n' "Package $RPM_NAME is newer than what's in the repo. Extra tests passed: $test_code" >> $test_log
+					test_code='0'
 				else
 					# Proposed rpm is either the same, older, or another problem
-					echo "Package $RPM_NAME is either the same, older, or another problem. Extra tests failed: $test_code" >> $test_log
-					return 5
+					printf '%s\n' "Package $RPM_NAME is either the same, older, or another problem. Extra tests failed: $test_code" >> $test_log
+					test_code='5'
 				fi
 			else
 				# It does not exist in the repo, so it's okay to go in
-				return 0
+				test_code='0'
 			fi
 		done
 	fi
@@ -281,12 +281,12 @@ test_rpm() {
 	rm -f "${test_log}".tmp
 
 	# Check exit code after testing
-	if [ $test_code != '0' ]; then
+	if [ "${test_code}" != '0' ]; then
 		printf '%s\n' '--> Test failed, see: tests.log'
 		test_code=5
 		[ "$rerun_tests" = '' ] && container_data
 		[ "$rerun_tests" = 'true' ] && cleanup
-		exit $test_code
+		exit "${test_code}"
 	else
 		return "${test_code}"
 	fi
