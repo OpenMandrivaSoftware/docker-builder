@@ -270,11 +270,11 @@ test_rpm() {
 		printf '%s\n' '--> Checking if same or older version of the package already exists in repositories' >> "${test_log}"
 
 		for i in $(ls "${OUTPUT_FOLDER}" | grep rpm); do
-			RPM_NAME=$(rpm -qp --qf "%{NAME}" "$i")
-			RPM_EPOCH=$(rpm -qp --qf "%{EPOCH}" "$i")
+			RPM_NAME=$(rpm -qp --qf "%{NAME}" "${OUTPUT_FOLDER}"/"$i")
+			RPM_EPOCH=$(rpm -qp --qf "%{EPOCH}" "${OUTPUT_FOLDER}"/"$i")
 
 			[ "${RPM_EPOCH}" = '(none)' ] && RPM_EPOCH='0'
-			RPM_VERREL=$(rpm -qp --qf "%{VERSION}-%{RELEASE}" "$i")
+			RPM_VERREL=$(rpm -qp --qf "%{VERSION}-%{RELEASE}" "${OUTPUT_FOLDER}"/"$i")
 			RPM_EVR="${RPM_EPOCH}:${RPM_VERREL}"
 			REPO_EVR=$(dnf repoquery -q --qf "%{EPOCH}:%{VERSION}-%{RELEASE}" --latest-limit=1 "${RPM_NAME}")
 
@@ -283,16 +283,17 @@ test_rpm() {
 				test_code="$?"
 				if [ "${test_code}" -eq 11 ]; then
 					# Proposed rpm is newer than what's in the repo
-					printf '%s\n' "Package $RPM_NAME is newer than what's in the repo. Extra tests passed: $test_code" >> $test_log
+					printf '%s\n' "Package $RPM_NAME is newer than what's in the repo. Extra tests passed: $test_code" >> "${test_log}"
 					test_code='0'
 				else
 					# Proposed rpm is either the same, older, or another problem
-					printf '%s\n' "Package $RPM_NAME is either the same, older, or another problem. Extra tests failed: $test_code" >> $test_log
+					printf '%s\n' "Package $RPM_NAME is either the same, older, or another problem. Extra tests failed: $test_code" >> "${test_log}"
 					test_code='5'
 				fi
 			else
 				# It does not exist in the repo, so it's okay to go in
 				test_code='0'
+				printf '%s\n' "Extra tests finished without errors: $test_code" >> "${test_log}"
 			fi
 		done
 	fi
