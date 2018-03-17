@@ -287,7 +287,7 @@ test_rpm() {
 					test_code='0'
 				else
 					# Proposed rpm is either the same, older, or another problem
-					printf '%s\n' "Package $RPM_NAME is either the same, older, or another problem. Extra tests failed: $test_code" >> "${test_log}"
+					printf '%s\n' "Package $RPM_NAME is either the same, older, or another problem. Extra tests failed: 5" >> "${test_log}"
 					test_code='5'
 				fi
 			else
