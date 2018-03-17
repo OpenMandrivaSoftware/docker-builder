@@ -283,12 +283,12 @@ test_rpm() {
 				test_code="$?"
 				if [ "${test_code}" -eq 11 ]; then
 					# Proposed rpm is newer than what's in the repo
-					printf '%s\n' "Package $RPM_NAME is newer than what's in the repo. Extra tests passed: $test_code" >> "${test_log}"
 					test_code='0'
+					printf '%s\n' "Package $i is newer than what's in the repo. Extra tests passed: $test_code" >> "${test_log}"
 				else
 					# Proposed rpm is either the same, older, or another problem
-					printf '%s\n' "Package $RPM_NAME is either the same, older, or another problem. Extra tests failed: 5" >> "${test_log}"
 					test_code='5'
+					printf '%s\n' "Package $i is either the same, older, or another problem. Extra tests failed: $test_code" >> "${test_log}"
 				fi
 			else
 				# It does not exist in the repo, so it's okay to go in
