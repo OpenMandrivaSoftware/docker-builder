@@ -16,7 +16,7 @@ set -e
 mkimg="$(basename "$0")"
 
 usage() {
-	echo >&2 "usage: $mkimg --rootfs=rootfs_path --version=mageia_version [--mirror=url] [--package-manager=dnf] [--with-systemd]"
+	echo >&2 "usage: $mkimg --rootfs=rootfs_path --version=openmandriva_version [--mirror=url] [--package-manager=dnf] [--with-systemd]"
 	echo >&2 "   ie: $mkimg --rootfs=. --version=4.0 --with-systemd"
 	echo >&2 "       $mkimg --rootfs=. --version=cooker --package-manager=dnf --with-systemd"
 	echo >&2 "       $mkimg --rootfs=/tmp/rootfs --version=4.0 --mirror=http://abf-downloads.openmandriva.org/4.0/repository/x86_64/ --with-systemd"
