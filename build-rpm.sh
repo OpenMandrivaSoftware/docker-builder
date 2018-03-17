@@ -269,7 +269,7 @@ test_rpm() {
 	if [ "${test_code}" = '0' ] && [ "$use_extra_tests" = 'true' ]; then
 		printf '%s\n' '--> Checking if same or older version of the package already exists in repositories' >> "${test_log}"
 
-		for i in $(ls "${OUTPUT_FOLDER}" | grep *.rpm); do
+		for i in $(ls "${OUTPUT_FOLDER}" | grep .rpm); do
 			RPM_NAME=$(rpm -qp --qf "%{NAME}" "${OUTPUT_FOLDER}"/"$i")
 			RPM_EPOCH=$(rpm -qp --qf "%{EPOCH}" "${OUTPUT_FOLDER}"/"$i")
 
@@ -419,7 +419,7 @@ build_rpm() {
 	test_rpm
 	# End tests
 	# check if RPM files are not vanished
-	if [ -n "$(ls -lA *.rpm | grep -v *.src.rpm)" ]; then
+	if [ -n "$(ls -lA "${OUTPUT_FOLDER}"/*.rpm | grep -v *.src.rpm)" ]; then
 	    printf '%s\n' "RPM files are missing. Something went terribly wrong. Exiting!"
 	    exit 1
 	fi
