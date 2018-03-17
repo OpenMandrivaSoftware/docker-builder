@@ -60,6 +60,7 @@ config_opts['cache_topdir'] = '/var/cache/mock/'
 config_opts['dist'] = 'cooker'  # only useful for --resultdir variable subst
 config_opts['macros']['%packager'] = '$uname <$email>'
 config_opts['macros']['%_topdir'] = '%s/build' % config_opts['chroothome']
+config_opts['macros']['%_rpmfilename'] = '%%{NAME}-%%{VERSION}-%%{RELEASE}-%%{DISTTAG}.%%{ARCH}.rpm'
 config_opts['macros']['%cross_compiling'] = '0' # ABF should generally be considered native builds
 config_opts['plugin_conf']['ccache_enable'] = False
 config_opts['plugin_conf']['root_cache_enable'] = '$cache_enable'
