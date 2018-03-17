@@ -72,13 +72,20 @@ generate_config() {
 	# Change output format for mock
 	sed '17c/format: %(message)s' "${config_dir}"/logging.ini > ~/logging.ini
 	mv -f ~/logging.ini "${config_dir}"/logging.ini
-
+# (tpg) check how old is cache file to prevent generating cache while building rpms
+	if [ -f "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz ]; then
+	    [ "$(( $(date +"%s") - $(stat -c "%Y" "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz)))" -lt "86400" ] && cache_enable='False'
+	else
+	    cache_enable='True'
+	fi
+	
 	EXTRA_CFG_OPTIONS="$extra_cfg_options" \
 		EXTRA_CFG_URPM_OPTIONS="$extra_cfg_urpm_options" \
 		UNAME="$uname" \
 		EMAIL="$email" \
 		PLATFORM_NAME="$platform_name" \
 		PLATFORM_ARCH="$platform_arch" \
+		CACHE_ENABLE="$cache_enable"
 		/bin/sh "/mdv/config-generator.sh"
 }
 
