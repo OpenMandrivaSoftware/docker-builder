@@ -85,7 +85,7 @@ generate_config() {
 		EMAIL="$email" \
 		PLATFORM_NAME="$platform_name" \
 		PLATFORM_ARCH="$platform_arch" \
-		CACHE_ENABLE="$cache_enable"
+		CACHE_ENABLE="$cache_enable"   \
 		/bin/sh "/mdv/config-generator.sh"
 }
 
