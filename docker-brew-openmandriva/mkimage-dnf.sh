@@ -61,7 +61,7 @@ fi
 
 if [ ! -z "${mirror}" ]; then
         # If mirror provided, use it exclusively
-        reposetup="--disablerepo=* --repofrompath=omvrel,$mirror/media/main/release/ --repofrompath=omvup,$mirror/media/main/updates/ --enablerepo=mgarel --enablerepo=mgaup"
+        reposetup="--disablerepo=* --repofrompath=omvrel,$mirror/media/main/release/ --repofrompath=omvup,$mirror/media/main/updates/ --enablerepo=omvrel --enablerepo=omvup"
 fi
 
 if [ -z "${mirror}" ]; then
