@@ -155,8 +155,8 @@ container_data() {
 setup_cache() {
 	if [ -f "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz ]; then
 		printf '%s\n' "Found cache ${platform_name}-${platform_arch}.cache.tar.xz"
-		[ ! -d /var/cache/mock/"${platform_name}"-"${platform_arch}"/root_cache ] && mkdir -p /var/cache/mock/"${platform_name}"-"${platform_arch}"/root_cache
-		cp -f "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz /var/cache/mock/"${platform_name}"-"${platform_arch}"/root_cache/cache.tar.xz
+		[ ! -d /var/cache/mock/"${platform_name}"-"${platform_arch}"/root_cache ] && sudo mkdir -p /var/cache/mock/"${platform_name}"-"${platform_arch}"/root_cache
+		sudo cp -f "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz /var/cache/mock/"${platform_name}"-"${platform_arch}"/root_cache/cache.tar.xz
 	fi
 }
 
