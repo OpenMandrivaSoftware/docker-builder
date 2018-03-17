@@ -75,8 +75,10 @@ generate_config() {
 # (tpg) check how old is cache file to prevent generating cache while building rpms
 	if [ -f "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz ]; then
 	    [ "$(( $(date +"%s") - $(stat -c "%Y" "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz)))" -lt "86400" ] && cache_enable='False'
+	    printf '%s\n' "Cache is not going to be rebuilded as it is not older than 24 hours."
 	else
 	    cache_enable='True'
+	    printf '%s\n' "Cache is older than 24 hours. Trying to rebuild it."
 	fi
 	
 	EXTRA_CFG_OPTIONS="$extra_cfg_options" \
