@@ -4,7 +4,7 @@ set -x
 cleanup() {
 	printf '%s\n' '--> Cleaning up...'
 	sudo rm -fv /etc/rpm/platform
-	rm -fv /etc/mock/default.cfg
+	sudo rm -fv /etc/mock/default.cfg
 	sudo rm -rf /var/lib/mock/*
 	sudo rm -rf /var/cache/mock/*
 	sudo rm -rf /var/cache/dnf/*
@@ -14,7 +14,7 @@ cleanup() {
 	#rm -fv ~/build_fail_reason.log
 
 	# (tpg) remove package
-	rm -rf "${HOME}"/"${PACKAGE}"
+	sudo rm -rf "${HOME}"/"${PACKAGE}"
 	# (tpg) remove old files
 	# in many cases these are leftovers when build fails
 	# would be nice to remove them to free disk space
@@ -44,7 +44,7 @@ GREP_PATTERN='error: (.*)$|Segmentation Fault|cannot find (.*)$|undefined refere
 
 filestore_url="http://file-store.openmandriva.org/api/v1/file_stores"
 platform_arch="$PLATFORM_ARCH"
-platform_name="$PLATFORM_NAME"
+platform_name=${PLATFORM_NAME:-"openmandriva"}
 uname="$UNAME"
 email="$EMAIL"
 git_repo="$GIT_REPO"
@@ -128,22 +128,31 @@ container_data() {
 	echo ']' >> ${c_data}
 }
 
-download_cache() {
-	if [ "${CACHED_CHROOT_SHA1}" != '' ]; then
-		# if chroot not exist download it
-		if [ ! -f "${HOME}"/"${CACHED_CHROOT_SHA1}".tar.xz ]; then
-			curl -L "${filestore_url}/${CACHED_CHROOT_SHA1}" -o "${HOME}/${CACHED_CHROOT_SHA1}.tar.xz"
-		fi
-		# unpack in root
-		printf '%s\n' "Extracting chroot $CACHED_CHROOT_SHA1"
-		if echo "${CACHED_CHROOT_SHA1} ${HOME}/${CACHED_CHROOT_SHA1}.tar.xz" | sha1sum -c --status &> /dev/null; then
-			sudo mv -f ${HOME}/${CACHED_CHROOT_SHA1}.tar.xz /var/cache/mock/openmandriva-"$platform_arch"/root_cache/cache.tar.xz
-		else
-			printf '%s\n' '--> Building without cached chroot, becasue SHA1 is wrong.'
-			export CACHED_CHROOT_SHA1=""
-		fi
+#download_cache() {
+#	if [ "${CACHED_CHROOT_SHA1}" != '' ]; then
+#		# if chroot not exist download it
+#		if [ ! -f "${HOME}"/"${CACHED_CHROOT_SHA1}".tar.xz ]; then
+#			curl -L "${filestore_url}/${CACHED_CHROOT_SHA1}" -o "${HOME}/${CACHED_CHROOT_SHA1}.tar.xz"
+#		fi
+#		# unpack in root
+#		printf '%s\n' "Extracting chroot $CACHED_CHROOT_SHA1"
+#		if echo "${CACHED_CHROOT_SHA1} ${HOME}/${CACHED_CHROOT_SHA1}.tar.xz" | sha1sum -c --status &> /dev/null; then
+#			sudo mv -f ${HOME}/${CACHED_CHROOT_SHA1}.tar.xz /var/cache/mock/openmandriva-"$platform_arch"/root_cache/cache.tar.xz
+#		else
+#			printf '%s\n' '--> Building without cached chroot, becasue SHA1 is wrong.'
+#			export CACHED_CHROOT_SHA1=""
+#		fi
+#	fi
+#}
+
+setup_cache() {
+	if [ -f "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz ]; then
+		printf '%s\n' "Found cache ${platform_name}-${platform_arch}.cache.tar.xz"
+		[ ! -d /var/cache/mock/"${platform_name}"-"${platform_arch}"/root_cache ] && mkdir -p /var/cache/mock/"${platform_name}"-"${platform_arch}"/root_cache
+		cp -f "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz /var/cache/mock/"${platform_name}"-"${platform_arch}"/root_cache/cache.tar.xz
 	fi
 }
+
 
 arm_platform_detector(){
 	probe_cpu() {
@@ -164,9 +173,9 @@ arm_platform_detector(){
 		if [ "$platform_arch" = 'aarch64' ]; then
 			if [ "$cpu" != 'aarch64' ]; then
 				# hack to copy qemu binary in non-existing path
-				(while [ ! -e  /var/lib/mock/openmandriva-$platform_arch/root/usr/bin/ ]; do sleep 1; done
+				(while [ ! -e  /var/lib/mock/"${platform_name}"-"${platform_arch}"/root/usr/bin/ ]; do sleep 1; done
 				# rebuild docker builder with qemu packages
-				sudo cp /usr/bin/qemu-static-aarch64 /var/lib/mock/openmandriva-$platform_arch/root/usr/bin/) &
+				sudo cp /usr/bin/qemu-static-aarch64 /var/lib/mock/"${platform_name}"-"${platform_arch}"/root/usr/bin/) &
 				subshellpid=$!
 			fi
 		fi
@@ -174,8 +183,8 @@ arm_platform_detector(){
 		if [ "$platform_arch" = 'armv7hl' ]; then
 			if [ "$cpu" != 'arm' ] || [ $cpu != "aarch64" ] ; then
 				# hack to copy qemu binary in non-existing path
-				(while [ ! -e  /var/lib/mock/openmandriva-$platform_arch/root/usr/bin/ ]; do sleep 1; done
-				sudo cp /usr/bin/qemu-static-arm /var/lib/mock/openmandriva-$platform_arch/root/usr/bin/) &
+				(while [ ! -e  /var/lib/mock/"${platform_name}"-"${platform_arch}"/root/usr/bin/ ]; do sleep 1; done
+				sudo cp /usr/bin/qemu-static-arm /var/lib/mock/"${platform_name}"-"${platform_arch}"/root/usr/bin/) &
 				subshellpid=$!
 			fi
 		fi
@@ -214,8 +223,12 @@ test_rpm() {
 			fi
 		done
 		cd -
-		$MOCK_BIN --init --configdir $config_dir -v --no-cleanup-after
-
+		if [ -f /var/cache/mock/"${platform_name}"-"${platform_arch}"/root_cache/cache.tar.xz ]; then
+			printf '%s\n' "--> Testing with cached chroot ..."
+			$MOCK_BIN --init --configdir $config_dir -v --no-cleanup-after --no-clean
+		else
+			$MOCK_BIN --init --configdir $config_dir -v --no-cleanup-after
+		fi
 		OUTPUT_FOLDER="$build_package"
 	fi
 
@@ -226,7 +239,7 @@ test_rpm() {
 	retry=0
 	while $try_retest; do
 		sudo rm -rf /var/cache/dnf/*
-		sudo rm -rf /var/lib/mock/openmandriva-$platform_arch/root/var/cache/dnf/*
+		sudo rm -rf /var/lib/mock/"${platform_name}"-"${platform_arch}"/root/var/cache/dnf/*
 		sudo dnf --installroot="${TEST_CHROOT_PATH}" --assumeyes --nogpgcheck --setopt=install_weak_deps=False --setopt=tsflags=test builddep "$OUTPUT_FOLDER"/*.src.rpm >> "${test_log}".tmp 2>&1
 		sudo dnf --installroot="${TEST_CHROOT_PATH}" --assumeyes --nogpgcheck --setopt=install_weak_deps=False --setopt=tsflags=test install $(ls "$OUTPUT_FOLDER"/*.rpm | grep -v .src.rpm) >> "${test_log}".tmp 2>&1
 		test_code=$?
@@ -313,14 +326,12 @@ build_rpm() {
 	while $try_rebuild; do
 		rm -rf "$OUTPUT_FOLDER"
 		sudo rm -rf /var/cache/dnf/*
-		sudo rm -rf /var/lib/mock/openmandriva-$platform_arch/root/var/cache/dnf/*
-		if [ "${CACHED_CHROOT_SHA1}" != '' ]; then
-			echo "--> Uses cached chroot with sha1 '$CACHED_CHROOT_SHA1'..."
-
-			$MOCK_BIN -v --configdir=$config_dir --buildsrpm --spec=$build_package/${PACKAGE}.spec --sources=$build_package --no-cleanup-after --no-clean $extra_build_src_rpm_options --resultdir=$OUTPUT_FOLDER
+		sudo rm -rf /var/lib/mock/"${platform_name}"-"$platform_arch"/root/var/cache/dnf/*
+		if [ -f /var/cache/mock/"${platform_name}"-"${platform_arch}"/root_cache/cache.tar.xz ]; then
+			printf '%s\n' "--> Building with cached chroot ..."
+			$MOCK_BIN -v --configdir=$config_dir --buildsrpm --spec=$build_package/${PACKAGE}.spec --sources=$build_package --no-cleanup-after --no-clean $extra_build_src_rpm_options --resultdir="${OUTPUT_FOLDER}"
 		else
-			sudo rm -rf /var/cache/mock/openmandriva-"$platform_arch"/root_cache/cache.tar.xz ||:
-			$MOCK_BIN -v --configdir=$config_dir --buildsrpm --spec=$build_package/${PACKAGE}.spec --sources=$build_package --no-cleanup-after $extra_build_src_rpm_options --resultdir=$OUTPUT_FOLDER
+			$MOCK_BIN -v --configdir=$config_dir --buildsrpm --spec=$build_package/${PACKAGE}.spec --sources=$build_package --no-cleanup-after $extra_build_src_rpm_options --resultdir="${OUTPUT_FOLDER}"
 		fi
 
 		rc=${PIPESTATUS[0]}
@@ -347,18 +358,23 @@ build_rpm() {
 		exit 1
 	fi
 
+	if [ -f /var/cache/mock/"${platform_name}"-"${platform_arch}"/root_cache/cache.tar.xz ]; then
+	    printf '%s\n' '--> Saving cached chroot for next builds.'
+	    cp -f /var/cache/mock/"${platform_name}"-"${platform_arch}"/root_cache/cache.tar.xz "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz
+	fi
+
 	printf '%s\n' '--> src.rpm build has been done successfully.'
 	printf '%s\n' '--> Building rpm.'
 	try_rebuild=true
 	retry=0
 	while $try_rebuild; do
 		sudo rm -rf /var/cache/dnf/*
-		sudo rm -rf /var/lib/mock/openmandriva-$platform_arch/root/var/cache/dnf/*
-		$MOCK_BIN -v --configdir=$config_dir --rebuild $OUTPUT_FOLDER/*.src.rpm --no-cleanup-after --no-clean $extra_build_rpm_options --resultdir=$OUTPUT_FOLDER
+		sudo rm -rf /var/lib/mock/"${platform_name}"-"${platform_arch}"/root/var/cache/dnf/*
+		$MOCK_BIN -v --configdir=$config_dir --rebuild "${OUTPUT_FOLDER}"/*.src.rpm --no-cleanup-after --no-clean $extra_build_rpm_options --resultdir="${OUTPUT_FOLDER}"
 		rc=${PIPESTATUS[0]}
 		try_rebuild=false
-		if [[ $rc != 0 && $retry < $MAX_RETRIES ]] ; then
-			if grep -q "$RETRY_GREP_STR" $OUTPUT_FOLDER/root.log; then
+		if [[ $rc != 0 && $retry < $MAX_RETRIES ]]; then
+			if grep -q "$RETRY_GREP_STR" "${OUTPUT_FOLDER}"/root.log; then
 				try_rebuild=true
 				(( retry=$retry+1 ))
 				echo "--> Repository was changed in the middle, will rerun the build. Next try (${retry} from ${MAX_RETRIES})..."
@@ -372,7 +388,7 @@ build_rpm() {
 	if [ "${rc}" != '0' ]; then
 		printf '%s\n' '--> Build failed: mock encountered a problem.'
 		# clean all the rpm files because build was not completed
-		grep -m1 -i -oP "$GREP_PATTERN" $OUTPUT_FOLDER/root.log >> ~/build_fail_reason.log
+		grep -m1 -i -oP "$GREP_PATTERN" "${OUTPUT_FOLDER}"/root.log >> ~/build_fail_reason.log
 		rm -rf "${OUTPUT_FOLDER}"/*.rpm
 		[ -n $subshellpid ] && kill $subshellpid
 		cleanup
@@ -384,11 +400,11 @@ build_rpm() {
 	printf '%s\n' "--> Grepping rpmlint logs from $OUTPUT_FOLDER/build.log to $OUTPUT_FOLDER/rpmlint.log"
 	sed -n "/Executing \"\/usr\/bin\/rpmlint/,/packages and.*specfiles checked/p" $OUTPUT_FOLDER/build.log > $OUTPUT_FOLDER/rpmlint.log
 	printf '%s\n' '--> Create rpm -qa list'
-	rpm --root=/var/lib/mock/openmandriva-$platform_arch/root/ -qa >> $OUTPUT_FOLDER/rpm-qa.log
+	rpm --root=/var/lib/mock/"${platform_name}"-"${platform_arch}"/root/ -qa >> "${OUTPUT_FOLDER}"/rpm-qa.log
 
 	# (tpg) Save build chroot
 	if [ "${rc}" != '0' ] && [ "${save_buildroot}" = 'true' ]; then
-		sudo tar --exclude=root/dev -zcvf "${OUTPUT_FOLDER}"/rpm-buildroot.tar.gz /var/lib/mock/openmandriva-$platform_arch/root/
+		sudo tar --exclude=root/dev -zcvf "${OUTPUT_FOLDER}"/rpm-buildroot.tar.gz /var/lib/mock/"${platform_name}"-"${platform_arch}"/root/
 	fi
 
 	# Test RPM files
@@ -511,8 +527,8 @@ clone_repo() {
 
 generate_config
 clone_repo
-download_cache
+setup_cache
 build_rpm
 container_data
 # wipe package
-rm -rf "${HOME}"/"${PACKAGE}"
+sudo rm -rf "${HOME}"/"${PACKAGE}"
