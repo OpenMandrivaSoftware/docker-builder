@@ -421,7 +421,7 @@ build_rpm() {
 	test_rpm
 	# End tests
 	# check if RPM files are not vanished
-	if [ -n "$(ls -lA "${OUTPUT_FOLDER}"/*.rpm | grep -v *.src.rpm)" ]; then
+	if [ -z "$(ls -A "${OUTPUT_FOLDER}"/*.rpm | grep -v .src.rpm)" ]; then
 	    printf '%s\n' "RPM files are missing. Something went terribly wrong. Exiting!"
 	    exit 1
 	fi
