@@ -81,13 +81,14 @@ generate_config() {
 	    printf '%s\n' "Cache is older than 24 hours. Trying to rebuild it."
 	fi
 # (tpg) disable cache until rpm4 is good
+export cache_enable='False'
 	EXTRA_CFG_OPTIONS="$extra_cfg_options" \
 		EXTRA_CFG_URPM_OPTIONS="$extra_cfg_urpm_options" \
 		UNAME="$uname" \
 		EMAIL="$email" \
 		PLATFORM_NAME="$platform_name" \
 		PLATFORM_ARCH="$platform_arch" \
-		CACHE_ENABLE="False"   \
+		CACHE_ENABLE="$cache_enable"   \
 		/bin/sh "/mdv/config-generator.sh"
 }
 
