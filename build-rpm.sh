@@ -74,10 +74,10 @@ generate_config() {
 	mv -f ~/logging.ini "${config_dir}"/logging.ini
 # (tpg) check how old is cache file to prevent generating cache while building rpms
 	if [ -f "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz ]; then
-	    [ "$(( $(date +"%s") - $(stat -c "%Y" "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz)))" -lt "86400" ] && cache_enable='False'
+	    [ "$(( $(date +"%s") - $(stat -c "%Y" "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz)))" -lt "86400" ] && export cache_enable='False'
 	    printf '%s\n' "Cache is not going to be rebuilded as it is not older than 24 hours."
 	else
-	    cache_enable='True'
+	    export cache_enable='True'
 	    printf '%s\n' "Cache is older than 24 hours. Trying to rebuild it."
 	fi
 # (tpg) disable cache until rpm4 is good
@@ -163,6 +163,8 @@ setup_cache() {
 		printf '%s\n' "Found cache ${platform_name}-${platform_arch}.cache.tar.xz"
 		[ ! -d /var/cache/mock/"${platform_name}"-"${platform_arch}"/root_cache ] && sudo mkdir -p /var/cache/mock/"${platform_name}"-"${platform_arch}"/root_cache
 		sudo cp -f "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz /var/cache/mock/"${platform_name}"-"${platform_arch}"/root_cache/cache.tar.xz
+	elif [ -f "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz ] && [ "${cache_enable}" != 'True']; then
+		rm -rf "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz	
 	fi
 }
 
@@ -372,7 +374,7 @@ build_rpm() {
 		exit 1
 	fi
 
-	if [ -f /var/cache/mock/"${platform_name}"-"${platform_arch}"/root_cache/cache.tar.xz ]; then
+	if [ -f /var/cache/mock/"${platform_name}"-"${platform_arch}"/root_cache/cache.tar.xz ] && && [ "${cache_enable}" = 'True']; then
 	    printf '%s\n' '--> Saving cached chroot for next builds.'
 	    cp -f /var/cache/mock/"${platform_name}"-"${platform_arch}"/root_cache/cache.tar.xz "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz
 	fi
