@@ -375,7 +375,7 @@ build_rpm() {
 		exit 1
 	fi
 
-	if [ -f /var/cache/mock/"${platform_name}"-"${platform_arch}"/root_cache/cache.tar.xz ] && && [ "${cache_enable}" = 'True']; then
+	if [ -f /var/cache/mock/"${platform_name}"-"${platform_arch}"/root_cache/cache.tar.xz ] && && [ "${cache_enable}" = 'True' ]; then
 	    printf '%s\n' '--> Saving cached chroot for next builds.'
 	    cp -f /var/cache/mock/"${platform_name}"-"${platform_arch}"/root_cache/cache.tar.xz "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz
 	fi
