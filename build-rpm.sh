@@ -98,7 +98,6 @@ container_data() {
 	[ "$rerun_tests" = 'true' ] && return 0
 
 	c_data="$OUTPUT_FOLDER"/container_data.json
-	project_name=$(echo ${git_repo} | sed s%.*/%% | sed s/.git$//)
 	echo '[' > ${c_data}
 	comma=0
 
@@ -112,14 +111,14 @@ container_data() {
 			if [ $comma -eq 0 ]; then
 				comma=1
 			fi
-			fullname=`basename $rpm`
+			fullname="$(basename $rpm)"
 			epoch=${nevr[1]}
 			version=${nevr[2]}
 			release=${nevr[3]}
 
 			dep_list=""
-			[[ ! "${fullname}" =~ .*src.rpm$ ]] && dep_list=`if [[ $(dnf repoquery -q --latest-limit=1 --qf "%{NAME}\\n" --whatrequires ${name} | wc -l ) -ne 0 ]];then dnf repoquery -q --latest-limit=1 --qf "%{NAME}\\n" --whatrequires ${name} | sort -u | xargs dnf repoquery -q --latest-limit=1 --qf "%{SOURCERPM}\\n" | rev | cut -f3- -d- | rev | sort -u | xargs echo; fi`
-			sha1=`sha1sum ${rpm} | awk '{ print $1 }'`
+			[[ ! "${fullname}" =~ .*src.rpm$ ]] && dep_list=$(if [[ $(dnf repoquery -q --latest-limit=1 --qf "%{NAME}\\n" --whatrequires ${name} | wc -l ) -ne 0 ]];then dnf repoquery -q --latest-limit=1 --qf "%{NAME}\\n" --whatrequires ${name} | sort -u | xargs dnf repoquery -q --latest-limit=1 --qf "%{SOURCERPM}\\n" | rev | cut -f3- -d- | rev | sort -u | xargs echo; fi)
+			sha1=$(sha1sum ${rpm} | awk '{ print $1 }')
 
 			echo "--> dep_list for '${name}':"
 			echo ${dep_list}
@@ -364,7 +363,7 @@ build_rpm() {
 	done
 
 	# Check exit code after build
-	if [ "${rc}" != 0 ] || [ ! -e "${OUTPUT_FOLDER}"/*.src.rpm ]; then
+	if [ "${rc}" != 0 ]; then
 		printf '%s\n' '--> Build failed: mock encountered a problem.'
 		# 99% of all build failures at src.rpm creation is broken deps
 		# m1 show only first match -oP show only matching
@@ -373,6 +372,19 @@ build_rpm() {
 		cleanup
 		exit 1
 	fi
+
+	# Check if src.rpm file does exist
+	for file in "${OUTPUT_FOLDER}"/*.src.rpm ; do
+		if [ ! -e "$file" ]
+			printf '%s\n' '--> Build failed: mock encountered a problem. src.rpm files is missing'
+			# 99% of all build failures at src.rpm creation is broken deps
+			# m1 show only first match -oP show only matching
+			grep -m1 -oP "\(due to unsatisfied(.*)$" $OUTPUT_FOLDER/root.log >> ~/build_fail_reason.log
+			[ -n "$subshellpid" ] && kill "$subshellpid"
+			cleanup
+			exit 1
+		fi
+	done
 
 	if [ -f /var/cache/mock/"${platform_name}"-"${platform_arch}"/root_cache/cache.tar.xz ] && [ "${cache_enable}" = 'True' ]; then
 	    printf '%s\n' '--> Saving cached chroot for next builds.'
