@@ -159,7 +159,7 @@ setup_cache() {
 		rm -rf "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz
 		printf '%s\n' "Cache is older than 24 hours. Removing cache ${platform_name}-${platform_arch}.cache.tar.xz"	
 	fi
-	if [ -f "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz ]; then
+	if [ -f "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz ] && [ "${cache_enable}" = 'True' ]; then
 		printf '%s\n' "Found cache ${platform_name}-${platform_arch}.cache.tar.xz"
 		[ ! -d /var/cache/mock/"${platform_name}"-"${platform_arch}"/root_cache ] && sudo mkdir -p /var/cache/mock/"${platform_name}"-"${platform_arch}"/root_cache
 		sudo cp -f "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz /var/cache/mock/"${platform_name}"-"${platform_arch}"/root_cache/cache.tar.xz
