@@ -98,7 +98,7 @@ container_data() {
 	[ "$rerun_tests" = 'true' ] && return 0
 
 	c_data="$OUTPUT_FOLDER"/container_data.json
-	project_name=`echo ${git_repo} | sed s%.*/%% | sed s/.git$//`
+	project_name=$(echo ${git_repo} | sed s%.*/%% | sed s/.git$//)
 	echo '[' > ${c_data}
 	comma=0
 
@@ -118,7 +118,7 @@ container_data() {
 			release=${nevr[3]}
 
 			dep_list=""
-			[[ ! "${fullname}" =~ ".*src.rpm$" ]] && dep_list=`if [[ $(dnf repoquery -q --latest-limit=1 --qf "%{NAME}\\n" --whatrequires ${name} | wc -l ) -ne 0 ]];then dnf repoquery -q --latest-limit=1 --qf "%{NAME}\\n" --whatrequires ${name} | sort -u | xargs dnf repoquery -q --latest-limit=1 --qf "%{SOURCERPM}\\n" | rev | cut -f3- -d- | rev | sort -u | xargs echo; fi`
+			[[ ! "${fullname}" =~ .*src.rpm$ ]] && dep_list=`if [[ $(dnf repoquery -q --latest-limit=1 --qf "%{NAME}\\n" --whatrequires ${name} | wc -l ) -ne 0 ]];then dnf repoquery -q --latest-limit=1 --qf "%{NAME}\\n" --whatrequires ${name} | sort -u | xargs dnf repoquery -q --latest-limit=1 --qf "%{SOURCERPM}\\n" | rev | cut -f3- -d- | rev | sort -u | xargs echo; fi`
 			sha1=`sha1sum ${rpm} | awk '{ print $1 }'`
 
 			echo "--> dep_list for '${name}':"
@@ -226,7 +226,6 @@ test_rpm() {
 
 		test_log="${OUTPUT_FOLDER}"/tests-"$(printf '%(%F-%R)T')".log
 		printf '%s\n' "--> Re-running tests on $(date -u)" >> $test_log
-		prefix='rerun-tests-'
 		arr=($packages)
 		cd "$build_package"
 		for package in ${arr[@]} ; do
@@ -370,7 +369,7 @@ build_rpm() {
 		# 99% of all build failures at src.rpm creation is broken deps
 		# m1 show only first match -oP show only matching
 		grep -m1 -oP "\(due to unsatisfied(.*)$" $OUTPUT_FOLDER/root.log >> ~/build_fail_reason.log
-		[ -n $subshellpid ] && kill $subshellpid
+		[ -n "$subshellpid" ] && kill "$subshellpid"
 		cleanup
 		exit 1
 	fi
@@ -407,7 +406,7 @@ build_rpm() {
 		# clean all the rpm files because build was not completed
 		grep -m1 -i -oP "$GREP_PATTERN" "${OUTPUT_FOLDER}"/root.log >> ~/build_fail_reason.log
 		rm -rf "${OUTPUT_FOLDER}"/*.rpm
-		[ -n $subshellpid ] && kill $subshellpid
+		[ -n "$subshellpid" ] && kill "$subshellpid"
 		cleanup
 		exit 1
 	fi
@@ -466,7 +465,7 @@ validate_arch() {
 		for item in ${SPEC_ARCH[@]}; do
 			if [[ "${_PLATFORM[@]}" =~ "${item}" ]] ; then
 				FOUND_MATCH=1
-				echo "--> Found match of ${item} in ${_PLATFORM[@]} for ${BUILD_TYPE}"
+				printf '%s\n' "--> Found match of ${item} in ${_PLATFORM[@]} for ${BUILD_TYPE}"
 			fi
 		done
 
