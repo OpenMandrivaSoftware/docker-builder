@@ -375,7 +375,7 @@ build_rpm() {
 
 	# Check if src.rpm file does exist
 	for file in "${OUTPUT_FOLDER}"/*.src.rpm ; do
-		if [ ! -e "$file" ]
+		if [ ! -e "$file" ]; then
 			printf '%s\n' '--> Build failed: mock encountered a problem. src.rpm files is missing'
 			# 99% of all build failures at src.rpm creation is broken deps
 			# m1 show only first match -oP show only matching
