@@ -164,6 +164,7 @@ setup_cache() {
 		[ ! -d /var/cache/mock/"${platform_name}"-"${platform_arch}"/root_cache ] && sudo mkdir -p /var/cache/mock/"${platform_name}"-"${platform_arch}"/root_cache
 		sudo cp -f "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz /var/cache/mock/"${platform_name}"-"${platform_arch}"/root_cache/cache.tar.xz
 	elif [ -f "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz ] && [ "${cache_enable}" != 'True' ]; then
+		printf '%s\n' "Cached chroot is disabled."
 		rm -rf "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz	
 	fi
 }
