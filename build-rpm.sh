@@ -82,7 +82,7 @@ generate_config() {
 	fi
 # (tpg) disable cache until rpm4 is good
 export cache_enable='False'
-	EXTRA_CFG_OPTIONS="$extra_cfg_options" \
+		EXTRA_CFG_OPTIONS="$extra_cfg_options" \
 		EXTRA_CFG_URPM_OPTIONS="$extra_cfg_urpm_options" \
 		UNAME="$uname" \
 		EMAIL="$email" \
@@ -157,7 +157,7 @@ container_data() {
 setup_cache() {
 	if [ -f "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz ] && [ "$(( $(date +"%s") - $(stat -c "%Y" "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz)))" -ge "86400" ]; then
 		rm -rf "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz
-		printf '%s\n' "Cache is older than 24 hours. Removing cache ${platform_name}-${platform_arch}.cache.tar.xz"	
+		printf '%s\n' "Cache is older than 24 hours. Removing cache ${platform_name}-${platform_arch}.cache.tar.xz"
 	fi
 	if [ -f "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz ] && [ "${cache_enable}" = 'True' ]; then
 		printf '%s\n' "Found cache ${platform_name}-${platform_arch}.cache.tar.xz"
@@ -165,7 +165,7 @@ setup_cache() {
 		sudo cp -f "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz /var/cache/mock/"${platform_name}"-"${platform_arch}"/root_cache/cache.tar.xz
 	elif [ -f "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz ] && [ "${cache_enable}" != 'True' ]; then
 		printf '%s\n' "Cached chroot is disabled."
-		rm -rf "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz	
+		rm -rf "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz
 	fi
 }
 
@@ -336,13 +336,13 @@ build_rpm() {
 		return 0
 	fi
 
-	echo '--> Build src.rpm'
+	printf '%s\n' '--> Build src.rpm'
 	try_rebuild=true
 	retry=0
 	while $try_rebuild; do
 		rm -rf "$OUTPUT_FOLDER"
 		sudo rm -rf /var/cache/dnf/*
-		sudo rm -rf /var/lib/mock/"${platform_name}"-"$platform_arch"/root/var/cache/dnf/*
+		sudo rm -rf /var/lib/mock/"${platform_name}"-"${platform_arch}"/root/var/cache/dnf/*
 		if [ -f /var/cache/mock/"${platform_name}"-"${platform_arch}"/root_cache/cache.tar.xz ]; then
 			printf '%s\n' "--> Building with cached chroot ..."
 			$MOCK_BIN -v --configdir=$config_dir --buildsrpm --spec=$build_package/${PACKAGE}.spec --sources=$build_package --no-cleanup-after --no-clean $extra_build_src_rpm_options --resultdir="${OUTPUT_FOLDER}"
@@ -352,13 +352,14 @@ build_rpm() {
 
 		rc=${PIPESTATUS[0]}
 		try_rebuild=false
-		if [[ $rc != 0 && $retry < $MAX_RETRIES ]]; then
+		if [ "${rc}" != 0 ] && [ "${retry}" < "${MAX_RETRIES}" ]; then
 			if grep -q "$RETRY_GREP_STR" $OUTPUT_FOLDER/root.log; then
 				try_rebuild=true
 				(( retry=$retry+1 ))
-				echo "--> Repository was changed in the middle, will rerun the build. Next try (${retry} from ${MAX_RETRIES})..."
-				echo "--> Delay ${WAIT_TIME} sec..."
-				sleep ${WAIT_TIME}
+				sudo rm -rf /var/lib/mock/"${platform_name}"-"${platform_arch}"/root/var/cache/dnf/*
+				printf '%s\n' "--> Repository was changed in the middle, will rerun the build. Next try (${retry} from ${MAX_RETRIES})..."
+				printf '%s\n' "--> Delay ${WAIT_TIME} sec..."
+				sleep "${WAIT_TIME}"
 			fi
 		fi
 	done
@@ -380,7 +381,7 @@ build_rpm() {
 			printf '%s\n' '--> Build failed: mock encountered a problem. src.rpm files is missing'
 			# 99% of all build failures at src.rpm creation is broken deps
 			# m1 show only first match -oP show only matching
-			grep -m1 -oP "\(due to unsatisfied(.*)$" $OUTPUT_FOLDER/root.log >> ~/build_fail_reason.log
+			grep -m1 -oP "\(due to unsatisfied(.*)$" "${OUTPUT_FOLDER}"/root.log >> ~/build_fail_reason.log
 			[ -n "$subshellpid" ] && kill "$subshellpid"
 			cleanup
 			exit 1
@@ -402,13 +403,14 @@ build_rpm() {
 		$MOCK_BIN -v --configdir=$config_dir --rebuild "${OUTPUT_FOLDER}"/*.src.rpm --no-cleanup-after --no-clean $extra_build_rpm_options --resultdir="${OUTPUT_FOLDER}"
 		rc=${PIPESTATUS[0]}
 		try_rebuild=false
-		if [[ $rc != 0 && $retry < $MAX_RETRIES ]]; then
+		if [ "${rc}" != 0 ] && [ "${retry}" < "${MAX_RETRIES}" ]; then
 			if grep -q "$RETRY_GREP_STR" "${OUTPUT_FOLDER}"/root.log; then
 				try_rebuild=true
 				(( retry=$retry+1 ))
-				echo "--> Repository was changed in the middle, will rerun the build. Next try (${retry} from ${MAX_RETRIES})..."
-				echo "--> Delay ${WAIT_TIME} sec..."
-				sleep ${WAIT_TIME}
+				sudo rm -rf /var/lib/mock/"${platform_name}"-"${platform_arch}"/root/var/cache/dnf/*
+				printf '%s\n' "--> Repository was changed in the middle, will rerun the build. Next try (${retry} from ${MAX_RETRIES})..."
+				printf '%s\n' "--> Delay ${WAIT_TIME} sec..."
+				sleep "${WAIT_TIME}"
 			fi
 		fi
 	done
@@ -439,6 +441,7 @@ build_rpm() {
 	# Test RPM files
 	test_rpm
 	# End tests
+
 	# check if RPM files are not vanished
 	if [ -z "$(ls -A "${OUTPUT_FOLDER}"/*.rpm | grep -v .src.rpm)" ]; then
 	    printf '%s\n' "RPM files are missing. Something went terribly wrong. Exiting!"
@@ -483,10 +486,10 @@ validate_arch() {
 		done
 
 		if [ -n "${FOUND_MATCH}" ] && [ "${BUILD_TYPE,,}" = 'excludearch' ]; then
-			echo "--> Build for this architecture is forbidden because of ${BUILD_TYPE} set in spec file!"
+			printf '%s\n' "--> Build for this architecture is forbidden because of ${BUILD_TYPE} set in spec file!"
 			exit 6
 		elif [ -z "${FOUND_MATCH}" ] && [ "${BUILD_TYPE,,}" = 'exclusivearch' ]; then
-			echo "--> Build for this architecture is forbidden because of ${BUILD_TYPE} set in spec file!"
+			printf '%s\n' "--> Build for this architecture is forbidden because of ${BUILD_TYPE} set in spec file!"
 			exit 6
 		else
 			printf '%s\n' "--> Spec validated for ExcludeArch and ExclusiveArch. Continue building."
@@ -534,12 +537,12 @@ clone_repo() {
 		fi
 		rc=$?
 		try_reclone=false
-		if [[ $rc != 0 && $retry < $MAX_RETRIES ]] ; then
+		if [ "${rc}" != 0 ] && [ "${retry}" < "${MAX_RETRIES}" ]; then
 			try_reclone=true
 			(( retry=$retry+1 ))
-			echo "--> Something wrong with git repository, next try (${retry} from ${MAX_RETRIES})..."
-			echo "--> Delay ${WAIT_TIME} sec..."
-			sleep ${WAIT_TIME}
+			printf '%s\n' "--> Something wrong with git repository, next try (${retry} from ${MAX_RETRIES})..."
+			printf '%s\n' "--> Delay ${WAIT_TIME} sec..."
+			sleep "${WAIT_TIME}"
 		fi
 	done
 
