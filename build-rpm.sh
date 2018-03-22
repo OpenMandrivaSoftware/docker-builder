@@ -329,7 +329,7 @@ build_rpm() {
 	# (since in case when repository metadata is really broken we can loop here forever)
 	MAX_RETRIES=10
 	WAIT_TIME=60
-	RETRY_GREP_STR="Error downloading packages\|All mirrors were already tried without success\|Cannot download "
+	RETRY_GREP_STR="Error downloading packages\|All mirrors were already tried\|Cannot download "
 
 	if [ "$rerun_tests" = 'true' ]; then
 		test_rpm
@@ -353,7 +353,7 @@ build_rpm() {
 		rc=${PIPESTATUS[0]}
 		try_rebuild=false
 		if [ "${rc}" != 0 ] && [ "${retry}" -lt "${MAX_RETRIES}" ]; then
-			if grep -q "$RETRY_GREP_STR" $OUTPUT_FOLDER/root.log; then
+			if grep -q "$RETRY_GREP_STR" "${OUTPUT_FOLDER}"/root.log; then
 				try_rebuild=true
 				(( retry=$retry+1 ))
 				sudo rm -rf /var/lib/mock/"${platform_name}"-"${platform_arch}"/root/var/cache/dnf/*
