@@ -537,7 +537,7 @@ clone_repo() {
 		fi
 		rc=$?
 		try_reclone=false
-		if [ "${rc}" != 0 ] && [ "${retry}" < "${MAX_RETRIES}" ]; then
+		if [ "${rc}" != 0 ] && [ "${retry}" -lt "${MAX_RETRIES}" ]; then
 			try_reclone=true
 			(( retry=$retry+1 ))
 			printf '%s\n' "--> Something wrong with git repository, next try (${retry} from ${MAX_RETRIES})..."
