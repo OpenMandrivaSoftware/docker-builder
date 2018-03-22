@@ -352,7 +352,7 @@ build_rpm() {
 
 		rc=${PIPESTATUS[0]}
 		try_rebuild=false
-		if [ "${rc}" != 0 ] && [ "${retry}" < "${MAX_RETRIES}" ]; then
+		if [ "${rc}" != 0 ] && [ "${retry}" -lt "${MAX_RETRIES}" ]; then
 			if grep -q "$RETRY_GREP_STR" $OUTPUT_FOLDER/root.log; then
 				try_rebuild=true
 				(( retry=$retry+1 ))
@@ -403,7 +403,7 @@ build_rpm() {
 		$MOCK_BIN -v --configdir=$config_dir --rebuild "${OUTPUT_FOLDER}"/*.src.rpm --no-cleanup-after --no-clean $extra_build_rpm_options --resultdir="${OUTPUT_FOLDER}"
 		rc=${PIPESTATUS[0]}
 		try_rebuild=false
-		if [ "${rc}" != 0 ] && [ "${retry}" < "${MAX_RETRIES}" ]; then
+		if [ "${rc}" != 0 ] && [ "${retry}" -lt "${MAX_RETRIES}" ]; then
 			if grep -q "$RETRY_GREP_STR" "${OUTPUT_FOLDER}"/root.log; then
 				try_rebuild=true
 				(( retry=$retry+1 ))
