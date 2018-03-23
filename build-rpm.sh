@@ -329,7 +329,7 @@ build_rpm() {
 	# (since in case when repository metadata is really broken we can loop here forever)
 	MAX_RETRIES=10
 	WAIT_TIME=60
-	RETRY_GREP_STR="Error downloading packages\|All mirrors were already tried\|Cannot download "
+	RETRY_GREP_STR="Unable to find a match\|Error downloading packages\|All mirrors were already tried\|Cannot download "
 
 	if [ "$rerun_tests" = 'true' ]; then
 		test_rpm
