@@ -56,6 +56,7 @@ extra_cfg_urpm_options="$EXTRA_CFG_URPM_OPTIONS"
 save_buildroot="$SAVE_BUILDROOT"
 use_extra_tests="$USE_EXTRA_TESTS"
 rerun_tests="$RERUN_TESTS"
+use_mock_cache="$MOCK_CACHE"
 # list of packages for tests relaunch
 packages="$PACKAGES"
 
@@ -76,19 +77,18 @@ generate_config() {
 	if [ -f "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz ]; then
 	    [ "$(( $(date +"%s") - $(stat -c "%Y" "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz)))" -lt "86400" ] && export cache_enable='False'
 	    printf '%s\n' "Cache is not going to be rebuilded as it is not older than 24 hours."
-	else
-	    export cache_enable='True'
+	elif [ "$use_mock_cache" = 'True' ]; then
+	    rebuild_cache='True'
 	    printf '%s\n' "Cache is older than 24 hours. Trying to rebuild it."
 	fi
 # (tpg) disable cache until rpm4 is good
-export cache_enable='False'
 		EXTRA_CFG_OPTIONS="$extra_cfg_options" \
 		EXTRA_CFG_URPM_OPTIONS="$extra_cfg_urpm_options" \
 		UNAME="$uname" \
 		EMAIL="$email" \
 		PLATFORM_NAME="$platform_name" \
 		PLATFORM_ARCH="$platform_arch" \
-		CACHE_ENABLE="$cache_enable"   \
+		REBUILD_CACHE="$rebuild_cache"   \
 		/bin/sh "/mdv/config-generator.sh"
 }
 
@@ -159,13 +159,14 @@ setup_cache() {
 		rm -rf "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz
 		printf '%s\n' "Cache is older than 24 hours. Removing cache ${platform_name}-${platform_arch}.cache.tar.xz"
 	fi
-	if [ -f "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz ] && [ "${cache_enable}" = 'True' ]; then
+	if [ -f "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz ] && [ "${use_mock_cache}" = 'True' ]; then
 		printf '%s\n' "Found cache ${platform_name}-${platform_arch}.cache.tar.xz"
 		[ ! -d /var/cache/mock/"${platform_name}"-"${platform_arch}"/root_cache ] && sudo mkdir -p /var/cache/mock/"${platform_name}"-"${platform_arch}"/root_cache
 		sudo cp -f "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz /var/cache/mock/"${platform_name}"-"${platform_arch}"/root_cache/cache.tar.xz
-	elif [ -f "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz ] && [ "${cache_enable}" != 'True' ]; then
+	elif [ -f "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz ] && [ "${use_mock_cache}" != 'True' ]; then
 		printf '%s\n' "Cached chroot is disabled."
-		rm -rf "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz
+		sudo rm -rf "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz
+		[ -f /var/cache/mock/"${platform_name}"-"${platform_arch}"/root_cache/cache.tar.xz ] && sudo rm -rf /var/cache/mock/"${platform_name}"-"${platform_arch}"/root_cache/cache.tar.xz
 	fi
 }
 
@@ -238,7 +239,7 @@ test_rpm() {
 			fi
 		done
 		cd -
-		if [ -f /var/cache/mock/"${platform_name}"-"${platform_arch}"/root_cache/cache.tar.xz ]; then
+		if [ -f /var/cache/mock/"${platform_name}"-"${platform_arch}"/root_cache/cache.tar.xz ] && [ "$use_mock_cache" = 'True' ]; then
 			printf '%s\n' "--> Testing with cached chroot ..."
 			$MOCK_BIN --init --configdir $config_dir -v --no-cleanup-after --no-clean
 		else
@@ -343,7 +344,7 @@ build_rpm() {
 		rm -rf "$OUTPUT_FOLDER"
 		sudo rm -rf /var/cache/dnf/*
 		sudo rm -rf /var/lib/mock/"${platform_name}"-"${platform_arch}"/root/var/cache/dnf/*
-		if [ -f /var/cache/mock/"${platform_name}"-"${platform_arch}"/root_cache/cache.tar.xz ]; then
+		if [ -f /var/cache/mock/"${platform_name}"-"${platform_arch}"/root_cache/cache.tar.xz ] && [ "$use_mock_cache" = 'True' ]; then
 			printf '%s\n' "--> Building with cached chroot ..."
 			$MOCK_BIN -v --configdir=$config_dir --buildsrpm --spec=$build_package/${PACKAGE}.spec --sources=$build_package --no-cleanup-after --no-clean $extra_build_src_rpm_options --resultdir="${OUTPUT_FOLDER}"
 		else
@@ -388,7 +389,7 @@ build_rpm() {
 		fi
 	done
 
-	if [ -f /var/cache/mock/"${platform_name}"-"${platform_arch}"/root_cache/cache.tar.xz ] && [ "${cache_enable}" = 'True' ]; then
+	if [ -f /var/cache/mock/"${platform_name}"-"${platform_arch}"/root_cache/cache.tar.xz ] && [ "$use_mock_cache" = 'True' ]; then
 	    printf '%s\n' '--> Saving cached chroot for next builds.'
 	    cp -f /var/cache/mock/"${platform_name}"-"${platform_arch}"/root_cache/cache.tar.xz "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz
 	fi

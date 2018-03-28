@@ -8,7 +8,7 @@ platform_arch="$PLATFORM_ARCH"
 platform_name=${PLATFORM_NAME:-"openmandriva"}
 repo_url="$REPO_URL"
 repo_names="$REPO_NAMES"
-cache_enable="$CACHE_ENABLE"
+rebuild_cache="$REBUILD_CACHE"
 default_cfg=/etc/mock/default.cfg
 
 gen_included_repos() {
@@ -63,7 +63,7 @@ config_opts['macros']['%_topdir'] = '%s/build' % config_opts['chroothome']
 config_opts['macros']['%_rpmfilename'] = '%%{NAME}-%%{VERSION}-%%{RELEASE}-%%{DISTTAG}.%%{ARCH}.rpm'
 config_opts['macros']['%cross_compiling'] = '0' # ABF should generally be considered native builds
 config_opts['plugin_conf']['ccache_enable'] = False
-config_opts['plugin_conf']['root_cache_enable'] = '$cache_enable'
+config_opts['plugin_conf']['root_cache_enable'] = '$rebuild_cache'
 config_opts['plugin_conf']['root_cache_opts']['compress_program'] = "xz"
 config_opts['plugin_conf']['root_cache_opts']['extension'] = ".xz"
 config_opts['yum.conf'] = """
