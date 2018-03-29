@@ -260,7 +260,7 @@ test_rpm() {
 		sudo dnf --installroot="${TEST_CHROOT_PATH}" --assumeyes --nogpgcheck --setopt=install_weak_deps=False --setopt=tsflags=test install $(ls "$OUTPUT_FOLDER"/*.rpm | grep -v .src.rpm) >> "${test_log}".tmp 2>&1
 		test_code=$?
 		try_retest=false
-		if [[ "${test_code}" != 0 && $retry < $MAX_RETRIES ]]; then
+		if [ "${test_code}" != 0 ] && [ "${retry}" -lt "${MAX_RETRIES}" ]; then
 			if grep -q "$RETRY_GREP_STR" "${test_log}".tmp; then
 				printf '%s\n' '--> Repository was changed in the middle, will rerun the tests' >> $test_log
 				sleep ${WAIT_TIME}
