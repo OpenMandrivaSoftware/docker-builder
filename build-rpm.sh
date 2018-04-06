@@ -75,20 +75,21 @@ generate_config() {
 	mv -f ~/logging.ini "${config_dir}"/logging.ini
 # (tpg) check how old is cache file to prevent generating cache while building rpms
 	if [ -f "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz ]; then
-	    [ "$(( $(date +"%s") - $(stat -c "%Y" "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz)))" -lt "86400" ] && export cache_enable='False'
+	    [ "$(( $(date +"%s") - $(stat -c "%Y" "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz)))" -lt "86400" ] && rebuild_cache='False'
 	    printf '%s\n' "Cache is not going to be rebuilded as it is not older than 24 hours."
 	elif [ "$use_mock_cache" = 'True' ]; then
 	    rebuild_cache='True'
 	    printf '%s\n' "Cache is older than 24 hours. Trying to rebuild it."
+	else
+	    rebuild_cache='False'
 	fi
-# (tpg) disable cache until rpm4 is good
 		EXTRA_CFG_OPTIONS="$extra_cfg_options" \
 		EXTRA_CFG_URPM_OPTIONS="$extra_cfg_urpm_options" \
 		UNAME="$uname" \
 		EMAIL="$email" \
 		PLATFORM_NAME="$platform_name" \
 		PLATFORM_ARCH="$platform_arch" \
-		REBUILD_CACHE="$rebuild_cache"   \
+		REBUILD_CACHE="$rebuild_cache" \
 		/bin/sh "/mdv/config-generator.sh"
 }
 
@@ -137,26 +138,9 @@ container_data() {
 	echo ']' >> ${c_data}
 }
 
-#download_cache() {
-#	if [ "${CACHED_CHROOT_SHA1}" != '' ]; then
-#		# if chroot not exist download it
-#		if [ ! -f "${HOME}"/"${CACHED_CHROOT_SHA1}".tar.xz ]; then
-#			curl -L "${filestore_url}/${CACHED_CHROOT_SHA1}" -o "${HOME}/${CACHED_CHROOT_SHA1}.tar.xz"
-#		fi
-#		# unpack in root
-#		printf '%s\n' "Extracting chroot $CACHED_CHROOT_SHA1"
-#		if echo "${CACHED_CHROOT_SHA1} ${HOME}/${CACHED_CHROOT_SHA1}.tar.xz" | sha1sum -c --status &> /dev/null; then
-#			sudo mv -f ${HOME}/${CACHED_CHROOT_SHA1}.tar.xz /var/cache/mock/openmandriva-"$platform_arch"/root_cache/cache.tar.xz
-#		else
-#			printf '%s\n' '--> Building without cached chroot, becasue SHA1 is wrong.'
-#			export CACHED_CHROOT_SHA1=""
-#		fi
-#	fi
-#}
-
 setup_cache() {
 	if [ -f "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz ] && [ "$(( $(date +"%s") - $(stat -c "%Y" "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz)))" -ge "86400" ]; then
-		rm -rf "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz
+		sudo rm -rf "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz
 		printf '%s\n' "Cache is older than 24 hours. Removing cache ${platform_name}-${platform_arch}.cache.tar.xz"
 	fi
 	if [ -f "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz ] && [ "${use_mock_cache}" = 'True' ]; then
@@ -165,8 +149,7 @@ setup_cache() {
 		sudo cp -f "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz /var/cache/mock/"${platform_name}"-"${platform_arch}"/root_cache/cache.tar.xz
 	elif [ -f "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz ] && [ "${use_mock_cache}" != 'True' ]; then
 		printf '%s\n' "Cached chroot is disabled."
-		sudo rm -rf "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz
-		[ -f /var/cache/mock/"${platform_name}"-"${platform_arch}"/root_cache/cache.tar.xz ] && sudo rm -rf /var/cache/mock/"${platform_name}"-"${platform_arch}"/root_cache/cache.tar.xz
+		[ -f /var/cache/mock/"${platform_name}"-"${platform_arch}"/root_cache/cache.tar.xz ] && sudo rm -rf /var/cache/mock/"${platform_name}"-"${platform_arch}"/root_cache
 	fi
 }
 
@@ -525,12 +508,12 @@ clone_repo() {
 	try_reclone=true
 	retry=0
 	while $try_reclone; do
-		rm -rf "${HOME}/${PACKAGE}"
+		rm -rf "${HOME}"/"${PACKAGE}"
 		# checkout specific branch/tag if defined
 		if [ ! -z "$project_version" ]; then
 			# (tpg) clone only history of 100 commits to reduce bandwith
 			git clone --depth 100 -b "$project_version" "$git_repo" "${HOME}"/"${PACKAGE}"
-			cd "${HOME}/${PACKAGE}"
+			cd "${HOME}"/"${PACKAGE}"
 			git rev-parse HEAD > "${HOME}"/commit_hash
 			cd -
 		else
