@@ -456,14 +456,14 @@ validate_arch() {
 	# check if spec file have both ExcludeArch and ExclusiveArch set up
 	[[ ${#BUILD_TYPE} -gt 15 ]] && printf '%s\n' "Spec file has set ExcludeArch and ExclusiveArch. Exiting!" && exit 1
 
-	SPEC_ARCH=(`grep -i '^excludearch:.*$\|^exclusivearch:.*$' *.spec | awk -F'[[:blank:]]' '{$1="";print $0}' | sort -u`)
+	SPEC_ARCH=( $(grep -i '^excludearch:.*$\|^exclusivearch:.*$' *.spec | awk -F'[[:blank:]]' '{$1="";print $0}' | sort -u) )
 
 	# validate platform against spec file settings
 	validate_build() {
 		local _PLATFORM=($1)
 		# count for occurences
 		for item in ${SPEC_ARCH[@]}; do
-			if [[ "${_PLATFORM[@]}" =~ ${item} ]] ; then
+			if [[ "${_PLATFORM[@]}" =~ "${item}" ]] ; then
 				FOUND_MATCH=1
 				printf '%s\n' "--> Found match of ${item} in ${_PLATFORM[@]} for ${BUILD_TYPE}"
 			fi
