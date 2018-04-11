@@ -9,8 +9,6 @@ COPY contrib.repo /etc/yum.repos.d/
 RUN dnf --nogpgcheck --refresh --assumeyes --nodocs --setopt=install_weak_deps=False upgrade \
  && rm -f /etc/localtime \
  && ln -s /usr/share/zoneinfo/UTC /etc/localtime \
- && dnf --nogpgcheck --assumeyes --setopt=install_weak_deps=False --nodocs install gnupg \
- && gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 \
  && dnf --nogpgcheck --assumeyes --setopt=install_weak_deps=False --nodocs install mock git coreutils curl sudo builder-c procps-ng gnutar \
  findutils util-linux wget rpmdevtools sed grep db52_recover xz gnupg \
  && sed -i -e "s/Defaults    requiretty.*/ #Defaults    requiretty/g" /etc/sudoers \
