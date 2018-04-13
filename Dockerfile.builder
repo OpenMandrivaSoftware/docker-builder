@@ -17,6 +17,7 @@ RUN dnf --nogpgcheck --refresh --assumeyes --nodocs --setopt=install_weak_deps=F
  && usermod -a -G mock omv \
  && chown -R omv:mock /etc/mock \
  && rm -rf /var/cache/dnf/* \
+ && rm -rf /var/lib/dnf/yumdb/* \
  && rm -rf /usr/share/man/ /usr/share/cracklib /usr/share/doc \
  && dnf --assumeyes autoremove
 
