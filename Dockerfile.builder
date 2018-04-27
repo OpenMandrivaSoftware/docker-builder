@@ -24,6 +24,10 @@ RUN dnf --nogpgcheck --refresh --assumeyes --nodocs --setopt=install_weak_deps=F
 
 RUN if [ $RARCH = "x86_64" ]; then dnf --nogpgcheck --assumeyes install qemu-static-aarch64 qemu-static-arm; fi
 
+RUN rm -rf /var/lib/dnf/yumdb/* \
+ && rm -rf /var/cache/dnf/* \
+ && rm -rf /var/lib/rpm/__db.*
+
 ## put me in RUN if you have more than 16gb of RAM
 # && echo "tmpfs /var/lib/mock/ tmpfs defaults,size=4096m,uid=$(id -u omv),gid=$(id -g omv),mode=0700 0 0" >> /etc/fstab \
 #
