@@ -194,6 +194,8 @@ arm_platform_detector(){
 
 test_rpm() {
 	local PERSONALITY
+	local EXTRA_ARGS
+
 	# Rerun tests
 	PACKAGES=${packages}
 	chroot_path=$chroot_path
@@ -206,10 +208,13 @@ test_rpm() {
 
 	if echo $platform_arch |grep -qE '^arm' && [ "$cpu" = "aarch64" ]; then
 		PERSONALITY="setarch linux32 -B"
+		EXTRA_ARGS="--forcearch=armv7hnl"
 	elif echo $platform_arch |grep -qE '^i.86' && [ "$cpu" = "x86_64" ]; then
 		PERSONALITY="i386"
+		EXTRA_ARGS=""
 	else
 		PERSONALITY=""
+		EXTRA_ARGS=""
 	fi
 
 	if [ "$rerun_tests" = 'true' ]; then
@@ -250,8 +255,9 @@ test_rpm() {
 		sudo rm -rf /var/cache/dnf/*
 		sudo rm -rf /var/lib/mock/"${platform_name}"-"${platform_arch}"/root/var/cache/dnf/*
 		echo "---> running $PERSONALITY dnf --installroot=${TEST_CHROOT_PATH} --assumeyes --nogpgcheck --setopt=install_weak_deps=False --setopt=tsflags=test builddep $OUTPUT_FOLDER/*.src.rpm" >> "${test_log}".tmp
-		sudo $PERSONALITY dnf --installroot="${TEST_CHROOT_PATH}" --assumeyes --nogpgcheck --setopt=install_weak_deps=False --setopt=tsflags=test builddep "$OUTPUT_FOLDER"/*.src.rpm >> "${test_log}".tmp 2>&1
-		sudo $PERSONALITY dnf --installroot="${TEST_CHROOT_PATH}" --assumeyes --nogpgcheck --setopt=install_weak_deps=False --setopt=tsflags=test install $(ls "$OUTPUT_FOLDER"/*.rpm | grep -v .src.rpm) >> "${test_log}".tmp 2>&1
+		sudo $PERSONALITY chroot ${TEST_CHROOT_PATH} uname -a >>"${test_log}".tmp
+		sudo $PERSONALITY dnf --installroot="${TEST_CHROOT_PATH}" --assumeyes ${EXTRA_ARGS} --nogpgcheck --setopt=install_weak_deps=False --setopt=tsflags=test builddep "$OUTPUT_FOLDER"/*.src.rpm >> "${test_log}".tmp 2>&1
+		sudo $PERSONALITY dnf --installroot="${TEST_CHROOT_PATH}" --assumeyes ${EXTRA_ARGS} --nogpgcheck --setopt=install_weak_deps=False --setopt=tsflags=test install $(ls "$OUTPUT_FOLDER"/*.rpm | grep -v .src.rpm) >> "${test_log}".tmp 2>&1
 		test_code=$?
 		try_retest=false
 		if [ "${test_code}" != 0 ] && [ "${retry}" -lt "${MAX_RETRIES}" ]; then
@@ -493,13 +499,25 @@ validate_arch() {
 
 	# translate arch into various options that may be set up in spec file
 	case ${PLATFORM_ARCH,,} in
+	armv8hcnl)
+		validate_build "arm %arm %{arm} armx %armx %{armx} armv7hl armv7hnl armv8hl armv8hnl armv8hcnl"
+		;;
+	armv8hnl)
+		validate_build "arm %arm %{arm} armx %armx %{armx} armv7hl armv7hnl armv8hl armv8hnl"
+		;;
+	armv8hl)
+		validate_build "arm %arm %{arm} armx %armx %{armx} armv7hl armv7hnl armv8hl"
+		;;
+	armv7hnl)
+		validate_build "arm %arm %{arm} armx %armx %{armx} armv7hl armv7hnl"
+		;;
 	armv7hl)
-		validate_build "armx %armx %{armx} armv7hl"
+		validate_build "arm %arm %{arm} armx %armx %{armx} armv7hl"
 		;;
 	aarch64)
 		validate_build "armx %armx %{armx} aarch64"
 		;;
-	i386|i586|i686)
+	i[3-9]86)
 		validate_build "ix86 %ix86 %{ix86} i686 %i686 %{i686} i586 %i586 %{i586} i386 %i386 %{i386}"
 		;;
 	x86_64)
