@@ -113,8 +113,8 @@ if [ "${arch}" = 'aarch64' ]; then
     fi
 fi
 
-if [ "${arch}" = 'armv7hl' ]; then
-    if [ "${cpu}" != 'arm' ] ; then
+if echo "${arch}" |grep -qE '^arm'; then
+    if [ "${cpu}" != 'arm' -a "${cpu}" != "aarch64" ] ; then
 	mkdir -p "${target_dir}"/usr/bin/
 	sudo sh -c "echo '${arch}-mandriva-linux-gnueabi' > /etc/rpm/platform"
 	cp /usr/bin/qemu-static-arm "${target_dir}"/usr/bin/
