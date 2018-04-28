@@ -9,7 +9,7 @@ filestore_url="http://file-store.openmandriva.org/api/v1/file_stores"
 distro_release=${DISTRO_RELEASE:-"cooker"}
 platform_name=${PLATFORM_NAME:-"openmandriva"}
 token="$TOKEN"
-arches=${ARCHES:-"i586 i686 x86_64 aarch64 armv7hl"}
+arches=${ARCHES:-"i586 i686 x86_64 aarch64 armv7hl armv7hnl armv8hl armv8hnl armv8hcnl"}
 
 chroot_path="/var/lib/mock"
 
@@ -27,6 +27,10 @@ if [ "$(uname -m)" = 'x86_64' ] && printf '%s\n' "${arch}" | grep -qE 'i[0-9]86'
     # Change the kernel personality so build scripts don't think
     # we're building for 64-bit
     MOCK_BIN="/usr/bin/i386 $MOCK_BIN"
+elif [ "$(uname -m)" = "aarch64" ] && echo ${arch} |grep -qE '^arm'; then
+    # Change the kernel personality so build scripts don't think
+    # we're building for 64-bit
+    MOCK_BIN="/usr/bin/setarch linux32 -B $MOCK_BIN"
 fi
 
 generate_config() {
@@ -74,11 +78,11 @@ if [ "${arch}" = 'aarch64' ]; then
 	    subshellpid=$!
     fi
 # remove me in future
-    sudo sh -c "printf '%s\n' '${arch}-mandriva-linux-gnueabi' > /etc/rpm/platform"
+    sudo sh -c "printf '%s\n' '${arch}-openmandriva-linux-gnueabi' > /etc/rpm/platform"
 fi
 
-if [ "${arch}" = 'armv7hl' ]; then
-    if [ "${cpu}" != 'arm' ]; then
+if echo "${arch}" |grep -qE '^arm'; then
+    if [ "${cpu}" != 'arm' -a "${cpu}" != "aarch64" ]; then
 # this string responsible for "cannot execute binary file"
 # change path to qemu
 # hack to copy qemu binary in non-existing path
@@ -88,7 +92,7 @@ if [ "${arch}" = 'armv7hl' ]; then
 	    subshellpid=$!
     fi
 # remove me in future
-    sudo sh -c "printf '%s\n' '${arch}-mandriva-linux-gnueabi' > /etc/rpm/platform"
+    sudo sh -c "printf '%s\n' '${arch}-openmandriva-linux-gnueabi' > /etc/rpm/platform"
 fi
 
 }
