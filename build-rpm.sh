@@ -180,8 +180,8 @@ arm_platform_detector(){
 			fi
 		fi
 
-		if [ "$platform_arch" = 'armv7hl' ]; then
-			if [ "$cpu" != 'arm' ] || [ $cpu != "aarch64" ] ; then
+		if echo "$platform_arch" |grep -qE '^arm'; then
+			if [ "$cpu" != 'arm' ] && [ $cpu != "aarch64" ] ; then
 				# hack to copy qemu binary in non-existing path
 				(while [ ! -e  /var/lib/mock/"${platform_name}"-"${platform_arch}"/root/usr/bin/ ]; do sleep 1; done
 				sudo cp /usr/bin/qemu-static-arm /var/lib/mock/"${platform_name}"-"${platform_arch}"/root/usr/bin/) &
@@ -193,6 +193,7 @@ arm_platform_detector(){
 }
 
 test_rpm() {
+	local PERSONALITY
 	# Rerun tests
 	PACKAGES=${packages}
 	chroot_path=$chroot_path
@@ -201,6 +202,15 @@ test_rpm() {
 	test_code=0
 	test_log="$OUTPUT_FOLDER"/tests.log
 	printf '%s\n' '--> Starting RPM tests.'
+	printf '%s\n' "---> Test for $PACKAGES for $platform_arch running on $cpu `hostname`"
+
+	if echo $platform_arch |grep -qE '^arm' && [ "$cpu" = "aarch64" ]; then
+		PERSONALITY="setarch linux32 -B"
+	elif echo $platform_arch |grep -qE '^i.86' && [ "$cpu" = "x86_64" ]; then
+		PERSONALITY="i386"
+	else
+		PERSONALITY=""
+	fi
 
 	if [ "$rerun_tests" = 'true' ]; then
 		[ "$packages" = '' ] && printf '%s\n' '--> No packages for testing. Something is wrong. Exiting. !!!' && exit 1
@@ -239,8 +249,10 @@ test_rpm() {
 	while $try_retest; do
 		sudo rm -rf /var/cache/dnf/*
 		sudo rm -rf /var/lib/mock/"${platform_name}"-"${platform_arch}"/root/var/cache/dnf/*
-		sudo dnf --installroot="${TEST_CHROOT_PATH}" --assumeyes --nogpgcheck --setopt=install_weak_deps=False --setopt=tsflags=test builddep "$OUTPUT_FOLDER"/*.src.rpm >> "${test_log}".tmp 2>&1
-		sudo dnf --installroot="${TEST_CHROOT_PATH}" --assumeyes --nogpgcheck --setopt=install_weak_deps=False --setopt=tsflags=test install $(ls "$OUTPUT_FOLDER"/*.rpm | grep -v .src.rpm) >> "${test_log}".tmp 2>&1
+		set -x
+		sudo $PERSONALITY dnf --installroot="${TEST_CHROOT_PATH}" --assumeyes --nogpgcheck --setopt=install_weak_deps=False --setopt=tsflags=test builddep "$OUTPUT_FOLDER"/*.src.rpm >> "${test_log}".tmp 2>&1
+		sudo $PERSONALITY dnf --installroot="${TEST_CHROOT_PATH}" --assumeyes --nogpgcheck --setopt=install_weak_deps=False --setopt=tsflags=test install $(ls "$OUTPUT_FOLDER"/*.rpm | grep -v .src.rpm) >> "${test_log}".tmp 2>&1
+		set +x
 		test_code=$?
 		try_retest=false
 		if [ "${test_code}" != 0 ] && [ "${retry}" -lt "${MAX_RETRIES}" ]; then
@@ -248,7 +260,7 @@ test_rpm() {
 				printf '%s\n' '--> Repository was changed in the middle, will rerun the tests' >> $test_log
 				sleep ${WAIT_TIME}
 				sudo rm -rf "${TEST_CHROOT_PATH}"/test_root/var/cache/dnf/* >> $test_log 2>&1
-				sudo dnf --installroot="${TEST_CHROOT_PATH}/test_root/" makecache >> $test_log 2>&1
+				sudo $PERSONALITY dnf --installroot="${TEST_CHROOT_PATH}/test_root/" makecache >> $test_log 2>&1
 				try_retest=true
 				(( retry=$retry+1 ))
 			fi

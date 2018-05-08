@@ -1,12 +1,12 @@
 FROM openmandriva/cooker
-#FROM openmandriva/cooker-aarch64
-#FROM openmandriva/cooker-armv7hl
+#FROM openmandriva/cooker:aarch64
+#FROM openmandriva/cooker:armv7hl
 # replace me with armv7hl, aarch64
 ENV RARCH x86_64
+#ENV RARCH aarch64
 
-COPY contrib.repo /etc/yum.repos.d/
-
-RUN dnf --nogpgcheck --refresh --assumeyes --nodocs --setopt=install_weak_deps=False upgrade \
+RUN sed -i -e 's,^enabled=0,enabled=1,' /etc/yum.repos.d/*contrib*.repo \
+ && dnf --nogpgcheck --refresh --assumeyes --nodocs --setopt=install_weak_deps=False upgrade \
  && rm -f /etc/localtime \
  && ln -s /usr/share/zoneinfo/UTC /etc/localtime \
  && dnf --nogpgcheck --assumeyes --setopt=install_weak_deps=False --nodocs install mock git coreutils curl sudo builder-c procps-ng gnutar \

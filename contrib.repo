@@ -1,6 +1,0 @@
-[cooker-x86_64-contrib]
-name=OpenMandriva Cooker - x86_64
-baseurl=http://abf-downloads.openmandriva.org/cooker/repository/x86_64/contrib/release/
-gpgcheck=0
-failovermethod=priority
-enabled=1
