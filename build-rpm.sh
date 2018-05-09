@@ -201,8 +201,8 @@ test_rpm() {
 
 	test_code=0
 	test_log="$OUTPUT_FOLDER"/tests.log
-	printf '%s\n' '--> Starting RPM tests.'
-	printf '%s\n' "---> Test for $PACKAGES for $platform_arch running on $cpu `hostname`"
+	printf '%s\n' '--> Starting RPM tests.' >> $test_log
+	printf '%s\n' "---> Test for $PACKAGES for $platform_arch running on $cpu $(hostname)" >> $test_log
 
 	if echo $platform_arch |grep -qE '^arm' && [ "$cpu" = "aarch64" ]; then
 		PERSONALITY="setarch linux32 -B"
@@ -213,7 +213,7 @@ test_rpm() {
 	fi
 
 	if [ "$rerun_tests" = 'true' ]; then
-		[ "$packages" = '' ] && printf '%s\n' '--> No packages for testing. Something is wrong. Exiting. !!!' && exit 1
+		[ "$packages" = '' ] && printf '%s\n' '--> No packages for testing. Something is wrong. Exiting. !!!' >> $test_log && exit 1
 
 		[ ! -e "$OUTPUT_FOLDER" ] && mkdir -p "$OUTPUT_FOLDER"
 		[ ! -e "$build_package" ] && mkdir -p "$build_package"
@@ -227,13 +227,13 @@ test_rpm() {
 			wget http://file-store.openmandriva.org/api/v1/file_stores/"$package" --content-disposition --no-check-certificate
 			rc=$?
 			if [ "${rc}" != '0' ]; then
-				printf '%s\n' "--> Error on extracting package with sha1 '$package'!!!"
+				printf '%s\n' "--> Error on extracting package with sha1 '$package'!!!" >> $test_log
 				exit "${rc}"
 			fi
 		done
 		cd -
 		if [ -f /var/cache/mock/"${platform_name}"-"${platform_arch}"/root_cache/cache.tar.xz ] && [ "$use_mock_cache" = 'True' ]; then
-			printf '%s\n' "--> Testing with cached chroot ..."
+			printf '%s\n' "--> Testing with cached chroot ..." >> $test_log
 			$MOCK_BIN --init --configdir $config_dir -v --no-cleanup-after --no-clean
 		else
 			$MOCK_BIN --init --configdir $config_dir -v --no-cleanup-after
