@@ -128,10 +128,6 @@ for arch in ${arches} ; do
 	exit 1
     fi
 
-    # Remove any stray lockfiles and make sure rpmdb is clean...
-    /bin/rm /var/lib/mock-urpm/"${platform_name}"-"${arch}"/root/var/lib/rpm/.RPMLOCK ||:
-    "${MOCK_BIN}" --chroot "/usr/bin/db52_recover"
-
     # xz options -7 is 7th level of compression, and -T0 is to use all available threads to speedup compress
     # need sudo to pack root:root dirs
     sudo XZ_OPT="-7 -T0" tar --format=gnutar --no-xattrs --no-acls --absolute-paths -Jcvf "${OUTPUT_FOLDER}"/"${platform_name}"-"${arch}".tar.xz "${chroot_path}"/"${platform_name}"-"${arch}"
