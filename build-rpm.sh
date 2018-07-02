@@ -71,8 +71,8 @@ sudo mount -a
 
 generate_config() {
 	# Change output format for mock
-	sed '17c/format: %(message)s' "${config_dir}"/logging.ini > ~/logging.ini
-	mv -f ~/logging.ini "${config_dir}"/logging.ini
+	sudo sed '17c/format: %(message)s' "${config_dir}"/logging.ini > ~/logging.ini
+	sudo mv -f ~/logging.ini "${config_dir}"/logging.ini
 # (tpg) check how old is cache file to prevent generating cache while building rpms
 	if [ -f "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz ]; then
 	    [ "$(( $(date +"%s") - $(stat -c "%Y" "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz)))" -lt "86400" ] && rebuild_cache='False'
@@ -90,7 +90,7 @@ generate_config() {
 		PLATFORM_NAME="$platform_name" \
 		PLATFORM_ARCH="$platform_arch" \
 		REBUILD_CACHE="$rebuild_cache" \
-		/bin/sh "/mdv/config-generator.sh"
+		sudo /bin/sh "/mdv/config-generator.sh"
 }
 
 container_data() {
