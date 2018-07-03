@@ -31,17 +31,24 @@ config_opts['target_arch'] = '$platform_arch'
 config_opts['legal_host_arches'] = ('i586', 'i686', 'x86_64', 'aarch64')
 EOF
 
-elif echo "${platform_arch}" |grep -qE '^armv8'; then
+elif echo "${platform_arch}" |grep -qE '^armv[78]'; then
 cat <<EOF> $default_cfg
 config_opts['target_arch'] = '$platform_arch'
 config_opts['legal_host_arches'] = ('i586', 'i686', 'x86_64', 'armv8hcnl', 'armv8hnl', 'armv8hl', 'armv7hnl', 'armv7hl', 'armv7l', 'aarch64')
 EOF
 
-elif echo "${platform_arch}" |grep -qE '^armv7'; then
+elif [ "${platform_arch}" = 'riscv64' ]; then
 cat <<EOF> $default_cfg
 config_opts['target_arch'] = '$platform_arch'
-config_opts['legal_host_arches'] = ('i586', 'i686', 'x86_64', 'armv7hnl', 'armv7hl', 'armv7l', 'aarch64')
+config_opts['legal_host_arches'] = ('riscv64')
 EOF
+
+elif [ "${platform_arch}" = 'znver1' ]; then
+cat <<EOF> $default_cfg
+config_opts['target_arch'] = '$platform_arch'
+config_opts['legal_host_arches'] = ('znver1', 'x86_64')
+EOF
+
 else
 
 cat <<EOF> $default_cfg
