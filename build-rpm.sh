@@ -204,7 +204,7 @@ test_rpm() {
 	test_code=0
 	test_log="$OUTPUT_FOLDER"/tests.log
 	printf '%s\n' '--> Starting RPM tests.' >> $test_log
-	printf '%s\n' "---> Test for $PACKAGES for $platform_arch running on $cpu $(hostname)" >> $test_log
+	printf '%s\n' "---> Test for $packages for $platform_arch running on $cpu $(hostname)" >> $test_log
 
 	if echo $platform_arch |grep -qE '^arm' && [ "$cpu" = "aarch64" ]; then
 		PERSONALITY="setarch linux32 -B"
