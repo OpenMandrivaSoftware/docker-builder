@@ -75,22 +75,22 @@ generate_config() {
 	sudo mv -f ~/logging.ini "${config_dir}"/logging.ini
 # (tpg) check how old is cache file to prevent generating cache while building rpms
 	if [ -f "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz ]; then
-	    [ "$(( $(date +"%s") - $(stat -c "%Y" "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz)))" -lt "86400" ] && rebuild_cache='False'
-	    printf '%s\n' "Cache is not going to be rebuilded as it is not older than 24 hours."
+		[ "$(( $(date +"%s") - $(stat -c "%Y" "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz)))" -lt "86400" ] && rebuild_cache='False'
+		printf '%s\n' "Cache is not going to be rebuilded as it is not older than 24 hours."
 	elif [ "$use_mock_cache" = 'True' ]; then
-	    rebuild_cache='True'
-	    printf '%s\n' "Cache is older than 24 hours. Trying to rebuild it."
+		rebuild_cache='True'
+		printf '%s\n' "Cache is older than 24 hours. Trying to rebuild it."
 	else
-	    rebuild_cache='False'
+		rebuild_cache='False'
 	fi
-		EXTRA_CFG_OPTIONS="$extra_cfg_options" \
-		EXTRA_CFG_URPM_OPTIONS="$extra_cfg_urpm_options" \
-		UNAME="$uname" \
-		EMAIL="$email" \
-		PLATFORM_NAME="$platform_name" \
-		PLATFORM_ARCH="$platform_arch" \
-		REBUILD_CACHE="$rebuild_cache" \
-		sudo -E /bin/sh "/mdv/config-generator.sh"
+	EXTRA_CFG_OPTIONS="$extra_cfg_options" \
+	EXTRA_CFG_URPM_OPTIONS="$extra_cfg_urpm_options" \
+	UNAME="$uname" \
+	EMAIL="$email" \
+	PLATFORM_NAME="$platform_name" \
+	PLATFORM_ARCH="$platform_arch" \
+	REBUILD_CACHE="$rebuild_cache" \
+	sudo -E /bin/sh "/mdv/config-generator.sh"
 }
 
 container_data() {
@@ -392,8 +392,8 @@ build_rpm() {
 	done
 
 	if [ -f /var/cache/mock/"${platform_name}"-"${platform_arch}"/root_cache/cache.tar.xz ] && [ "$use_mock_cache" = 'True' ]; then
-	    printf '%s\n' '--> Saving cached chroot for next builds.'
-	    cp -f /var/cache/mock/"${platform_name}"-"${platform_arch}"/root_cache/cache.tar.xz "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz
+		printf '%s\n' '--> Saving cached chroot for next builds.'
+		cp -f /var/cache/mock/"${platform_name}"-"${platform_arch}"/root_cache/cache.tar.xz "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz
 	fi
 
 	printf '%s\n' '--> src.rpm build has been done successfully.'
@@ -447,8 +447,8 @@ build_rpm() {
 
 	# check if RPM files are not vanished
 	if [ -z "$(ls -A "${OUTPUT_FOLDER}"/*.rpm | grep -v .src.rpm)" ]; then
-	    printf '%s\n' "RPM files are missing. Something went terribly wrong. Exiting!"
-	    exit 1
+		printf '%s\n' "RPM files are missing. Something went terribly wrong. Exiting!"
+		exit 1
 	fi
 }
 
