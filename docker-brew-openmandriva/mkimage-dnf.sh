@@ -63,7 +63,7 @@ fi
 
 if [ -z "${mirror}" ]; then
         # If mirror is *not* provided, use mirrorlist
-        reposetup="--disablerepo=* --enablerepo=openmandriva-x86_64 --enablerepo=updates-x86_64"
+        reposetup="--disablerepo=* --enablerepo=openmandriva-${arch} --enablerepo=updates-${arch}"
 fi
 
 # Must be after the non-empty check or otherwise this will fail
@@ -78,6 +78,7 @@ install_chroot(){
     --refresh \
     ${reposetup} \
     --installroot="${target_dir}" \
+    --forcearch="${arch}" \
     --releasever="${installversion}" \
     --setopt=install_weak_deps=False \
     --nodocs --assumeyes \
