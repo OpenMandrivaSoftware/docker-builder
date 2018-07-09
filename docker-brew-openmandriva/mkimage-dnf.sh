@@ -68,16 +68,16 @@ if [ -z "${mirror}" ]; then
 	mkdir -p ${target_dir}/etc/yum.repos.d
 	cat >${target_dir}/etc/yum.repos.d/openmandriva-${arch}.repo <<EOF
 [openmandriva-$arch]
-name=OpenMandriva $releasever - $arch
-baseurl=http://abf-downloads.openmandriva.org/$releasever/repository/$arch/main/release/
+name=OpenMandriva $installversion - $arch
+baseurl=http://abf-downloads.openmandriva.org/$installversion/repository/$arch/main/release/
 gpgcheck=1
 gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-OpenMandriva
 failovermethod=priority
 enabled=1
 
 [updates-$arch]
-name=OpenMandriva $releasever - $arch - Updates
-baseurl=http://abf-downloads.openmandriva.org/$releasever/repository/$arch/main/updates/
+name=OpenMandriva $installversion - $arch - Updates
+baseurl=http://abf-downloads.openmandriva.org/$installversion/repository/$arch/main/updates/
 gpgcheck=1
 gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-OpenMandriva
 failovermethod=priority
