@@ -75,6 +75,7 @@ fi
 # run me here
 install_chroot(){
     dnf \
+    --refresh \
     ${reposetup} \
     --installroot="${target_dir}" \
     --releasever="${installversion}" \
