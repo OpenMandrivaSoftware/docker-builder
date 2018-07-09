@@ -83,6 +83,8 @@ gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-OpenMandriva
 failovermethod=priority
 enabled=1
 EOF
+	echo "Repository config:" >/dev/stderr
+	cat ${target_dir}/etc/yum.repos.d/openmandriva-${arch}.repo >/dev/stderr
 fi
 
 # Must be after the non-empty check or otherwise this will fail
