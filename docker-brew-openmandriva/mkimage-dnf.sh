@@ -64,13 +64,31 @@ fi
 if [ -z "${mirror}" ]; then
         # If mirror is *not* provided, use mirrorlist
         reposetup="--disablerepo=* --enablerepo=openmandriva-${arch} --enablerepo=updates-${arch}"
+
+	mkdir -p ${target_dir}/etc/yum.repos.d
+	cat >${target_dir}/etc/yum.repos.d/openmandriva-${arch}.repo <<EOF
+[openmandriva-$arch]
+name=OpenMandriva $releasever - $arch
+baseurl=http://abf-downloads.openmandriva.org/$releasever/repository/$arch/main/release/
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-OpenMandriva
+failovermethod=priority
+enabled=1
+
+[updates-$arch]
+name=OpenMandriva $releasever - $arch - Updates
+baseurl=http://abf-downloads.openmandriva.org/$releasever/repository/$arch/main/updates/
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-OpenMandriva
+failovermethod=priority
+enabled=1
+EOF
 fi
 
 # Must be after the non-empty check or otherwise this will fail
 if [ -z "${pkgmgr}" ]; then
         pkgmgr="dnf"
 fi
-
 
 # run me here
 install_chroot(){
