@@ -75,8 +75,8 @@ generate_config() {
 	sudo mv -f ~/logging.ini "${config_dir}"/logging.ini
 # (tpg) check how old is cache file to prevent generating cache while building rpms
 	if [ -f "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz ]; then
-		[ "$(( $(date +"%s") - $(stat -c "%Y" "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz)))" -lt "86400" ] && rebuild_cache='False'
-		printf '%s\n' "Cache is not going to be rebuilded as it is not older than 24 hours."
+		[ "$(( $(date '+%s') - $(stat -c '%Y' \"${HOME}/${platform_name}-${platform_arch}\".cache.tar.xz)))" -lt 86400 ] && rebuild_cache='False'
+		printf '%s\n' "Cache is not going to be rebuilt as it is not older than 24 hours."
 	elif [ "$use_mock_cache" = 'True' ]; then
 		rebuild_cache='True'
 		printf '%s\n' "Cache is older than 24 hours. Trying to rebuild it."
@@ -139,11 +139,10 @@ container_data() {
 }
 
 setup_cache() {
-	if [ -f "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz ] && [ "$(( $(date +"%s") - $(stat -c "%Y" "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz)))" -ge "86400" ]; then
+	if [ -f "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz ] && [ "$(( $(date '+%s') - $(stat -c '%Y' \"${HOME}/${platform_name}-${platform_arch}\".cache.tar.xz)))" -ge 86400 ]; then
 		sudo rm -rf "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz
 		printf '%s\n' "Cache is older than 24 hours. Removing cache ${platform_name}-${platform_arch}.cache.tar.xz"
-	fi
-	if [ -f "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz ] && [ "${use_mock_cache}" = 'True' ]; then
+	elif [ -f "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz ] && [ "${use_mock_cache}" = 'True' ]; then
 		printf '%s\n' "Found cache ${platform_name}-${platform_arch}.cache.tar.xz"
 		[ ! -d /var/cache/mock/"${platform_name}"-"${platform_arch}"/root_cache ] && sudo mkdir -p /var/cache/mock/"${platform_name}"-"${platform_arch}"/root_cache
 		sudo cp -f "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz /var/cache/mock/"${platform_name}"-"${platform_arch}"/root_cache/cache.tar.xz
@@ -159,7 +158,7 @@ arm_platform_detector(){
 		# probe cpu type
 		cpu="$(uname -m)"
 		case "$cpu" in
-		i386|i486|i586|i686|i86pc|BePC|x86_64)
+		i386|i486|i586|i686|i86pc|znver1_32|BePC|x86_64|znver1)
 			cpu="i386"
 			;;
 		armv[4-9]*)
@@ -178,9 +177,7 @@ arm_platform_detector(){
 				sudo cp /usr/bin/qemu-static-aarch64 /var/lib/mock/"${platform_name}"-"${platform_arch}"/root/usr/bin/) &
 				subshellpid=$!
 			fi
-		fi
-
-		if echo "$platform_arch" |grep -qE '^arm'; then
+		elif echo "$platform_arch" |grep -qE '^arm'; then
 			if [ "$cpu" != 'arm' ] && [ $cpu != "aarch64" ] ; then
 				# hack to copy qemu binary in non-existing path
 				(while [ ! -e  /var/lib/mock/"${platform_name}"-"${platform_arch}"/root/usr/bin/ ]; do sleep 1; done
@@ -209,7 +206,7 @@ test_rpm() {
 	if echo $platform_arch |grep -qE '^arm' && [ "$cpu" = "aarch64" ]; then
 		PERSONALITY="setarch linux32 -B"
 		EXTRA_ARGS="--forcearch=armv7hnl"
-	elif echo $platform_arch |grep -qE '^i.86' && [ "$cpu" = "x86_64" ]; then
+	elif echo $platform_arch |grep -qE '^(i.86|znver1_32)' && [ "$cpu" = "x86_64" ]; then
 		PERSONALITY="i386"
 		EXTRA_ARGS=""
 	else
@@ -519,11 +516,11 @@ validate_arch() {
 	aarch64)
 		validate_build "armx %armx %{armx} aarch64"
 		;;
-	i[3-9]86)
-		validate_build "ix86 %ix86 %{ix86} i686 %i686 %{i686} i586 %i586 %{i586} i386 %i386 %{i386}"
+	i[3-9]86|znver1_32)
+		validate_build "ix86 %ix86 %{ix86} i686 %i686 %{i686} i586 %i586 %{i586} i386 %i386 %{i386} znver1_32"
 		;;
-	x86_64)
-		validate_build "x86_64 %x86_64 %{x86_64}"
+	x86_64|znver1)
+		validate_build "x86_64 %x86_64 %{x86_64} znver1"
 		;;
 	*)
 		printf '%s\n' "--> ${BUILD_TYPE} validated."
