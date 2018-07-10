@@ -75,7 +75,7 @@ generate_config() {
 	sudo mv -f ~/logging.ini "${config_dir}"/logging.ini
 # (tpg) check how old is cache file to prevent generating cache while building rpms
 	if [ -f "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz ]; then
-		[ "$(( $(date '+%s') - $(stat -c '%Y' \"${HOME}/${platform_name}-${platform_arch}\".cache.tar.xz)))" -lt 86400 ] && rebuild_cache='False'
+		[ $(( $(date '+%s') - $(stat -c '%Y' "${HOME}/${platform_name}-${platform_arch}".cache.tar.xz))) -lt 86400 ] && rebuild_cache='False'
 		printf '%s\n' "Cache is not going to be rebuilt as it is not older than 24 hours."
 	elif [ "$use_mock_cache" = 'True' ]; then
 		rebuild_cache='True'
@@ -139,7 +139,7 @@ container_data() {
 }
 
 setup_cache() {
-	if [ -f "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz ] && [ "$(( $(date '+%s') - $(stat -c '%Y' \"${HOME}/${platform_name}-${platform_arch}\".cache.tar.xz)))" -ge 86400 ]; then
+	if [ -f "${HOME}/${platform_name}-${platform_arch}".cache.tar.xz ] && [ $(( $(date '+%s') - $(stat -c '%Y' "${HOME}/${platform_name}-${platform_arch}".cache.tar.xz))) -ge 86400 ]; then
 		sudo rm -rf "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz
 		printf '%s\n' "Cache is older than 24 hours. Removing cache ${platform_name}-${platform_arch}.cache.tar.xz"
 	elif [ -f "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz ] && [ "${use_mock_cache}" = 'True' ]; then
