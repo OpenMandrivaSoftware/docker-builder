@@ -16,11 +16,12 @@ RUN sed -i -e 's,^enabled=0,enabled=1,' /etc/yum.repos.d/*contrib*.repo \
  && adduser omv \
  && usermod -a -G mock omv \
  && chown -R omv:mock /etc/mock \
+ && dnf --assumeyes autoremove \
+ && dnf clean all \
  && rm -rf /var/cache/dnf/* \
  && rm -rf /var/lib/dnf/yumdb/* \
- && rm -rf /usr/share/man/ /usr/share/cracklib /usr/share/doc \
- && dnf --assumeyes autoremove
-
+ && rm -rf /var/lib/dnf/history/* \
+ && rm -rf /usr/share/man/ /usr/share/cracklib /usr/share/doc /tmp/*
 
 RUN if [ $RARCH = "x86_64" ]; then dnf --nogpgcheck --assumeyes install qemu-static-aarch64 qemu-static-arm; fi
 
