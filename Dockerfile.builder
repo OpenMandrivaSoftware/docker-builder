@@ -23,7 +23,7 @@ RUN sed -i -e 's,^enabled=0,enabled=1,' /etc/yum.repos.d/*contrib*.repo \
  && rm -rf /var/lib/dnf/history/* \
  && rm -rf /usr/share/man/ /usr/share/cracklib /usr/share/doc /tmp/*
 
-RUN if [ $RARCH = "x86_64" ]; then dnf --nogpgcheck --assumeyes install qemu-static-aarch64 qemu-static-arm; fi
+RUN if [ $RARCH = "x86_64" ]; then dnf --nogpgcheck --assumeyes install qemu-static-aarch64 qemu-static-arm qemu-static-riscv64; fi
 
 RUN rm -rf /var/lib/dnf/yumdb/* \
  && rm -rf /var/cache/dnf/* \
