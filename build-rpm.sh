@@ -251,6 +251,8 @@ test_rpm() {
 	while $try_retest; do
 		sudo rm -rf /var/cache/dnf/*
 		sudo rm -rf /var/lib/mock/"${platform_name}"-"${platform_arch}"/root/var/cache/dnf/*
+		sudo dnf clean all
+		sudo dnf --installroot=${TEST_CHROOT_PATH} clean all
 		echo "---> running $PERSONALITY dnf --installroot=${TEST_CHROOT_PATH} --assumeyes --nogpgcheck --setopt=install_weak_deps=False --setopt=tsflags=test builddep $OUTPUT_FOLDER/*.src.rpm" >> "${test_log}".tmp
 		sudo $PERSONALITY chroot ${TEST_CHROOT_PATH} uname -a >>"${test_log}".tmp
 		sudo $PERSONALITY dnf --installroot="${TEST_CHROOT_PATH}" --assumeyes ${EXTRA_ARGS} --nogpgcheck --setopt=install_weak_deps=False --setopt=tsflags=test builddep "$OUTPUT_FOLDER"/*.src.rpm >> "${test_log}".tmp 2>&1
