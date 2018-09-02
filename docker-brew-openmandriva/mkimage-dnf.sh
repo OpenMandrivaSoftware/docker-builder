@@ -98,6 +98,7 @@ install_chroot(){
     --refresh \
     ${reposetup} \
     --installroot="${target_dir}" \
+    --nogpgcheck \
     --forcearch="${arch}" \
     --releasever="${installversion}" \
     --setopt=install_weak_deps=False \
@@ -208,7 +209,18 @@ fi
 
 cd "${target_dir}"
 rm -fv usr/bin/qemu-*
-tar --numeric-owner -caf "${tarFile}" -c .
+if [ "${arch}" = 'x86_64' ]; then
+	tar --numeric-owner -cf - . | docker import - openmandriva/$installversion:latest
+else
+	tar --numeric-owner -cf - . | docker import - openmandriva/$installversion:$arch
+fi
+
+if [ "${arch}" = 'x86_64' ]; then
+	docker run -i -t --rm openmandriva/$installversion:latest /bin/bash -c 'echo success'
+else
+	docker run -i -t --rm openmandriva/$installversion:$arch /bin/bash -c 'echo success'
+fi
+
 cd ..
 rm -rf "${target_dir}"
 rm -fv /etc/rpm/platform
