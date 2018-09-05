@@ -181,6 +181,18 @@ if [ ! -z "${systemd}" ]; then
 	rm -f "${target}"/lib/systemd/system/anaconda.target.wants/*;
 fi
 
+# effectively: febootstrap-minimize --keep-zoneinfo --keep-rpmdb --keep-services "$target".
+#  locales
+rm -rf "$target"/usr/{{lib,share}/locale,{lib,lib64}/gconv,bin/localedef,sbin/build-locale-archive}
+#  docs and man pages
+rm -rf "$target"/usr/share/{man,doc,info,gnome/help}
+#  cracklib
+rm -rf "$target"/usr/share/cracklib
+#  i18n
+rm -rf "$target"/usr/share/i18n
+#  yum cache
+rm -rf "$target"/var/cache/dnf/*
+
 if [ -d "${target}"/etc/sysconfig ]; then
 # allow networking init scripts inside the container to work without extra steps
 cat > "$target"/etc/sysconfig/network <<EOF
