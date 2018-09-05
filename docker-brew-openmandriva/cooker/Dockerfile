@@ -3,5 +3,5 @@
 #
 
 FROM scratch
-MAINTAINER "Alexander Stefanov-Khryukin" <alexander@mezon.ru>
+MAINTAINER "Alexander Stefanov" <alexander@mezon.ru>
 ADD rootfs-cooker.tar.xz /

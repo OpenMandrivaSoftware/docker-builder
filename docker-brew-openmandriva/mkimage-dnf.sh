@@ -4,6 +4,7 @@ set -x
 set -e
 
 mkimg="$(basename "$0")"
+common_pwd="$PWD"
 
 usage() {
     echo >&2 "usage: $mkimg --rootfs=rootfs_path --version=openmandriva_version [--mirror=url]"
