@@ -256,7 +256,8 @@ else
 fi
 
 if [ ! -z "${builder}" ]; then
-	pushd $common_pwd/../
+	cd $common_pwd
+	cd ../
 	if [ "${arch}" = 'x86_64' ]; then
 		docker build --tag=openmandriva/builder --file Dockerfile.builder .
 	else
