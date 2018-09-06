@@ -8,14 +8,13 @@ common_pwd="$PWD"
 
 usage() {
     echo >&2 "usage: $mkimg --rootfs=rootfs_path --version=openmandriva_version [--mirror=url]"
-    echo >&2 "       $mkimg --rootfs=/tmp/rootfs --version=3.0 --arch=x86_64 --with-updates"
     echo >&2 "       $mkimg --rootfs=/tmp/rootfs --version=openmandriva2014.0 --arch=x86_64"
     echo >&2 "       $mkimg --rootfs=. --version=cooker --mirror=http://abf-downloads.openmandriva.org/cooker/repository/x86_64/main/release/"
     echo >&2 "       $mkimg --rootfs=. --version=cooker"
     exit 1
 }
 
-optTemp=$(getopt --options '+d,v:,m:,a:,s,u,U,p,h,+x' --longoptions 'rootfs:,version:,mirror:,arch:,with-systemd,with-updates,without-user,with-passwd,help,extra-package:' --name mkimage-dnf -- "$@")
+optTemp=$(getopt --options '+d,v:,m:,a:,s,b,U,p,h,+x' --longoptions 'rootfs:,version:,mirror:,arch:,with-systemd,with-builder,without-user,with-passwd,help,extra-package:' --name mkimage-dnf -- "$@")
 eval set -- "$optTemp"
 unset optTemp
 
@@ -28,7 +27,7 @@ while true; do
 	-m|--mirror) mirror="$2" ; shift 2 ;;
 	-a|--arch) arch="$2" ; shift 2 ;;
 	-s|--with-systemd) systemd=systemd ; shift ;;
-	-u|--with-updates) updates=true ; shift ;;
+	-b|--with-builder) builder=true ; shift ;;
 	-p|--with-passwd) passwd=true ; shift ;;
 	-U|--without-user) without_user=true ; shift ;;
 	-h|--help) usage ;;
@@ -254,6 +253,15 @@ if [ "${arch}" = 'x86_64' ]; then
 	docker run -i -t --rm openmandriva/$installversion:latest /bin/bash -c 'echo success'
 else
 	docker run -i -t --rm openmandriva/$installversion:$arch /bin/bash -c 'echo success'
+fi
+
+if [ ! -z "${builder}" ]; then
+	pushd $common_pwd/../
+	if [ "${arch}" = 'x86_64' ]; then
+		docker build --tag=openmandriva/builder --file Dockerfile.builder .
+	else
+		docker build --tag=openmandriva/builder:$arch --file Dockerfile.builder .
+	fi
 fi
 
 cd ..
