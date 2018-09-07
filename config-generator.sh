@@ -59,7 +59,7 @@ fi
 
 cat <<EOF>> $default_cfg
 config_opts['root'] = '$platform_name-$platform_arch'
-config_opts['chroot_setup_cmd'] = ('install', 'basesystem-minimal', 'locales', 'locales-en', 'distro-release-OpenMandriva', 'gnupg', 'shadow', 'rpm-build', 'wget', 'task-devel', 'clang', 'openmandriva-repos-pkgprefs', 'rpmlint-distro-policy', 'dwz')
+config_opts['chroot_setup_cmd'] = ('install', 'basesystem-minimal', 'locales', 'locales-en', 'distro-release-OpenMandriva', 'gnupg', 'shadow', 'rpm-build', 'glibc-devel' ,'wget', 'task-devel', 'clang', 'openmandriva-repos-pkgprefs', 'rpmlint-distro-policy', 'dwz')
 config_opts['package_manager'] = 'dnf'
 config_opts['dnf_common_opts'] = ['--refresh', '--disableplugin=local', '--setopt=deltarpm=False', '--forcearch=$platform_arch']
 config_opts['dnf_builddep_opts'] = ['--refresh', '--forcearch=$platform_arch']
