@@ -228,9 +228,9 @@ EOF
 fi
 
 if [ ! -z "${systemd}" ]; then
-    tarFile="${rootfsdir}"/rootfs-"${arch}"-systemd.tar.xz
+    tarFile="${rootfsdir}"/rootfs-"${installversion/}"-systemd.tar.xz
 else
-    tarFile="${rootfsdir}"/rootfs-"${arch}".tar.xz
+    tarFile="${rootfsdir}"/rootfs-"${installversion/}".tar.xz
 fi
 
 cd "${target}"
