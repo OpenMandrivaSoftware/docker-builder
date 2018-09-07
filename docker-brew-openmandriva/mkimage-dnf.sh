@@ -261,7 +261,7 @@ if [ ! -z "${builder}" ]; then
 	if [ "${arch}" = 'x86_64' ]; then
 		docker build --tag=openmandriva/builder  --file Dockerfile.builder .
 	else
-		sed -i 's!__replace__!${arch}!g' Dockerfile.builder
+		sed -i "s/replace/${arch}/g" Dockerfile.builder
 		docker build --tag=openmandriva/builder:$arch --file Dockerfile.builder .
 		git checkout Dockerfile.builder
 	fi
