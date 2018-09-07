@@ -1,4 +1,4 @@
-FROM openmandriva/cooker:__replace__
+FROM openmandriva/cooker:replace
 
 RUN sed -i -e 's,^enabled=0,enabled=1,' /etc/yum.repos.d/*contrib*.repo \
  && dnf --nogpgcheck --refresh --assumeyes --nodocs --setopt=install_weak_deps=False upgrade \
