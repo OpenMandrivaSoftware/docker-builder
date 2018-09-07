@@ -228,9 +228,9 @@ EOF
 fi
 
 if [ ! -z "${systemd}" ]; then
-    tarFile="${rootfsdir}"/rootfs-"${arch}"-systemd.tar.xz
+    tarFile="${rootfsdir}"/rootfs-"${installversion}"-systemd.tar.xz
 else
-    tarFile="${rootfsdir}"/rootfs-"${arch}".tar.xz
+    tarFile="${rootfsdir}"/rootfs-"${installversion}".tar.xz
 fi
 
 cd "${target}"
@@ -259,9 +259,14 @@ if [ ! -z "${builder}" ]; then
 	cd $common_pwd
 	cd ../
 	if [ "${arch}" = 'x86_64' ]; then
-		docker build --tag=openmandriva/builder --file Dockerfile.builder .
+		sed -i "s/replace/latest/g" Dockerfile.builder
+		sed -i "s/rarch/x86_64/g" Dockerfile.builder
+		docker build --tag=openmandriva/builder  --file Dockerfile.builder .
+		git checkout Dockerfile.builder
 	else
+		sed -i "s/replace/${arch}/g" Dockerfile.builder
 		docker build --tag=openmandriva/builder:$arch --file Dockerfile.builder .
+		git checkout Dockerfile.builder
 	fi
 fi
 
