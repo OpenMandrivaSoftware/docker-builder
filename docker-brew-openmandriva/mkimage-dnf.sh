@@ -238,14 +238,14 @@ rm -fv usr/bin/qemu-*
 
 if [ "${arch}" = 'x86_64' ]; then
         tar --numeric-owner -caf "${tarFile}" -c .
-        mv -f "${tarFile}" $common_pwd/$installversion/
-        pushd $common_pwd/$installversion/
+        mv -f "${tarFile}" $common_pwd/docker-brew-openmandriva/$installversion/
+        pushd $common_pwd/docker-brew-openmandriva/$installversion/
         docker build --tag=openmandriva/$installversion --file Dockerfile .
 
 else
         tar --numeric-owner -caf "${tarFile}" -c .
-        mv -f "${tarFile}" $common_pwd/$installversion/
-        pushd $common_pwd/$installversion/
+        mv -f "${tarFile}" $common_pwd/docker-brew-openmandriva/$installversion/
+        pushd $common_pwd/docker-brew-openmandriva/$installversion/
         docker build --tag=openmandriva/$installversion:$arch --file Dockerfile .
 fi
 
