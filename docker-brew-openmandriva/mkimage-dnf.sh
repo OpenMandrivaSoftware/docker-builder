@@ -257,7 +257,6 @@ fi
 
 if [ ! -z "${builder}" ]; then
 	cd $common_pwd
-	cd ../
 	if [ "${arch}" = 'x86_64' ]; then
 		sed -i "s/replace/latest/g" Dockerfile.builder
 		sed -i "s/rarch/x86_64/g" Dockerfile.builder
