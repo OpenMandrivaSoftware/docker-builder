@@ -436,7 +436,8 @@ build_rpm() {
 	rpm --root=/var/lib/mock/"${platform_name}"-"${platform_arch}"/root/ -qa >> "${OUTPUT_FOLDER}"/rpm-qa.log
 
 	# (tpg) Save build chroot
-	if [ "${rc}" != '0' ] && [ "${save_buildroot}" = 'true' ]; then
+	if [ "${rc}" = '0' ] && [ "${save_buildroot}" = 'true' ]; then
+		printf '%s\n' '--> Saving buildroot...'
 		sudo tar --exclude=root/dev -zcvf "${OUTPUT_FOLDER}"/rpm-buildroot.tar.gz /var/lib/mock/"${platform_name}"-"${platform_arch}"/root/
 	fi
 
