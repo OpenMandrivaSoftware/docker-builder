@@ -424,6 +424,11 @@ build_rpm() {
 		grep -m1 -i -oP "$GREP_PATTERN" "${OUTPUT_FOLDER}"/root.log >> ~/build_fail_reason.log
 		rm -rf "${OUTPUT_FOLDER}"/*.rpm
 		[ -n "$subshellpid" ] && kill "$subshellpid"
+		# (tpg) Save build chroot
+		if [ "${save_buildroot}" = 'true' ]; then
+		    printf '%s\n' '--> Saving buildroot...'
+		    sudo tar --exclude=root/dev -zcvf "${OUTPUT_FOLDER}"/rpm-buildroot.tar.gz /var/lib/mock/"${platform_name}"-"${platform_arch}"/root/
+		fi
 		cleanup
 		exit 1
 	fi
