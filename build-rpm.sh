@@ -570,7 +570,7 @@ clone_repo() {
 	# count number of specs (should be 1)
 	find_spec
 	# check for excludearch or exclusivearch
-	validate_arch
+	# validate_arch
 	# download sources from .abf.yml
 	/bin/sh /mdv/download_sources.sh
 	cd -
