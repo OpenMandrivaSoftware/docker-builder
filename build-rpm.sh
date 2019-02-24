@@ -14,7 +14,7 @@ cleanup() {
 	#rm -fv ~/build_fail_reason.log
 
 	# (tpg) remove package
-	sudo rm -rf "${HOME}"/"${PACKAGE}"
+	sudo rm -rf "${HOME}"/"${PACKAGE:?}"
 	# (tpg) remove old files
 	# in many cases these are leftovers when build fails
 	# would be nice to remove them to free disk space
@@ -140,7 +140,7 @@ container_data() {
 
 setup_cache() {
 	if [ -f "${HOME}/${platform_name}-${platform_arch}".cache.tar.xz ] && [ $(( $(date '+%s') - $(stat -c '%Y' "${HOME}/${platform_name}-${platform_arch}".cache.tar.xz))) -ge 86400 ]; then
-		sudo rm -rf "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz
+		sudo rm -rf "${HOME}"/"${platform_name:?}"-"${platform_arch:?}".cache.tar.xz
 		printf '%s\n' "Cache is older than 24 hours. Removing cache ${platform_name}-${platform_arch}.cache.tar.xz"
 	elif [ -f "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz ] && [ "${use_mock_cache}" = 'True' ]; then
 		printf '%s\n' "Found cache ${platform_name}-${platform_arch}.cache.tar.xz"
@@ -148,7 +148,7 @@ setup_cache() {
 		sudo cp -f "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz /var/cache/mock/"${platform_name}"-"${platform_arch}"/root_cache/cache.tar.xz
 	elif [ -f "${HOME}"/"${platform_name}"-"${platform_arch}".cache.tar.xz ] && [ "${use_mock_cache}" != 'True' ]; then
 		printf '%s\n' "Cached chroot is disabled."
-		[ -f /var/cache/mock/"${platform_name}"-"${platform_arch}"/root_cache/cache.tar.xz ] && sudo rm -rf /var/cache/mock/"${platform_name}"-"${platform_arch}"/root_cache
+		[ -f /var/cache/mock/"${platform_name}"-"${platform_arch}"/root_cache/cache.tar.xz ] && sudo rm -rf /var/cache/mock/"${platform_name:?}"-"${platform_arch:?}"/root_cache
 	fi
 }
 
@@ -250,7 +250,7 @@ test_rpm() {
 	retry=0
 	while $try_retest; do
 		sudo rm -rf /var/cache/dnf/*
-		sudo rm -rf /var/lib/mock/"${platform_name}"-"${platform_arch}"/root/var/cache/dnf/*
+		sudo rm -rf /var/lib/mock/"${platform_name:?}"-"${platform_arch:?}"/root/var/cache/dnf/*
 		sudo dnf clean all
 		sudo dnf --installroot=${TEST_CHROOT_PATH} clean all
 		echo "---> running $PERSONALITY dnf --installroot=${TEST_CHROOT_PATH} --assumeyes --nogpgcheck --setopt=install_weak_deps=False --setopt=tsflags=test builddep $OUTPUT_FOLDER/*.src.rpm" >> "${test_log}".tmp
@@ -342,9 +342,9 @@ build_rpm() {
 	try_rebuild=true
 	retry=0
 	while $try_rebuild; do
-		rm -rf "$OUTPUT_FOLDER"
+		rm -rf "${OUTPUT_FOLDER:?}"
 		sudo rm -rf /var/cache/dnf/*
-		sudo rm -rf /var/lib/mock/"${platform_name}"-"${platform_arch}"/root/var/cache/dnf/*
+		sudo rm -rf /var/lib/mock/"${platform_name:?}"-"${platform_arch:?}"/root/var/cache/dnf/*
 		if [ -f /var/cache/mock/"${platform_name}"-"${platform_arch}"/root_cache/cache.tar.xz ] && [ "$use_mock_cache" = 'True' ]; then
 			printf '%s\n' "--> Building with cached chroot ..."
 			$MOCK_BIN -v --update --configdir=$config_dir --buildsrpm --spec=$build_package/${PACKAGE}.spec --sources=$build_package --no-cleanup-after --no-clean $extra_build_src_rpm_options --resultdir="${OUTPUT_FOLDER}"
@@ -401,7 +401,7 @@ build_rpm() {
 	retry=0
 	while $try_rebuild; do
 		sudo rm -rf /var/cache/dnf/*
-		sudo rm -rf /var/lib/mock/"${platform_name}"-"${platform_arch}"/root/var/cache/dnf/*
+		sudo rm -rf /var/lib/mock/"${platform_name:?}"-"${platform_arch:?}"/root/var/cache/dnf/*
 		$MOCK_BIN -v --update --configdir=$config_dir --rebuild "${OUTPUT_FOLDER}"/*.src.rpm --no-cleanup-after --no-clean $extra_build_rpm_options --resultdir="${OUTPUT_FOLDER}"
 		rc=${PIPESTATUS[0]}
 		try_rebuild=false
@@ -409,7 +409,7 @@ build_rpm() {
 			if grep -q "$RETRY_GREP_STR" "${OUTPUT_FOLDER}"/root.log; then
 				try_rebuild=true
 				(( retry=$retry+1 ))
-				sudo rm -rf /var/lib/mock/"${platform_name}"-"${platform_arch}"/root/var/cache/dnf/*
+				sudo rm -rf /var/lib/mock/"${platform_name:?}"-"${platform_arch:?}"/root/var/cache/dnf/*
 				printf '%s\n' "--> Repository was changed in the middle, will rerun the build. Next try (${retry} from ${MAX_RETRIES})..."
 				printf '%s\n' "--> Delay ${WAIT_TIME} sec..."
 				sleep "${WAIT_TIME}"
@@ -544,7 +544,7 @@ clone_repo() {
 	try_reclone=true
 	retry=0
 	while $try_reclone; do
-		rm -rf "${HOME}"/"${PACKAGE}"
+		rm -rf "${HOME}"/"${PACKAGE:?}"
 		# checkout specific branch/tag if defined
 		if [ ! -z "$project_version" ]; then
 			# (tpg) clone only history of 100 commits to reduce bandwith
@@ -583,4 +583,4 @@ setup_cache
 build_rpm
 container_data
 # wipe package
-sudo rm -rf "${HOME}"/"${PACKAGE}"
+sudo rm -rf "${HOME}"/"${PACKAGE:?}"
