@@ -79,6 +79,7 @@ config_opts['plugin_conf']['ccache_enable'] = False
 config_opts['plugin_conf']['root_cache_enable'] = '$rebuild_cache'
 config_opts['plugin_conf']['root_cache_opts']['compress_program'] = "xz"
 config_opts['plugin_conf']['root_cache_opts']['extension'] = ".xz"
+config_opts['plugin_conf']['root_cache_opts']['decompress_program'] = "unxz"
 config_opts['yum.conf'] = """
 [main]
 keepcache=1
