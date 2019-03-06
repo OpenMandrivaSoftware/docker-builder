@@ -40,7 +40,7 @@ EOF
 elif [ "${platform_arch}" = 'riscv64' ]; then
 cat <<EOF> $default_cfg
 config_opts['target_arch'] = '$platform_arch'
-config_opts['legal_host_arches'] = ('riscv64')
+config_opts['legal_host_arches'] = ('i586', 'i686', 'x86_64', 'riscv64')
 EOF
 
 elif [ "${platform_arch}" = 'znver1' ]; then
