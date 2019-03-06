@@ -69,6 +69,22 @@ config_opts['use_nspawn'] = False
 config_opts['tar'] = "bsdtar"
 config_opts['basedir'] = '/var/lib/mock/'
 config_opts['cache_topdir'] = '/var/cache/mock/'
+config_opts['nosync'] = True
+
+# fail here with more logs in result dir
+config_opts['plugin_conf']['chroot_scan_enable'] = True
+config_opts['plugin_conf']['chroot_scan_opts'] = {
+    'regexes': [ "core(\.\d+)?", "\.log$",],
+    'only_failed': True,
+}
+
+# enable tmpfs for builder with 64gb+
+config_opts['plugin_conf']['tmpfs_enable'] = True
+config_opts['plugin_conf']['tmpfs_opts'] = {}
+config_opts['plugin_conf']['tmpfs_opts']['required_ram_mb'] = 64000
+config_opts['plugin_conf']['tmpfs_opts']['max_fs_size'] = '2500m'
+config_opts['plugin_conf']['tmpfs_opts']['mode'] = '0755'
+config_opts['plugin_conf']['tmpfs_opts']['keep_mounted'] = False
 
 config_opts['dist'] = 'cooker'  # only useful for --resultdir variable subst
 config_opts['macros']['%packager'] = '$uname <$email>'
@@ -76,10 +92,11 @@ config_opts['macros']['%_topdir'] = '%s/build' % config_opts['chroothome']
 config_opts['macros']['%_rpmfilename'] = '%%{NAME}-%%{VERSION}-%%{RELEASE}-%%{DISTTAG}.%%{ARCH}.rpm'
 config_opts['macros']['%cross_compiling'] = '0' # ABF should generally be considered native builds
 config_opts['plugin_conf']['ccache_enable'] = False
-config_opts['plugin_conf']['root_cache_enable'] = '$rebuild_cache'
-config_opts['plugin_conf']['root_cache_opts']['compress_program'] = "xz"
+config_opts['plugin_conf']['root_cache_opts']['compress_program'] = "unxz"
 config_opts['plugin_conf']['root_cache_opts']['extension'] = ".xz"
-config_opts['plugin_conf']['root_cache_opts']['decompress_program'] = "unxz"
+config_opts['plugin_conf']['root_cache_enable'] = True
+config_opts['plugin_conf']['root_cache_opts']['age_check'] = True
+config_opts['plugin_conf']['root_cache_opts']['max_age_days'] = 7
 config_opts['yum.conf'] = """
 [main]
 keepcache=1
