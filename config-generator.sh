@@ -74,6 +74,7 @@ config_opts['nosync'] = True
 # fail here with more logs in result dir
 config_opts['plugin_conf']['chroot_scan_enable'] = True
 config_opts['plugin_conf']['chroot_scan_opts'] = {
+    'basedir': '/var/lib/mock/openmandriva-${platform_arch}/root/builddir/',
     'regexes': [ "core(\.\d+)?", "\.log$",],
     'only_failed': True,
 }
