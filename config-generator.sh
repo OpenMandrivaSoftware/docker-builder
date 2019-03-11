@@ -97,7 +97,7 @@ config_opts['plugin_conf']['root_cache_opts']['compress_program'] = ""
 config_opts['plugin_conf']['root_cache_opts']['extension'] = ""
 config_opts['plugin_conf']['root_cache_enable'] = True
 config_opts['plugin_conf']['root_cache_opts']['age_check'] = True
-config_opts['plugin_conf']['root_cache_opts']['max_age_days'] = 7
+config_opts['plugin_conf']['root_cache_opts']['max_age_days'] = 1
 config_opts['yum.conf'] = """
 [main]
 keepcache=1
