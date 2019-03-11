@@ -6,7 +6,8 @@ cleanup() {
 	sudo rm -fv /etc/rpm/platform
 	sudo rm -fv /etc/mock/default.cfg
 	sudo rm -rf /var/lib/mock/*
-	sudo rm -rf /var/cache/mock/*
+#	sudo rm -rf /var/cache/mock/*
+  sudo rm -rf  /var/cache/mock/*-${platform_arch}/dnf_cache/
 	sudo rm -rf /var/cache/dnf/*
 
 	# unmask/mask both, we need to keep logs
@@ -320,7 +321,7 @@ test_rpm() {
 
 build_rpm() {
 	arm_platform_detector
-  sudo touch -d "24 hours ago" $config_dir/default.cfg
+  sudo touch -d "23 hours ago" $config_dir/default.cfg
 
 	# We will rerun the build in case when repository is modified in the middle,
 	# but for safety let's limit number of retest attempts
