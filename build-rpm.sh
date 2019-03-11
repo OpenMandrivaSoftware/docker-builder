@@ -320,6 +320,7 @@ test_rpm() {
 
 build_rpm() {
 	arm_platform_detector
+  touch -d "24 hours ago" $config_dir/default.cfg
 
 	# We will rerun the build in case when repository is modified in the middle,
 	# but for safety let's limit number of retest attempts
