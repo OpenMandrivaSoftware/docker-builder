@@ -163,6 +163,9 @@ arm_platform_detector(){
 		aarch64)
 			cpu="aarch64"
 			;;
+		riscv64)
+			cpu="riscv64"
+			;;
 		esac
 
 		if [ "$platform_arch" = 'aarch64' ]; then
@@ -171,6 +174,14 @@ arm_platform_detector(){
 				(while [ ! -e  /var/lib/mock/"${platform_name}"-"${platform_arch}"/root/usr/bin/ ]; do sleep 1; done
 				# rebuild docker builder with qemu packages
 				sudo cp /usr/bin/qemu-static-aarch64 /var/lib/mock/"${platform_name}"-"${platform_arch}"/root/usr/bin/) &
+				subshellpid=$!
+			fi
+		if [ "$platform_arch" = 'riscv64' ]; then
+			if [ "$cpu" != 'riscv64' ]; then
+				# hack to copy qemu binary in non-existing path
+				(while [ ! -e  /var/lib/mock/"${platform_name}"-"${platform_arch}"/root/usr/bin/ ]; do sleep 1; done
+				# rebuild docker builder with qemu packages
+				sudo cp /usr/bin/qemu-static-riscv64 /var/lib/mock/"${platform_name}"-"${platform_arch}"/root/usr/bin/) &
 				subshellpid=$!
 			fi
 		elif echo "$platform_arch" |grep -qE '^arm'; then
@@ -520,6 +531,9 @@ validate_arch() {
 		;;
 	aarch64)
 		validate_build "armx %armx %{armx} aarch64"
+		;;
+	riscv64)
+		validate_build "riscv64"
 		;;
 	i[3-9]86|znver1_32)
 		validate_build "ix86 %ix86 %{ix86} i686 %i686 %{i686} i586 %i586 %{i586} i386 %i386 %{i386} znver1_32"
