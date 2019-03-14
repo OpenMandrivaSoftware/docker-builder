@@ -16,7 +16,6 @@ rm -rf "${HOME}/${PACKAGE}"
 # (tpg) remove old files
 # in many cases these are leftovers when build fails
 # would be nice to remove them to free disk space
-find ${HOME} -maxdepth 1 ! -name 'qemu-a*' ! -name 'docker-worker' ! -name '.gem' ! -name 'envfile' -mmin +1500 -exec rm -rf '{}' \;  &> /dev/null
 }
 
 # (tpg) Clean build environment
@@ -32,11 +31,6 @@ config_dir=/etc/mock-urpm/
 # e.g. github.com/OpenMandrivaAssociation/htop
 build_package=${HOME}/"$PACKAGE"
 OUTPUT_FOLDER=${HOME}/output
-# Qemu ARM binaries
-QEMU_ARM_SHA="9c7e32080fab6751a773f363bfebab8ac8cb9f4a"
-QEMU_ARM_BINFMT_SHA="10131ee0db7a486186c32e0cb7229f4368d0d28b"
-QEMU_ARM64_SHA="240d661cee1fc7fbaf7623baa3a5b04dfb966424"
-QEMU_ARM64_BINFMT_SHA="ec864fdf8b57ac77652cd6ab998e56fc4ed7ef5d"
 
 GREP_PATTERN='error: (.*)$|Segmentation Fault|cannot find (.*)$|undefined reference (.*)$|cp: (.*)$|Hunk #1 FAILED|\(due to unsatisfied(.*)$'
 
@@ -161,6 +155,9 @@ case "$cpu" in
    aarch64)
       cpu="aarch64"
    ;;
+   riscv64)
+      cpu="riscv64"
+   ;;
 esac
 
 if [ "$platform_arch" = 'aarch64' ]; then
@@ -182,6 +179,19 @@ if [ "$platform_arch" = 'armv7hl' ]; then
 	(while [ ! -e  /var/lib/mock-urpm/openmandriva-$platform_arch/root/usr/bin/ ]
 	do sleep 1; done
 	sudo cp /usr/bin/qemu-static-arm /var/lib/mock-urpm/openmandriva-$platform_arch/root/usr/bin/) &
+	subshellpid=$!
+    fi
+# remove me in future
+    sudo sh -c "echo '$platform_arch-mandriva-linux-gnueabi' > /etc/rpm/platform"
+fi
+
+if [ "$platform_arch" = 'riscv64' ]; then
+    if [ $cpu != "riscv64" ] ; then
+# hack to copy qemu binary in non-existing path
+	(while [ ! -e  /var/lib/mock-urpm/openmandriva-$platform_arch/root/usr/bin/ ]
+	do sleep 1; done
+	# rebuild docker builder with qemu packages
+	sudo cp /usr/bin/qemu-static-riscv64 /var/lib/mock-urpm/openmandriva-$platform_arch/root/usr/bin/) &
 	subshellpid=$!
     fi
 # remove me in future
@@ -444,16 +454,19 @@ validate_arch() {
 
 # translate arch into various options that may be set up in spec file
     case ${PLATFORM_ARCH,,} in
-	armv7hl)
+  armv7hl)
 		validate_build "armx %armx %{armx} armv7hl"
 		;;
-	aarch64)
+  aarch64)
 		validate_build "armx %armx %{armx} aarch64"
 		;;
-    i386|i586|i686)
+  i386|i586|i686)
 		validate_build "ix86 %ix86 %{ix86} i686 %i686 %{i686} i586 %i586 %{i586} i386 %i386 %{i386}"
 		;;
-	x86_64)
+  riscv64)
+    validate_build "riscv64"
+    ;;
+  x86_64)
 		validate_build "x86_64 %x86_64 %{x86_64}"
 		;;
 	    *)
