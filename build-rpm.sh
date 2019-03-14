@@ -455,7 +455,9 @@ build_rpm() {
 	fi
 
 	# Test RPM files
-	test_rpm
+  if [ "$use_extra_tests" = 'true' ]; then
+      test_rpm
+  fi
 	# End tests
 
 	# check if RPM files are not vanished
