@@ -62,9 +62,6 @@ if [ "$(uname -m)" = 'x86_64' ] && printf '%s\n' "${arch}" | grep -qE 'i[0-9]86'
 	MOCK_BIN="/usr/bin/i386 $MOCK_BIN"
 fi
 
-printf '%s\n' '--> Mounting tmpfs filesystem to builddir'
-sudo mount -a
-
 generate_config() {
 	# Change output format for mock
 	sed '17c/format: %(message)s' "${config_dir}"/logging.ini > ~/logging.ini
