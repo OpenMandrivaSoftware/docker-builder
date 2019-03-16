@@ -16,10 +16,6 @@ cleanup() {
 
 	# (tpg) remove package
 	sudo rm -rf "${HOME}"/"${PACKAGE:?}"
-	# (tpg) remove old files
-	# in many cases these are leftovers when build fails
-	# would be nice to remove them to free disk space
-	find "${HOME}" -maxdepth 1 ! -name 'qemu-a*' ! -name 'docker-worker' ! -name '.gem' ! -name 'envfile' -mmin +1500 -exec rm -rf '{}' \;  &> /dev/null
 }
 
 # (tpg) Clean build environment
