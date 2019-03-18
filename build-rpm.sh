@@ -418,6 +418,9 @@ build_rpm() {
 		fi
 	done
 
+	printf '%s\n' '--> Create rpm -qa list'
+	rpm --root=/var/lib/mock/"${platform_name}"-"${platform_arch}"/root/ -qa >> "${OUTPUT_FOLDER}"/rpm-qa.log
+
 	# Check exit code after build
 	if [ "${rc}" != '0' ]; then
 		printf '%s\n' '--> Build failed: mock encountered a problem.'
@@ -438,8 +441,6 @@ build_rpm() {
 	# Extract rpmlint logs into separate file
 	printf '%s\n' "--> Grepping rpmlint logs from $OUTPUT_FOLDER/build.log to $OUTPUT_FOLDER/rpmlint.log"
 	sed -n "/Executing \"\/usr\/bin\/rpmlint/,/packages and.*specfiles checked/p" $OUTPUT_FOLDER/build.log > $OUTPUT_FOLDER/rpmlint.log
-	printf '%s\n' '--> Create rpm -qa list'
-	rpm --root=/var/lib/mock/"${platform_name}"-"${platform_arch}"/root/ -qa >> "${OUTPUT_FOLDER}"/rpm-qa.log
 
 	# (tpg) Save build chroot
 	if [ "${rc}" = '0' ] && [ "${save_buildroot}" = 'true' ]; then
