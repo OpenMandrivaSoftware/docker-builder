@@ -82,7 +82,7 @@ config_opts['nosync'] = True
 # enable tmpfs for builder with 64gb+
 config_opts['plugin_conf']['tmpfs_enable'] = True
 config_opts['plugin_conf']['tmpfs_opts'] = {}
-config_opts['plugin_conf']['tmpfs_opts']['required_ram_mb'] = 64000
+config_opts['plugin_conf']['tmpfs_opts']['required_ram_mb'] = 256000
 config_opts['plugin_conf']['tmpfs_opts']['max_fs_size'] = '2500m'
 config_opts['plugin_conf']['tmpfs_opts']['mode'] = '0755'
 config_opts['plugin_conf']['tmpfs_opts']['keep_mounted'] = False
