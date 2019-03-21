@@ -258,11 +258,11 @@ fi
 if [ ! -z "${builder}" ]; then
 	cd $common_pwd
 	if [ "${arch}" = 'x86_64' ]; then
-		sed -i "s/replace/latest/g" Dockerfile.builder
-		sed -i "s/rarch/x86_64/g" Dockerfile.builder
+		sed -i "s/ARCH_REL/latest/g" Dockerfile.builder
+		sed -i "s/ARCH_TARGET/x86_64/g" Dockerfile.builder
 		docker build --tag=openmandriva/builder  --file Dockerfile.builder .
 	else
-		sed -i "s/replace/${arch}/g" Dockerfile.builder
+		sed -i "s/ARCH_REL/${arch}/g" Dockerfile.builder
 		docker build --tag=openmandriva/builder:$arch --file Dockerfile.builder .
 		git checkout Dockerfile.builder
 	fi
