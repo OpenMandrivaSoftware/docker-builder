@@ -32,7 +32,7 @@ config_dir=/etc/mock/
 build_package="${HOME}"/"$PACKAGE"
 OUTPUT_FOLDER="${HOME}"/output
 
-GREP_PATTERN='error: (.*)$|Segmentation Fault|cannot find (.*)$|undefined reference (.*)$|cp: (.*)$|Hunk #1 FAILED|\(due to unsatisfied(.*)$'
+GREP_PATTERN='error: (.*)$|Segmentation Fault|cannot find (.*)$|undefined reference (.*)$|cp: (.*)$|hunks FAILED(.*)$|No matching(.*)$'
 
 filestore_url="http://file-store.openmandriva.org/api/v1/file_stores"
 platform_arch="$PLATFORM_ARCH"
@@ -372,7 +372,7 @@ build_rpm() {
 		printf '%s\n' '--> Build failed: mock encountered a problem.'
 		# 99% of all build failures at src.rpm creation is broken deps
 		# m1 show only first match -oP show only matching
-		grep -m1 -oP "\(due to unsatisfied(.*)$" $OUTPUT_FOLDER/root.log >> ~/build_fail_reason.log
+		grep -m1 -oP "No matching(.*)$" $OUTPUT_FOLDER/root.log >> ~/build_fail_reason.log
 		[ -n "$subshellpid" ] && kill "$subshellpid"
 		cleanup
 		exit 1
@@ -384,7 +384,7 @@ build_rpm() {
 			printf '%s\n' '--> Build failed: mock encountered a problem. src.rpm files is missing'
 			# 99% of all build failures at src.rpm creation is broken deps
 			# m1 show only first match -oP show only matching
-			grep -m1 -oP "\(due to unsatisfied(.*)$" "${OUTPUT_FOLDER}"/root.log >> ~/build_fail_reason.log
+			grep -m1 -oP "No matching(.*)$" "${OUTPUT_FOLDER}"/root.log >> ~/build_fail_reason.log
 			[ -n "$subshellpid" ] && kill "$subshellpid"
 			cleanup
 			exit 1
