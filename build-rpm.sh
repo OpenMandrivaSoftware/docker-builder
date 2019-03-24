@@ -330,7 +330,7 @@ build_rpm() {
 	# We will rerun the build in case when repository is modified in the middle,
 	# but for safety let's limit number of retest attempts
 	# (since in case when repository metadata is really broken we can loop here forever)
-	MAX_RETRIES=10
+	MAX_RETRIES=2
 	WAIT_TIME=60
 	RETRY_GREP_STR="Unable to find a match\|Error downloading packages\|All mirrors were already tried\|Cannot download\|Some packages could not be found"
 
