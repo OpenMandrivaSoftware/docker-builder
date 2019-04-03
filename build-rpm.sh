@@ -190,29 +190,13 @@ arm_platform_detector(){
 }
 
 test_rpm() {
-	local PERSONALITY
-	local EXTRA_ARGS
-
 	# Rerun tests
 	PACKAGES=${packages}
-	chroot_path=$chroot_path
 	use_extra_tests=$use_extra_tests
 
 	test_code=0
 	test_log="$OUTPUT_FOLDER"/tests.log
 	printf '%s\n' '--> Starting RPM tests.' >> $test_log
-	printf '%s\n' "---> Test for $packages for $platform_arch running on $cpu $(hostname)" >> $test_log
-
-	if echo $platform_arch |grep -qE '^arm' && [ "$cpu" = "aarch64" ]; then
-		PERSONALITY="setarch linux32 -B"
-		EXTRA_ARGS="--forcearch=armv7hnl"
-	elif echo $platform_arch |grep -qE '^(i.86|znver1_32)' && [ "$cpu" = "x86_64" ]; then
-		PERSONALITY="i386"
-		EXTRA_ARGS=""
-	else
-		PERSONALITY=""
-		EXTRA_ARGS=""
-	fi
 
 	if [ "$rerun_tests" = 'true' ]; then
 		[ "$packages" = '' ] && printf '%s\n' '--> No packages for testing. Something is wrong. Exiting. !!!' >> $test_log && exit 1
@@ -238,14 +222,13 @@ test_rpm() {
 			printf '%s\n' "--> Testing with cached chroot ..." >> $test_log
 			$MOCK_BIN --init --configdir $config_dir -v --no-cleanup-after --no-clean
 		else
+			# useless logic
 			$MOCK_BIN --init --configdir $config_dir -v --no-cleanup-after
 		fi
 		OUTPUT_FOLDER="$build_package"
 	fi
 
 	printf '%s\n' '--> Checking if rpm packages can be installed.' >> $test_log
-	TEST_CHROOT_PATH=$($MOCK_BIN --configdir=$config_dir --print-root-path)
-
 	try_retest=true
 	retry=0
 	while $try_retest; do
@@ -291,8 +274,6 @@ test_rpm() {
 			fi
 		done
 	fi
-	sudo rm -f "${TEST_CHROOT_PATH}"/*.rpm
-	sudo rm -rf "${TEST_CHROOT_PATH}"/test_root
 	rm -f "${test_log}".tmp
 
 	# Check exit code after testing
