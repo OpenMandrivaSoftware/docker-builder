@@ -263,7 +263,8 @@ test_rpm() {
 					printf '%s\n' "Package $i is either the same, older, or another problem. Extra tests failed: $test_code" >> "${test_log}"
 					printf 'Compared %s %s (new) to %s (repo) for %s\n' "$RPM_NAME" "$RPM_EVR" "$REPO_EVR" "$i" >> "${test_log}"
 					rpmdev-vercmp "${RPM_EVR}" "${REPO_EVR}" >> "${test_log}"
-					return $test_code
+					# package exist in repo, let's fail tests
+					rm -f "${test_log}".tmp && exit "${test_code}"
 				fi
 			else
 				# It does not exist in the repo, so it's okay to go in
