@@ -250,25 +250,9 @@ test_rpm() {
 	retry=0
 	while $try_retest; do
 		sudo rm -rf /var/cache/dnf/*
-		sudo rm -rf /var/lib/mock/"${platform_name:?}"-"${platform_arch:?}"/root/var/cache/dnf/*
-		sudo dnf clean all
-		sudo dnf --installroot=${TEST_CHROOT_PATH} clean all
-		echo "---> running $PERSONALITY dnf --installroot=${TEST_CHROOT_PATH} --assumeyes --nogpgcheck --setopt=install_weak_deps=False --setopt=tsflags=test builddep $OUTPUT_FOLDER/*.src.rpm" >> "${test_log}".tmp
-		sudo $PERSONALITY chroot ${TEST_CHROOT_PATH} uname -a >>"${test_log}".tmp
-		sudo $PERSONALITY dnf --installroot="${TEST_CHROOT_PATH}" --assumeyes ${EXTRA_ARGS} --nogpgcheck --setopt=install_weak_deps=False --setopt=tsflags=test builddep "$OUTPUT_FOLDER"/*.src.rpm >> "${test_log}".tmp 2>&1
-		sudo $PERSONALITY dnf --installroot="${TEST_CHROOT_PATH}" --assumeyes ${EXTRA_ARGS} --nogpgcheck --setopt=install_weak_deps=False --setopt=tsflags=test install $(ls "$OUTPUT_FOLDER"/*.rpm | grep -v .src.rpm) >> "${test_log}".tmp 2>&1
-		test_code=$?
-		try_retest=false
-		if [ "${test_code}" != 0 ] && [ "${retry}" -lt "${MAX_RETRIES}" ]; then
-			if grep -q "$RETRY_GREP_STR" "${test_log}".tmp; then
-				printf '%s\n' '--> Repository was changed in the middle, will rerun the tests' >> $test_log
-				sleep ${WAIT_TIME}
-				sudo rm -rf "${TEST_CHROOT_PATH}"/test_root/var/cache/dnf/* >> $test_log 2>&1
-				sudo $PERSONALITY dnf --installroot="${TEST_CHROOT_PATH}/test_root/" makecache >> $test_log 2>&1
-				try_retest=true
-				(( retry=$retry+1 ))
-			fi
-		fi
+		sudo rm -rf /var/lib/mock/"${platform_name:?}"-"${platform_arch:?}"/
+		mock --init --configdir /etc/mock/ $OUTPUT_FOLDER/*.src.rpm >> "${test_log}".tmp
+		mock --init --configdir /etc/mock/ --install $(ls "$OUTPUT_FOLDER"/*.rpm | grep -v .src.rpm) >> "${test_log}".tmp 2>&1
 	done
 
 	cat "$test_log".tmp >> "${test_log}"
