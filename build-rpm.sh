@@ -229,14 +229,11 @@ test_rpm() {
 	fi
 
 	printf '%s\n' '--> Checking if rpm packages can be installed.' >> $test_log
-	try_retest=true
-	retry=0
-	while $try_retest; do
-		sudo rm -rf /var/cache/dnf/*
-		sudo rm -rf /var/lib/mock/"${platform_name:?}"-"${platform_arch:?}"/
-		mock --init --configdir /etc/mock/ $OUTPUT_FOLDER/*.src.rpm >> "${test_log}".tmp
-		mock --init --configdir /etc/mock/ --install $(ls "$OUTPUT_FOLDER"/*.rpm | grep -v .src.rpm) >> "${test_log}".tmp 2>&1
-	done
+
+	sudo rm -rf /var/cache/dnf/*
+	sudo rm -rf /var/lib/mock/"${platform_name:?}"-"${platform_arch:?}"/
+	mock --init --configdir /etc/mock/ $OUTPUT_FOLDER/*.src.rpm >> "${test_log}".tmp
+	mock --init --configdir /etc/mock/ --install $(ls "$OUTPUT_FOLDER"/*.rpm | grep -v .src.rpm) >> "${test_log}".tmp 2>&1
 
 	cat "$test_log".tmp >> "${test_log}"
 	printf '%s\n' "--> Tests finished at $(date -u)" >> "$test_log"
