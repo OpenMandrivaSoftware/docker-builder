@@ -190,29 +190,13 @@ arm_platform_detector(){
 }
 
 test_rpm() {
-	local PERSONALITY
-	local EXTRA_ARGS
-
 	# Rerun tests
 	PACKAGES=${packages}
-	chroot_path=$chroot_path
 	use_extra_tests=$use_extra_tests
 
 	test_code=0
 	test_log="$OUTPUT_FOLDER"/tests.log
 	printf '%s\n' '--> Starting RPM tests.' >> $test_log
-	printf '%s\n' "---> Test for $packages for $platform_arch running on $cpu $(hostname)" >> $test_log
-
-	if echo $platform_arch |grep -qE '^arm' && [ "$cpu" = "aarch64" ]; then
-		PERSONALITY="setarch linux32 -B"
-		EXTRA_ARGS="--forcearch=armv7hnl"
-	elif echo $platform_arch |grep -qE '^(i.86|znver1_32)' && [ "$cpu" = "x86_64" ]; then
-		PERSONALITY="i386"
-		EXTRA_ARGS=""
-	else
-		PERSONALITY=""
-		EXTRA_ARGS=""
-	fi
 
 	if [ "$rerun_tests" = 'true' ]; then
 		[ "$packages" = '' ] && printf '%s\n' '--> No packages for testing. Something is wrong. Exiting. !!!' >> $test_log && exit 1
@@ -238,38 +222,18 @@ test_rpm() {
 			printf '%s\n' "--> Testing with cached chroot ..." >> $test_log
 			$MOCK_BIN --init --configdir $config_dir -v --no-cleanup-after --no-clean
 		else
+			# useless logic
 			$MOCK_BIN --init --configdir $config_dir -v --no-cleanup-after
 		fi
 		OUTPUT_FOLDER="$build_package"
 	fi
 
 	printf '%s\n' '--> Checking if rpm packages can be installed.' >> $test_log
-	TEST_CHROOT_PATH=$($MOCK_BIN --configdir=$config_dir --print-root-path)
 
-	try_retest=true
-	retry=0
-	while $try_retest; do
-		sudo rm -rf /var/cache/dnf/*
-		sudo rm -rf /var/lib/mock/"${platform_name:?}"-"${platform_arch:?}"/root/var/cache/dnf/*
-		sudo dnf clean all
-		sudo dnf --installroot=${TEST_CHROOT_PATH} clean all
-		echo "---> running $PERSONALITY dnf --installroot=${TEST_CHROOT_PATH} --assumeyes --nogpgcheck --setopt=install_weak_deps=False --setopt=tsflags=test builddep $OUTPUT_FOLDER/*.src.rpm" >> "${test_log}".tmp
-		sudo $PERSONALITY chroot ${TEST_CHROOT_PATH} uname -a >>"${test_log}".tmp
-		sudo $PERSONALITY dnf --installroot="${TEST_CHROOT_PATH}" --assumeyes ${EXTRA_ARGS} --nogpgcheck --setopt=install_weak_deps=False --setopt=tsflags=test builddep "$OUTPUT_FOLDER"/*.src.rpm >> "${test_log}".tmp 2>&1
-		sudo $PERSONALITY dnf --installroot="${TEST_CHROOT_PATH}" --assumeyes ${EXTRA_ARGS} --nogpgcheck --setopt=install_weak_deps=False --setopt=tsflags=test install $(ls "$OUTPUT_FOLDER"/*.rpm | grep -v .src.rpm) >> "${test_log}".tmp 2>&1
-		test_code=$?
-		try_retest=false
-		if [ "${test_code}" != 0 ] && [ "${retry}" -lt "${MAX_RETRIES}" ]; then
-			if grep -q "$RETRY_GREP_STR" "${test_log}".tmp; then
-				printf '%s\n' '--> Repository was changed in the middle, will rerun the tests' >> $test_log
-				sleep ${WAIT_TIME}
-				sudo rm -rf "${TEST_CHROOT_PATH}"/test_root/var/cache/dnf/* >> $test_log 2>&1
-				sudo $PERSONALITY dnf --installroot="${TEST_CHROOT_PATH}/test_root/" makecache >> $test_log 2>&1
-				try_retest=true
-				(( retry=$retry+1 ))
-			fi
-		fi
-	done
+	sudo rm -rf /var/cache/dnf/*
+	sudo rm -rf /var/lib/mock/"${platform_name:?}"-"${platform_arch:?}"/
+	mock --init --configdir /etc/mock/ $OUTPUT_FOLDER/*.src.rpm >> "${test_log}".tmp
+	mock --init --configdir /etc/mock/ --install $(ls "$OUTPUT_FOLDER"/*.rpm | grep -v .src.rpm) >> "${test_log}".tmp 2>&1
 
 	cat "$test_log".tmp >> "${test_log}"
 	printf '%s\n' "--> Tests finished at $(date -u)" >> "$test_log"
@@ -299,6 +263,8 @@ test_rpm() {
 					printf '%s\n' "Package $i is either the same, older, or another problem. Extra tests failed: $test_code" >> "${test_log}"
 					printf 'Compared %s %s (new) to %s (repo) for %s\n' "$RPM_NAME" "$RPM_EVR" "$REPO_EVR" "$i" >> "${test_log}"
 					rpmdev-vercmp "${RPM_EVR}" "${REPO_EVR}" >> "${test_log}"
+					# package exist in repo, let's fail tests
+					rm -f "${test_log}".tmp && exit "${test_code}"
 				fi
 			else
 				# It does not exist in the repo, so it's okay to go in
@@ -307,8 +273,6 @@ test_rpm() {
 			fi
 		done
 	fi
-	sudo rm -f "${TEST_CHROOT_PATH}"/*.rpm
-	sudo rm -rf "${TEST_CHROOT_PATH}"/test_root
 	rm -f "${test_log}".tmp
 
 	# Check exit code after testing
