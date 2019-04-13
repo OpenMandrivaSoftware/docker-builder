@@ -258,11 +258,11 @@ test_rpm() {
 					test_code='0'
 					printf '%s\n' "Package $i is newer than what's in the repo. Extra tests passed: $test_code" >> "${test_log}"
 				else
-					# Proposed rpm is either the same, older, or another problem
-					test_code='5'
 					printf '%s\n' "Package $i is either the same, older, or another problem. Extra tests failed: $test_code" >> "${test_log}"
 					printf 'Compared %s %s (new) to %s (repo) for %s\n' "$RPM_NAME" "$RPM_EVR" "$REPO_EVR" "$i" >> "${test_log}"
 					rpmdev-vercmp "${RPM_EVR}" "${REPO_EVR}" >> "${test_log}"
+					# Proposed rpm is either the same, older, or another problem
+					test_code='5'
 					# package exist in repo, let's fail tests
 					rm -f "${test_log}".tmp
 				fi
