@@ -263,6 +263,7 @@ test_rpm() {
 					rpmdev-vercmp "${RPM_EVR}" "${REPO_EVR}" >> "${test_log}"
 					# Proposed rpm is either the same, older, or another problem
 					test_code='5'
+          return $test_code
 					# package exist in repo, let's fail tests
 					rm -f "${test_log}".tmp
 				fi
