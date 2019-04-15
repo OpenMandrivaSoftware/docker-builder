@@ -234,6 +234,7 @@ test_rpm() {
 	sudo rm -rf /var/lib/mock/"${platform_name:?}"-"${platform_arch:?}"/
 	mock --init --configdir /etc/mock/ $OUTPUT_FOLDER/*.src.rpm >> "${test_log}".tmp
 	mock --init --configdir /etc/mock/ --install $(ls "$OUTPUT_FOLDER"/*.rpm | grep -v .src.rpm) >> "${test_log}".tmp 2>&1
+	CHROOT_PATH="$(mock --print-root-path)"
 
 	cat "$test_log".tmp >> "${test_log}"
 	printf '%s\n' "--> Tests finished at $(date -u)" >> "$test_log"
@@ -248,7 +249,7 @@ test_rpm() {
 			[ "${RPM_EPOCH}" = '(none)' ] && RPM_EPOCH='0'
 			RPM_VERREL=$(rpm -qp --qf "%{VERSION}-%{RELEASE}" "${OUTPUT_FOLDER}"/"$i")
 			RPM_EVR="${RPM_EPOCH}:${RPM_VERREL}"
-			REPO_EVR=$(dnf repoquery -q --qf "%{EPOCH}:%{VERSION}-%{RELEASE}" --latest-limit=1 "${RPM_NAME}")
+			REPO_EVR=$(sudo dnf repoquery --installroot=${CHROOT_PATH} -q --qf "%{EPOCH}:%{VERSION}-%{RELEASE}" --latest-limit=1 "${RPM_NAME}")
 
 			if [ ! -z "${REPO_EVR}" ]; then
 				rpmdev-vercmp "${RPM_EVR}" "${REPO_EVR}"
