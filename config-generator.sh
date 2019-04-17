@@ -98,6 +98,11 @@ config_opts['plugin_conf']['root_cache_opts']['extension'] = ""
 config_opts['plugin_conf']['root_cache_enable'] = True
 config_opts['plugin_conf']['root_cache_opts']['age_check'] = True
 config_opts['plugin_conf']['root_cache_opts']['max_age_days'] = 1
+config_opts['plugin_conf']['package_state_enable'] = True
+config_opts['plugin_conf']['package_state_opts'] = {}
+config_opts['plugin_conf']['package_state_opts']['available_pkgs'] = False
+config_opts['plugin_conf']['package_state_opts']['installed_pkgs'] = True
+
 config_opts['yum.conf'] = """
 [main]
 keepcache=1

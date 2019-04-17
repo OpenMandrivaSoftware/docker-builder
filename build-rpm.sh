@@ -383,9 +383,6 @@ build_rpm() {
 		fi
 	done
 
-	printf '%s\n' '--> Create rpm -qa list'
-	rpm --root=/var/lib/mock/"${platform_name}"-"${platform_arch}"/root/ -qa >> "${OUTPUT_FOLDER}"/rpm-qa.log
-
 	# Check exit code after build
 	if [ "${rc}" != '0' ]; then
 		printf '%s\n' '--> Build failed: mock encountered a problem.'
