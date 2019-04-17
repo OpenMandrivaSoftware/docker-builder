@@ -160,31 +160,6 @@ arm_platform_detector(){
 			cpu="riscv64"
 			;;
 		esac
-
-		if [ "$platform_arch" = 'aarch64' ]; then
-			if [ "$cpu" != 'aarch64' ]; then
-				# hack to copy qemu binary in non-existing path
-				(while [ ! -e  /var/lib/mock/"${platform_name}"-"${platform_arch}"/root/usr/bin/ ]; do sleep 1; done
-				# rebuild docker builder with qemu packages
-				sudo cp /usr/bin/qemu-static-aarch64 /var/lib/mock/"${platform_name}"-"${platform_arch}"/root/usr/bin/) &
-				subshellpid=$!
-			fi
-		elif [ "$platform_arch" = 'riscv64' ]; then
-			if [ "$cpu" != 'riscv64' ]; then
-				# hack to copy qemu binary in non-existing path
-				(while [ ! -e  /var/lib/mock/"${platform_name}"-"${platform_arch}"/root/usr/bin/ ]; do sleep 1; done
-				# rebuild docker builder with qemu packages
-				sudo cp /usr/bin/qemu-static-riscv64 /var/lib/mock/"${platform_name}"-"${platform_arch}"/root/usr/bin/) &
-				subshellpid=$!
-			fi
-		elif echo "$platform_arch" |grep -qE '^arm'; then
-			if [ "$cpu" != 'arm' ] && [ $cpu != "aarch64" ] ; then
-				# hack to copy qemu binary in non-existing path
-				(while [ ! -e  /var/lib/mock/"${platform_name}"-"${platform_arch}"/root/usr/bin/ ]; do sleep 1; done
-				sudo cp /usr/bin/qemu-static-arm /var/lib/mock/"${platform_name}"-"${platform_arch}"/root/usr/bin/) &
-				subshellpid=$!
-			fi
-		fi
 	}
 	probe_cpu
 }
