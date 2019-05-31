@@ -263,7 +263,7 @@ test_rpm() {
 
 build_rpm() {
 	arm_platform_detector
-  sudo touch -d "23 hours ago" $config_dir/default.cfg
+	sudo touch -d "23 hours ago" $config_dir/default.cfg
 
 	# We will rerun the build in case when repository is modified in the middle,
 	# but for safety let's limit number of retest attempts
@@ -310,7 +310,7 @@ build_rpm() {
 		printf '%s\n' '--> Build failed: mock encountered a problem.'
 		# 99% of all build failures at src.rpm creation is broken deps
 		# m1 show only first match -oP show only matching
-		grep -m1 -oP "No matching(.*)$" $OUTPUT_FOLDER/root.log >> ~/build_fail_reason.log
+		/usr/bin/python /mdv/check_error.py --file "${OUTPUT_FOLDER}"/root.log >> ~/build_fail_reason.log
 		[ -n "$subshellpid" ] && kill "$subshellpid"
 		cleanup
 		exit 1
@@ -322,7 +322,7 @@ build_rpm() {
 			printf '%s\n' '--> Build failed: mock encountered a problem. src.rpm files is missing'
 			# 99% of all build failures at src.rpm creation is broken deps
 			# m1 show only first match -oP show only matching
-			grep -m1 -oP "No matching(.*)$" "${OUTPUT_FOLDER}"/root.log >> ~/build_fail_reason.log
+			/usr/bin/python /mdv/check_error.py --file "${OUTPUT_FOLDER}"/root.log >> ~/build_fail_reason.log
 			[ -n "$subshellpid" ] && kill "$subshellpid"
 			cleanup
 			exit 1
