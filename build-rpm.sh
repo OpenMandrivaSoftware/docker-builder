@@ -32,8 +32,6 @@ config_dir=/etc/mock/
 build_package="${HOME}"/"$PACKAGE"
 OUTPUT_FOLDER="${HOME}"/output
 
-GREP_PATTERN='error: (.*)$|Segmentation Fault|cannot find (.*)$|undefined reference (.*)$|cp: (.*)$|hunks FAILED(.*)$|No matching(.*)$'
-
 filestore_url="http://file-store.openmandriva.org/api/v1/file_stores"
 platform_arch="$PLATFORM_ARCH"
 platform_name=${PLATFORM_NAME:-"openmandriva"}
@@ -362,7 +360,7 @@ build_rpm() {
 	if [ "${rc}" != '0' ]; then
 		printf '%s\n' '--> Build failed: mock encountered a problem.'
 		# clean all the rpm files because build was not completed
-		grep -m1 -i -oP "$GREP_PATTERN" "${OUTPUT_FOLDER}"/root.log >> ~/build_fail_reason.log
+		/usr/bin/python /mdv/check-error.py --file "${OUTPUT_FOLDER}"/root.log >> ~/build_fail_reason.log
 		rm -rf "${OUTPUT_FOLDER}"/*.rpm
 		[ -n "$subshellpid" ] && kill "$subshellpid"
 		# (tpg) Save build chroot
