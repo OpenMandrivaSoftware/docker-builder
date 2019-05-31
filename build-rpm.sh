@@ -360,7 +360,7 @@ build_rpm() {
 	if [ "${rc}" != '0' ]; then
 		printf '%s\n' '--> Build failed: mock encountered a problem.'
 		# clean all the rpm files because build was not completed
-		/usr/bin/python /mdv/check-error.py --file "${OUTPUT_FOLDER}"/root.log >> ~/build_fail_reason.log
+		/usr/bin/python /mdv/check_error.py --file "${OUTPUT_FOLDER}"/root.log >> ~/build_fail_reason.log
 		rm -rf "${OUTPUT_FOLDER}"/*.rpm
 		[ -n "$subshellpid" ] && kill "$subshellpid"
 		# (tpg) Save build chroot
