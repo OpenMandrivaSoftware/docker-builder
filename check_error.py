@@ -29,7 +29,8 @@ err_type = ['Segmentation fault',
             'cannot find -l(.*)', 'implicit declaration of function (.*)',
             '\'(.*)\' file not found', 'use of undeclared identifier (.*)',
             'function cannot return function type (.*)',
-            'unknown type name (.*)', 'incomplete definition of type (.*)']
+            'unknown type name (.*)', 'incomplete definition of type (.*)',
+            'Problem encountered: Man pages cannot be built: (.*)']
 
 
 def known_errors(logfile):
