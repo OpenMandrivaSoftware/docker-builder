@@ -24,7 +24,7 @@ err_type = ['Segmentation fault',
             'bytecode stream in file (.*) generated with (.*)',
             'Could not find a configuration file for package (.*)',
             'variable has incomplete type (.*)',
-            'File must begin with (.*)',
+            'File must begin with (.*)', 'Bad source: (.*)'.
             'File not found: (.*)', 'Installed \(but unpackaged\) file\(s\) found',
             'cannot find -l(.*)', 'implicit declaration of function (.*)',
             '\'(.*)\' file not found', 'use of undeclared identifier (.*)',
