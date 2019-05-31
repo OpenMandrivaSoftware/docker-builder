@@ -24,13 +24,14 @@ err_type = ['Segmentation fault',
             'bytecode stream in file (.*) generated with (.*)',
             'Could not find a configuration file for package (.*)',
             'variable has incomplete type (.*)',
-            'File must begin with (.*)', 'Bad source: (.*)'.
+            'File must begin with (.*)', 'Bad source: (.*)',
             'File not found: (.*)', 'Installed \(but unpackaged\) file\(s\) found',
             'cannot find -l(.*)', 'implicit declaration of function (.*)',
             '\'(.*)\' file not found', 'use of undeclared identifier (.*)',
             'function cannot return function type (.*)',
             'unknown type name (.*)', 'incomplete definition of type (.*)',
-            'Problem encountered: Man pages cannot be built: (.*)']
+            'Problem encountered: Man pages cannot be built: (.*)',
+            'format string is not a string literal (.*)']
 
 
 def known_errors(logfile):
@@ -43,6 +44,13 @@ def known_errors(logfile):
                 if error:
                     print(error.group(0).decode('utf-8'))
                     return
+                else:
+                    common_pattern = 'error: (.*)'
+                    error = re.search(common_pattern.encode("utf-8"), mm)
+                    if error:
+                        print(error.group(0).decode('utf-8'))
+                        return
+
 
 
 if __name__ == '__main__':
