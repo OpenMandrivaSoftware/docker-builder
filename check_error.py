@@ -52,10 +52,10 @@ def known_errors(logfile):
                         return
 
 
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Run me over the buildlog')
-    parser.add_argument('-f','--file', help='build.log requires', required=True)
+    parser.add_argument(
+        '-f', '--file', help='build.log requires', required=True)
     args = vars(parser.parse_args())
     if args['file']:
         try:
@@ -64,21 +64,21 @@ if __name__ == '__main__':
             print('Sorry the file you asked does not exists!')
             print(str(o))
 
-#known_errors('cannot_allocate.log')
-#known_errors('no_file_topatch.log')
-#known_errors('no_package_to_install.log')
-#known_errors('no_such_package_in_repo.log')
-#known_errors('unable_to_execute.log')
-#known_errors('protected_member.log')
-#known_errors('undef_reference_to.log')
-#known_errors('no_matching_func_to_call.log')
-#known_errors('bytecode_generated_with_lto.log')
-#known_errors('config_cmake_not_found.log')
-#known_errors('variable_incompl_type.log')
-#known_errors('file_must_begin.log')
-#known_errors('file_not_found.log')
-#known_errors('cannot_find_lib.log')
-#known_errors('header_not_found.log')
-#known_errors('func_cant_return_some_shit.log')
-#known_errors('unknown_type_name.log')
-#known_errors('installed_but_unpkgd.log')
+# known_errors('cannot_allocate.log')
+# known_errors('no_file_topatch.log')
+# known_errors('no_package_to_install.log')
+# known_errors('no_such_package_in_repo.log')
+# known_errors('unable_to_execute.log')
+# known_errors('protected_member.log')
+# known_errors('undef_reference_to.log')
+# known_errors('no_matching_func_to_call.log')
+# known_errors('bytecode_generated_with_lto.log')
+# known_errors('config_cmake_not_found.log')
+# known_errors('variable_incompl_type.log')
+# known_errors('file_must_begin.log')
+# known_errors('file_not_found.log')
+# known_errors('cannot_find_lib.log')
+# known_errors('header_not_found.log')
+# known_errors('func_cant_return_some_shit.log')
+# known_errors('unknown_type_name.log')
+# known_errors('installed_but_unpkgd.log')
