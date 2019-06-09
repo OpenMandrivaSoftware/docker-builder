@@ -99,7 +99,7 @@ def generate_config():
     repo_names = repo_names.split()
     repo_urls = repo_url.split()
     repo_conf = dict(zip(repo_names, repo_urls))
-    print_conf("\n".join("[{}]\nname={}{}\n{}\ngpgcheck=0\nenabled=1\n".format(k, k, k[:0], v) for k, v in repo_conf.items()))
+    print_conf("\n".join("[{}]\nname={}\nbaseurl={}{}\ngpgcheck=0\nenabled=1\n".format(k, k, k[:0], v) for k, v in repo_conf.items()))
     print_conf('"""')
 
 generate_config()
