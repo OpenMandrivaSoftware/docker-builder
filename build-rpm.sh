@@ -77,7 +77,7 @@ generate_config() {
 	PLATFORM_NAME="$platform_name" \
 	PLATFORM_ARCH="$platform_arch" \
 	REBUILD_CACHE="$rebuild_cache" \
-	sudo -E /bin/sh "/mdv/config-generator.sh"
+	sudo -E /usr/bin/python "/mdv/config-generator.py"
 }
 
 container_data() {
