@@ -11,7 +11,7 @@ err_type = ['Segmentation fault',
             'A fatal error has been detected by the Java Runtime Environment',
             'error:(.*)field(.*)has incomplete type',
             'error:(.*)conflicting types for',
-            'No rule to make target(.*)',
+            'No rule to make target (.*)',
             'failed to allocate (.*) bytes for output file: Cannot allocate memory',
             'cp: cannot stat (.*):(.*)',
             'can\'t find file to patch at input line (.*)',
@@ -41,7 +41,9 @@ def known_errors(logfile):
             mm = mmap.mmap(msgf.fileno(), sz, access=mmap.ACCESS_READ)
             for pat in err_type:
                 error = re.search(pat.encode("utf-8"), mm)
-                if error:
+                if not error:
+                    continue
+                elif error:
                     print(error.group(0).decode('utf-8'))
                     return
                 else:
