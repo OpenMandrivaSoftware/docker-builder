@@ -162,13 +162,13 @@ def container_data():
 #        print(package_info)
         app_json = json.dumps(package_info, sort_keys=True, indent=4)
         multikeys.append(package_info)
-
 #    print(multikeys)
     with open(c_data, 'w') as out_json:
         json.dump(multikeys, out_json, sort_keys=True, indent=4)
 
 
 def build_rpm():
+    tries = 3
     # pattern for retry
     pattern_for_retry = 'No matching package to install: (.*)'
     if os.environ.get("EXTRA_BUILD_SRC_RPM_OPTIONS") is None:
@@ -189,15 +189,21 @@ def build_rpm():
     # validate src.rpm here
     # ....................
     # for exclusive_arches
-    try:
-#        build_rpm = mock_binary + ' -v --update --configdir {} --rebuild {} --no-cleanup-after --no-clean {} --resultdir={}'.format(mock_config, src_rpm[0], extra_build_rpm_options, output_dir)
-        if os.environ.get("EXTRA_BUILD_RPM_OPTIONS") is None:
-            subprocess.check_output([mock_binary, '-v', '--update', '--configdir', mock_config, '--rebuild', src_rpm[0], '--no-cleanup-after', '--no-clean', '--resultdir=' + output_dir])
-        else:
-            subprocess.check_output([mock_binary, '-v', '--update', '--configdir', mock_config, '--rebuild', src_rpm[0], '--no-cleanup-after', '--no-clean', extra_build_rpm_options, '--resultdir=' + output_dir])
-    except subprocess.CalledProcessError as e:
-        print(e)
-        sys.exit(1)
+    for i in range(tries):
+        try:
+            if os.environ.get("EXTRA_BUILD_RPM_OPTIONS") is None:
+                subprocess.check_output([mock_binary, '-v', '--update', '--configdir', mock_config, '--rebuild', src_rpm[0], '--no-cleanup-after', '--no-clean', '--resultdir=' + output_dir])
+            else:
+                subprocess.check_output([mock_binary, '-v', '--update', '--configdir', mock_config, '--rebuild', src_rpm[0], '--no-cleanup-after', '--no-clean', extra_build_rpm_options, '--resultdir=' + output_dir])
+        except subprocess.CalledProcessError as e:
+            print(e)
+            if i < tries - 1:
+                time.sleep(60)
+                continue
+            else:
+                print('build failed')
+                sys.exit(1)
+        break
     for r, d, f in os.walk(output_dir):
         for rpm_pkg in f:
             if '.rpm' in rpm_pkg:
