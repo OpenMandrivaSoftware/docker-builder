@@ -20,6 +20,9 @@ extra_build_rpm_options = os.environ.get('EXTRA_BUILD_RPM_OPTIONS')
 # e.g. /home/omv/htop
 # print(build_package)
 
+platform_arch = os.getenv('PLATFORM_ARCH')
+platform_name = os.getenv('PLATFORM_NAME')
+
 # static
 # /home/omv/output
 mock_binary = '/usr/bin/mock'
@@ -133,6 +136,26 @@ def hash_file(rpm):
     # return the hex representation of digest
     return h.hexdigest()
 
+
+def validate_exclusive(srpm):
+    ts = rpm.TransactionSet()
+    ts.setVSFlags(~(rpm.RPMVSF_NEEDPAYLOAD))
+    fdno = os.open(srpm, os.O_RDONLY)
+    hdr = ts.hdrFromFdno(fdno)
+    if hdr['excludearch']:
+        for a in hdr['excludearch']:
+            if a == platform_arch:
+                print("Architecture is excluded per package spec file (ExcludeArch tag)")
+                sys.exit(6)
+    if hdr['exclusivearch']:
+        for a in hdr['exclusivearch']:
+            if a == platform_arch:
+                break
+            else:
+                print("exclusive arch for package is %s" % (a.decode()))
+                sys.exit(6)
+
+
 def container_data():
     ts = rpm.ts()
     multikeys = []
@@ -187,7 +210,7 @@ def build_rpm():
                 src_rpm.append(output_dir + '/' + srpm)
     print('srpm is %s' % src_rpm[0])
     # validate src.rpm here
-    # ....................
+    validate_exclusive(src_rpm[0])
     # for exclusive_arches
     for i in range(tries):
         try:
@@ -220,7 +243,7 @@ def cleanup_all():
     # dirs
     remove_if_exist('/var/lib/mock/')
     # probably need to drop it and point in mock
-    remove_if_exist('/var/cache/mock/')
+#    remove_if_exist('/var/cache/mock/')
     remove_if_exist('/var/cache/dnf/')
     # /home/omv/package_name
     remove_if_exist(build_package)
@@ -234,3 +257,5 @@ validate_spec(build_package)
 download_yml(build_package + '/' + '.abf.yml')
 build_rpm()
 container_data()
+#validate_exclusive('get-skypeforlinux-8.44.0.40-1.src.rpm')
+#validate_exclusive('/home/fdrt/output/dos2unix-7.4.0-1.src.rpm')
