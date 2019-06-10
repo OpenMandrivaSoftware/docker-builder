@@ -8,6 +8,9 @@ import sys
 import time
 import rpm
 import hashlib
+import io
+import mmap
+import re
 
 
 get_home = os.environ.get('HOME')
@@ -30,6 +33,7 @@ mock_config = '/etc/mock/'
 file_store_base = 'http://file-store.openmandriva.org'
 output_dir = get_home + '/output'
 c_data = output_dir + '/container_data.json'
+root_log = output_dir + '/root.log'
 
 spec_name = []
 rpm_packages = []
@@ -220,12 +224,19 @@ def build_rpm():
                 subprocess.check_output([mock_binary, '-v', '--update', '--configdir', mock_config, '--rebuild', src_rpm[0], '--no-cleanup-after', '--no-clean', extra_build_rpm_options, '--resultdir=' + output_dir])
         except subprocess.CalledProcessError as e:
             print(e)
-            if i < tries - 1:
-                time.sleep(60)
-                continue
-            else:
-                print('build failed')
-                sys.exit(1)
+            sz = os.path.getsize(root_log)
+            if os.path.exists(root_log) and sz > 0:
+                with io.open(root_log, "r", encoding="utf-8") as msgf:
+                    mm = mmap.mmap(msgf.fileno(), sz, access=mmap.ACCESS_READ)
+                    error = re.search(pattern_for_retry.encode(), mm)
+                    # probably metadata not ready
+                    if error:
+                        if i < tries - 1:
+                            time.sleep(60)
+                            continue
+                        else:
+                            print('build failed')
+                            sys.exit(1)
         break
     for r, d, f in os.walk(output_dir):
         for rpm_pkg in f:
