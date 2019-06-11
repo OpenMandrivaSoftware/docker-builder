@@ -258,7 +258,7 @@ def build_rpm():
         try:
             # mock --init --configdir /etc/mock/ --install $(ls "$OUTPUT_FOLDER"/*.rpm | grep -v .src.rpm) >> "${test_log}".tmp 2>&1
 #            print(' '.join(only_rpms))
-            subprocess.check_output([mock_binary, '--init', '--configdir', mock_config, '--install', ' '.join(only_rpms)])
+            subprocess.check_output([mock_binary, '--init', '--configdir', mock_config, '--install'] + list(only_rpms))
         except subprocess.CalledProcessError as e:
             print(e)
             # tests failed
