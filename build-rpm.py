@@ -18,8 +18,16 @@ package = os.environ.get('PACKAGE')
 git_repo = os.environ.get('GIT_REPO')
 build_package = get_home + '/' + package
 project_version = os.environ.get('PROJECT_VERSION')
-extra_build_src_rpm_options = os.environ.get('EXTRA_BUILD_SRC_RPM_OPTIONS')
-extra_build_rpm_options = os.environ.get('EXTRA_BUILD_RPM_OPTIONS')
+
+if os.environ.get("EXTRA_BUILD_SRC_RPM_OPTIONS") is None:
+    extra_build_src_rpm_options = ''
+else:
+    extra_build_src_rpm_options = os.environ.get('EXTRA_BUILD_SRC_RPM_OPTIONS')
+if os.environ.get("EXTRA_BUILD_RPM_OPTIONS") is None:
+    extra_build_rpm_options = ''
+else:
+    extra_build_rpm_options = os.environ.get('EXTRA_BUILD_RPM_OPTIONS')
+
 # e.g. /home/omv/htop
 # print(build_package)
 
@@ -38,9 +46,6 @@ root_log = output_dir + '/root.log'
 spec_name = []
 rpm_packages = []
 src_rpm = []
-# only rpms mean that here only arch.rpm packages
-# and not src.rpm
-only_rpms = set(rpm_packages) - set(src_rpm)
 
 def download_hash(hashsum):
     fstore_json_url = '{}/api/v1/file_stores.json?hash={}'.format(
@@ -201,10 +206,6 @@ def build_rpm():
     tries = 3
     # pattern for retry
     pattern_for_retry = 'No matching package to install: (.*)'
-    if os.environ.get("EXTRA_BUILD_SRC_RPM_OPTIONS") is None:
-        extra_build_src_rpm_options = ''
-    if os.environ.get("EXTRA_BUILD_RPM_OPTIONS") is None:
-        extra_build_rpm_options = ''
     try:
         subprocess.check_output([mock_binary, '-v', '--update', '--configdir', mock_config, '--buildsrpm', '--spec=' + build_package + '/' + spec_name[0], '--source=' + build_package, '--no-cleanup-after', extra_build_src_rpm_options,
                                  '--resultdir=' + output_dir])
@@ -247,8 +248,21 @@ def build_rpm():
         for rpm_pkg in f:
             if '.rpm' in rpm_pkg:
                 rpm_packages.append(output_dir + '/' + rpm_pkg)
+    # rpm packages
     print(rpm_packages)
     container_data()
+    # only rpms mean that here only arch.rpm packages
+    # and not src.rpm
+    only_rpms = set(rpm_packages) - set(src_rpm)
+    if os.environ.get("USE_EXTRA_TESTS"):
+        try:
+            # mock --init --configdir /etc/mock/ --install $(ls "$OUTPUT_FOLDER"/*.rpm | grep -v .src.rpm) >> "${test_log}".tmp 2>&1
+#            print(' '.join(only_rpms))
+            subprocess.check_output([mock_binary, '--init', '--configdir', mock_config, '--install', ' '.join(only_rpms)])
+        except subprocess.CalledProcessError as e:
+            print(e)
+            # tests failed
+            sys.exit(5)
 
 
 
