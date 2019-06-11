@@ -60,11 +60,12 @@ def download_hash(hashsum):
         page = resp.content.decode('utf-8')
         page2 = json.loads(page)
         name = page2[0]['file_name']
-        download_file = requests.get(fstore_file_url)
+        download_file = requests.get(fstore_file_url, stream=True)
         source_tarball = build_package + '/' + name
         with open(source_tarball, 'wb') as f:
-            f.write(download_file.content)
-
+            for chunk in download_file.iter_content(chunk_size=512):
+                if chunk:
+                    f.write(chunk)
 
 def validate_spec(path):
     spec_counter = len([f for f in os.listdir(path) if f.endswith('.spec')])
