@@ -163,8 +163,7 @@ def validate_exclusive(srpm):
 def container_data():
     ts = rpm.ts()
     multikeys = []
-#    rpm_packages = ['/home/fdrt/output/lib64png16_16-1.6.36-3-omv4000.x86_64.rpm']
-    deps = ''
+#    rpm_packages = ['/home/fdrt/output/libinput10-1.13.2-1-omv4000.i686.rpm']
     for pkg in rpm_packages:
         # Do not check src.srm
         if os.path.basename(pkg).endswith("src.rpm"):
@@ -185,7 +184,8 @@ def container_data():
             full_list = dependencies.decode().split('\n')
         except subprocess.CalledProcessError:
             print('some problem with dnf repoquery for %s' % name )
-        package_info = dict([('name', name), ('version', version), ('release', release), ('epoch', epoch), ('fullname', pkg), ('sha1', shasum), ('dependent_packages', ' '.join(full_list))])
+        package_info = dict([('name', name), ('version', version), ('release', release), ('epoch', epoch), ('fullname', pkg.split('/'[-1])), ('sha1', shasum), ('dependent_packages', ' '.join(full_list))])
+
 #        print(package_info)
         app_json = json.dumps(package_info, sort_keys=True, indent=4)
         multikeys.append(package_info)
@@ -244,6 +244,7 @@ def build_rpm():
         for rpm_pkg in f:
             if '.rpm' in rpm_pkg:
                 rpm_packages.append(output_dir + '/' + rpm_pkg)
+    print(rpm_packages)
     container_data()
 
 
@@ -269,6 +270,6 @@ clone_repo(git_repo, project_version)
 validate_spec(build_package)
 download_yml(build_package + '/' + '.abf.yml')
 build_rpm()
-container_data()
+#container_data()
 #validate_exclusive('get-skypeforlinux-8.44.0.40-1.src.rpm')
 #validate_exclusive('/home/fdrt/output/dos2unix-7.4.0-1.src.rpm')
