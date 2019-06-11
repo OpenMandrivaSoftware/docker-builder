@@ -236,6 +236,8 @@ def build_rpm():
                             continue
                         else:
                             print('build failed')
+                            # /usr/bin/python /mdv/check_error.py --file "${OUTPUT_FOLDER}"/root.log >> ~/build_fail_reason.log
+                            # add here check_error.py
                             sys.exit(1)
         break
     for r, d, f in os.walk(output_dir):
@@ -255,14 +257,14 @@ def cleanup_all():
     remove_if_exist('/var/lib/mock/')
     # probably need to drop it and point in mock
 #    remove_if_exist('/var/cache/mock/')
-    remove_if_exist('/var/cache/dnf/')
+#    remove_if_exist('/var/cache/dnf/')
     # /home/omv/package_name
     remove_if_exist(build_package)
     remove_if_exist('/home/omv/build_fail_reason.log')
     remove_if_exist(output_dir)
 
 
-#cleanup_all()
+cleanup_all()
 clone_repo(git_repo, project_version)
 validate_spec(build_package)
 download_yml(build_package + '/' + '.abf.yml')
