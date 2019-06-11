@@ -202,6 +202,62 @@ def container_data():
     with open(c_data, 'w') as out_json:
         json.dump(multikeys, out_json, sort_keys=True, indent=4)
 
+def extra_tests():
+    only_rpms = set(rpm_packages) - set(src_rpm)
+    # check_package
+    try:
+        # mock --init --configdir /etc/mock/ --install $(ls "$OUTPUT_FOLDER"/*.rpm | grep -v .src.rpm) >> "${test_log}".tmp 2>&1
+#        print(' '.join(only_rpms))
+        subprocess.check_output([mock_binary, '--init', '--configdir', mock_config, '--install'] + list(only_rpms))
+    except subprocess.CalledProcessError as e:
+        print('failed to install packages')
+        print(e)
+        # tests failed
+        sys.exit(5)
+    # stage2
+    # check versions
+    # here only rpm packages, not debuginfo
+    skip_debuginfo = [s for s in only_rpms if "debuginfo" not in s]
+    ts = rpm.ts()
+    try:
+        for pkg in skip_debuginfo:
+            fdno = os.open(pkg, os.O_RDONLY)
+            hdr = ts.hdrFromFdno(fdno)
+            name = hdr['name'].decode('utf-8')
+            version = hdr['version'].decode('utf-8')
+            release = hdr['release'].decode('utf-8')
+            if hdr['epoch']:
+                epoch = hdr['epoch'].decode('utf-8')
+            else:
+                epoch = 0
+            evr = '{}:{}-{}'.format(epoch, version, release)
+            check_string = 'LC_ALL=C dnf repoquery -q --qf %{{EPOCH}}:%{{VERSION}}-%{{RELEASE}} --latest-limit=1 {}'.format(name)
+            inrepo_version = subprocess.check_output([mock_binary, '--quiet', '--shell', check_string]).decode('utf-8')
+            # rpmdev-vercmp 0:7.4.0-1 0:7.4.0-1
+            if inrepo_version:
+                print(inrepo_version)
+            else:
+                inrepo_version = 0
+            try:
+                print('run rpmdev-vercmp %s %s' % (evr, str(inrepo_version)))
+                a = subprocess.check_call(['rpmdev-vercmp', evr, str(inrepo_version)])
+                if a == 0:
+                    print('Package {} is either the same, older, or another problem. Extra tests failed'.format(name))
+                    sys.exit(5)
+            except subprocess.CalledProcessError as e:
+                exit_code = e.returncode
+                if exit_code == 11:
+                    print('package newer than in repo')
+                    sys.exit(0)
+                print('package older, same or other issue')
+                sys.exit(5)
+
+
+    except subprocess.CalledProcessError as e:
+        print(e)
+        print('failed to check packages')
+        sys.exit(5)
+
 
 def build_rpm():
     tries = 3
@@ -254,16 +310,8 @@ def build_rpm():
     container_data()
     # only rpms mean that here only arch.rpm packages
     # and not src.rpm
-    only_rpms = set(rpm_packages) - set(src_rpm)
     if os.environ.get("USE_EXTRA_TESTS"):
-        try:
-            # mock --init --configdir /etc/mock/ --install $(ls "$OUTPUT_FOLDER"/*.rpm | grep -v .src.rpm) >> "${test_log}".tmp 2>&1
-#            print(' '.join(only_rpms))
-            subprocess.check_output([mock_binary, '--init', '--configdir', mock_config, '--install'] + list(only_rpms))
-        except subprocess.CalledProcessError as e:
-            print(e)
-            # tests failed
-            sys.exit(5)
+        extra_tests()
 
 
 
