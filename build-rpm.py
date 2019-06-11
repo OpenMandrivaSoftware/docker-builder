@@ -38,6 +38,9 @@ root_log = output_dir + '/root.log'
 spec_name = []
 rpm_packages = []
 src_rpm = []
+# only rpms mean that here only arch.rpm packages
+# and not src.rpm
+only_rpms = set(rpm_packages) - set(src_rpm)
 
 def download_hash(hashsum):
     fstore_json_url = '{}/api/v1/file_stores.json?hash={}'.format(
