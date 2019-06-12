@@ -63,7 +63,7 @@ def download_hash(hashsum):
         download_file = requests.get(fstore_file_url, stream=True)
         source_tarball = build_package + '/' + name
         with open(source_tarball, 'wb') as f:
-            for chunk in download_file.iter_content(chunk_size=512):
+            for chunk in download_file.iter_content(chunk_size=1048576):
                 if chunk:
                     f.write(chunk)
 
@@ -143,8 +143,8 @@ def hash_file(rpm):
         # loop till the end of the file
         chunk = 0
         while chunk != b'':
-            # read only 1024 bytes at a time
-            chunk = file.read(1024)
+            # read only 1 Mbyte at a time
+            chunk = file.read(1048576)
             h.update(chunk)
     # return the hex representation of digest
     return h.hexdigest()
@@ -251,8 +251,6 @@ def extra_tests():
                     sys.exit(0)
                 print('package older, same or other issue')
                 sys.exit(5)
-
-
     except subprocess.CalledProcessError as e:
         print(e)
         print('failed to check packages')
