@@ -193,7 +193,7 @@ def container_data():
             full_list = dependencies.decode().split('\n')
         except subprocess.CalledProcessError:
             print('some problem with dnf repoquery for %s' % name )
-        package_info = dict([('name', name), ('version', version), ('release', release), ('epoch', epoch), ('fullname', pkg.split('/'[-1])), ('sha1', shasum), ('dependent_packages', ' '.join(full_list))])
+        package_info = dict([('name', name), ('version', version), ('release', release), ('epoch', epoch), ('fullname', pkg.split('/')[-1]), ('sha1', shasum), ('dependent_packages', ' '.join(full_list))])
 
 #        print(package_info)
         app_json = json.dumps(package_info, sort_keys=True, indent=4)
