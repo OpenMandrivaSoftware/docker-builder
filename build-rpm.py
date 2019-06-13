@@ -208,7 +208,7 @@ def extra_tests():
     try:
         # mock --init --configdir /etc/mock/ --install $(ls "$OUTPUT_FOLDER"/*.rpm | grep -v .src.rpm) >> "${test_log}".tmp 2>&1
 #        print(' '.join(only_rpms))
-        subprocess.check_output([mock_binary, '--init', '--configdir', mock_config, '--install'] + list(only_rpms))
+        subprocess.check_call([mock_binary, '--init', '--configdir', mock_config, '--install'] + list(only_rpms))
     except subprocess.CalledProcessError as e:
         print('failed to install packages')
         print(e)
@@ -278,7 +278,7 @@ def build_rpm():
     for i in range(tries):
         try:
             if os.environ.get("EXTRA_BUILD_RPM_OPTIONS") is None:
-                subprocess.check_output([mock_binary, '-v', '--update', '--configdir', mock_config, '--rebuild', src_rpm[0], '--no-cleanup-after', '--no-clean', '--resultdir=' + output_dir])
+                subprocess.check_call([mock_binary, '-v', '--update', '--configdir', mock_config, '--rebuild', src_rpm[0], '--no-cleanup-after', '--no-clean', '--resultdir=' + output_dir])
             else:
                 subprocess.check_output([mock_binary, '-v', '--update', '--configdir', mock_config, '--rebuild', src_rpm[0], '--no-cleanup-after', '--no-clean', extra_build_rpm_options, '--resultdir=' + output_dir])
         except subprocess.CalledProcessError as e:
@@ -293,11 +293,14 @@ def build_rpm():
                         if i < tries - 1:
                             time.sleep(60)
                             continue
-                        else:
-                            print('build failed')
-                            # /usr/bin/python /mdv/check_error.py --file "${OUTPUT_FOLDER}"/root.log >> ~/build_fail_reason.log
-                            # add here check_error.py
-                            sys.exit(1)
+                    else:
+                        print('build failed')
+                        # /usr/bin/python /mdv/check_error.py --file "${OUTPUT_FOLDER}"/root.log >> ~/build_fail_reason.log
+                        # add here check_error.py
+                        sys.exit(1)
+            else:
+                print('exit')
+                sys.exit(1)
         break
     for r, d, f in os.walk(output_dir):
         for rpm_pkg in f:
