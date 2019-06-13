@@ -259,6 +259,7 @@ def extra_tests():
 
 
 def build_rpm():
+    config_generator.generate_config()
     tries = 3
     # pattern for retry
     pattern_for_retry = 'No matching package to install: (.*)'

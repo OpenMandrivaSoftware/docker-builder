@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import os
+import sys
 common_string = """
 config_opts['yum.conf'] = \"\"\"
 [main]
@@ -69,7 +70,7 @@ def generate_config():
 
     print_conf("config_opts['root'] = '%s-%s'" %
                (platform_name, platform_arch))
-    print_conf("config_opts['chroot_setup_cmd'] = ('install', 'basesystem-minimal', 'locales', 'locales-en', 'distro-release-OpenMandriva', 'gnupg', 'shadow', 'rpm-build', 'glibc-devel' ,'wget', 'task-devel', 'openmandriva-repos-pkgprefs', 'rpmlint-distro-policy', 'dwz')")
+    print_conf("config_opts['chroot_setup_cmd'] = ('install', 'basesystem-minimal', 'locales', 'locales-en', 'distro-release-OpenMandriva', 'gnupg', 'shadow', 'rpm-build', 'glibc-devel' ,'wget', 'task-devel', 'openmandriva-repos-pkgprefs', 'rpmlint-distro-policy', 'dwz', 'dnf')")
     print_conf("config_opts['package_manager'] = 'dnf'")
     print_conf(
         "config_opts['dnf_common_opts'] = ['--refresh', '--disableplugin=local', '--setopt=deltarpm=False', '--forcearch=%s']" % platform_arch)
@@ -126,6 +127,3 @@ def generate_config():
     print_conf("\n".join("[{}]\nname={}\nbaseurl={}{}\ngpgcheck=0\nenabled=1\n".format(
         k, k, k[:0], v) for k, v in repo_conf.items()))
     print_conf('"""')
-
-
-generate_config()
