@@ -11,6 +11,7 @@ import hashlib
 import io
 import mmap
 import re
+import config_generator
 
 
 get_home = os.environ.get('HOME')
@@ -235,7 +236,7 @@ def extra_tests():
             inrepo_version = subprocess.check_output([mock_binary, '--quiet', '--shell', check_string]).decode('utf-8')
             # rpmdev-vercmp 0:7.4.0-1 0:7.4.0-1
             if inrepo_version:
-                print(inrepo_version)
+                print('repo version is: %s' % inrepo_version)
             else:
                 inrepo_version = 0
             try:
@@ -299,7 +300,6 @@ def build_rpm():
                         # add here check_error.py
                         sys.exit(1)
             else:
-                print('exit')
                 sys.exit(1)
         break
     for r, d, f in os.walk(output_dir):
