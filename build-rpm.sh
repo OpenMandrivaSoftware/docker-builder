@@ -7,13 +7,11 @@ cleanup() {
 	sudo rm -fv /etc/mock/default.cfg
 	sudo rm -rf /var/lib/mock/*
 #	sudo rm -rf /var/cache/mock/*
-  sudo rm -rf  /var/cache/mock/*-${platform_arch}/dnf_cache/
+	sudo rm -rf  /var/cache/mock/*-${platform_arch}/dnf_cache/
 	sudo rm -rf /var/cache/dnf/*
-
 	# unmask/mask both, we need to keep logs
 	#rm -rf ${HOME}/output/
 	#rm -fv ~/build_fail_reason.log
-
 	# (tpg) remove package
 	sudo rm -rf "${HOME}"/"${PACKAGE:?}"
 }
@@ -31,7 +29,6 @@ config_dir=/etc/mock/
 # e.g. github.com/OpenMandrivaAssociation/htop
 build_package="${HOME}"/"$PACKAGE"
 OUTPUT_FOLDER="${HOME}"/output
-
 filestore_url="http://file-store.openmandriva.org/api/v1/file_stores"
 platform_arch="$PLATFORM_ARCH"
 platform_name=${PLATFORM_NAME:-"openmandriva"}
@@ -140,28 +137,6 @@ setup_cache() {
 }
 
 
-arm_platform_detector(){
-	probe_cpu() {
-		# probe cpu type
-		cpu="$(uname -m)"
-		case "$cpu" in
-		i386|i486|i586|i686|i86pc|znver1_32|BePC|x86_64|znver1)
-			cpu="i386"
-			;;
-		armv[4-9]*)
-			cpu="arm"
-			;;
-		aarch64)
-			cpu="aarch64"
-			;;
-		riscv64)
-			cpu="riscv64"
-			;;
-		esac
-	}
-	probe_cpu
-}
-
 test_rpm() {
 	# Rerun tests
 	PACKAGES=${packages}
@@ -202,23 +177,19 @@ test_rpm() {
 	fi
 
 	printf '%s\n' '--> Checking if rpm packages can be installed.' >> $test_log
-
 	sudo rm -rf /var/cache/dnf/*
 	sudo rm -rf /var/lib/mock/"${platform_name:?}"-"${platform_arch:?}"/
 	mock --init --configdir /etc/mock/ $OUTPUT_FOLDER/*.src.rpm >> "${test_log}".tmp
 	mock --init --configdir /etc/mock/ --install $(ls "$OUTPUT_FOLDER"/*.rpm | grep -v .src.rpm) >> "${test_log}".tmp 2>&1
 	CHROOT_PATH="$(mock --print-root-path)"
-
 	cat "$test_log".tmp >> "${test_log}"
 	printf '%s\n' "--> Tests finished at $(date -u)" >> "$test_log"
 	printf '%s\n' "Test code output: $test_code" >> "$test_log" 2>&1
 	if [ "${test_code}" = '0' ] && [ "$use_extra_tests" = 'true' ]; then
 		printf '%s\n' '--> Checking if same or older version of the package already exists in repositories' >> "${test_log}"
-
 		for i in $(ls "${OUTPUT_FOLDER}" | grep .rpm); do
 			RPM_NAME=$(rpm -qp --qf "%{NAME}" "${OUTPUT_FOLDER}"/"$i")
 			RPM_EPOCH=$(rpm -qp --qf "%{EPOCH}" "${OUTPUT_FOLDER}"/"$i")
-
 			[ "${RPM_EPOCH}" = '(none)' ] && RPM_EPOCH='0'
 			RPM_VERREL=$(rpm -qp --qf "%{VERSION}-%{RELEASE}" "${OUTPUT_FOLDER}"/"$i")
 			RPM_EVR="${RPM_EPOCH}:${RPM_VERREL}"
@@ -248,7 +219,6 @@ test_rpm() {
 		done
 	fi
 	rm -f "${test_log}".tmp
-
 	# Check exit code after testing
 	if [ "${test_code}" != '0' ]; then
 		printf '%s\n' '--> Test failed, see: tests.log'
@@ -262,9 +232,7 @@ test_rpm() {
 }
 
 build_rpm() {
-	arm_platform_detector
 	sudo touch -d "23 hours ago" $config_dir/default.cfg
-
 	# We will rerun the build in case when repository is modified in the middle,
 	# but for safety let's limit number of retest attempts
 	# (since in case when repository metadata is really broken we can loop here forever)
