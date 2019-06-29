@@ -11,7 +11,7 @@ RUN dnf --nogpgcheck --refresh --assumeyes --nodocs --setopt=install_weak_deps=F
  && adduser omv \
  && usermod -a -G mock omv \
  && chown -R omv:mock /etc/mock \
- && dnf reinstall locales-en \
+ && dnf reinstall -y locales-en \
  && dnf --assumeyes autoremove \
  && dnf clean all \
  && rm -rf /var/cache/dnf/* \
