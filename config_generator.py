@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+import time
+from stat import *
 import os
 import sys
 common_string = """
@@ -127,3 +129,13 @@ def generate_config():
     print_conf("\n".join("[{}]\nname={}\nbaseurl={}{}\ngpgcheck=0\nenabled=1\n".format(
         k, k, k[:0], v) for k, v in repo_conf.items()))
     print_conf('"""')
+    # it's a hack to modify time of /etc/mock/default.cfg
+    # to prevent root cache recreation
+    # and yes, mock recreates whole cache
+    # if default.cfg were changed
+    st = os.stat(conf)
+    atime = st[ST_ATIME] #access time
+    mtime = st[ST_MTIME] #modification time
+    # rebuild cache every 4 hours
+    new_mtime = mtime - (4*3600)
+    os.utime(conf,(atime,new_mtime))
