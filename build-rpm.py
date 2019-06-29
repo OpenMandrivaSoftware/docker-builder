@@ -275,6 +275,7 @@ def relaunch_tests():
     try:
         print(list(rpm_packages))
         subprocess.check_call([mock_binary, '--init', '--configdir', mock_config, '--install'] + list(rpm_packages))
+        print('packages %s installed successfully' % list(rpm_packages))
     except subprocess.CalledProcessError as e:
         print('failed to rerun tests')
         print(e)
