@@ -29,11 +29,11 @@ if os.environ.get("EXTRA_BUILD_RPM_OPTIONS") is None:
 else:
     extra_build_rpm_options = os.environ.get('EXTRA_BUILD_RPM_OPTIONS')
 
-# e.g. /home/omv/htop
-# print(build_package)
 
 platform_arch = os.getenv('PLATFORM_ARCH')
 platform_name = os.getenv('PLATFORM_NAME')
+rerun_tests = os.environ.get('RERUN_TESTS')
+print('rerun tests is %s' % rerun_tests)
 
 # static
 # /home/omv/output
@@ -257,6 +257,29 @@ def extra_tests():
         print('failed to check packages')
         sys.exit(5)
 
+def relaunch_tests():
+    config_generator.generate_config()
+    # clone repo and generate config
+    clone_repo(git_repo, project_version)
+    print(os.environ.keys())
+    packages = os.getenv('PACKAGES')
+    for package in packages.split():
+        print('downloading {}'.format(package))
+        # download packages to /home/omv/pkg_name/
+        download_hash(package)
+        # build package is /home/omv/pkg_name
+    for r, d, f in os.walk(build_package):
+        for rpm_pkg in f:
+             if '.rpm' in rpm_pkg:
+                 rpm_packages.append(build_package + '/' + rpm_pkg)
+    try:
+        print(list(rpm_packages))
+        subprocess.check_call([mock_binary, '--init', '--configdir', mock_config, '--install'] + list(rpm_packages))
+    except subprocess.CalledProcessError as e:
+        print('failed to rerun tests')
+        print(e)
+        sys.exit(5)
+
 
 def build_rpm():
     config_generator.generate_config()
@@ -264,7 +287,7 @@ def build_rpm():
     # pattern for retry
     pattern_for_retry = 'No matching package to install: (.*)'
     try:
-        subprocess.check_output([mock_binary, '-v', '--update', '--configdir', mock_config, '--buildsrpm', '--spec=' + build_package + '/' + spec_name[0], '--source=' + build_package, '--no-cleanup-after', extra_build_src_rpm_options,
+        subprocess.check_output([mock_binary, '--update', '--configdir', mock_config, '--buildsrpm', '--spec=' + build_package + '/' + spec_name[0], '--source=' + build_package, '--no-cleanup-after', extra_build_src_rpm_options,
                                  '--resultdir=' + output_dir])
     except subprocess.CalledProcessError as e:
         print(e)
@@ -280,9 +303,9 @@ def build_rpm():
     for i in range(tries):
         try:
             if os.environ.get("EXTRA_BUILD_RPM_OPTIONS") == '':
-                subprocess.check_call([mock_binary, '-v', '--update', '--configdir', mock_config, '--rebuild', src_rpm[0], '--no-cleanup-after', '--no-clean', '--resultdir=' + output_dir])
+                subprocess.check_call([mock_binary, '--update', '--configdir', mock_config, '--rebuild', src_rpm[0], '--no-cleanup-after', '--no-clean', '--resultdir=' + output_dir])
             else:
-                subprocess.check_output([mock_binary, '-v', '--update', '--configdir', mock_config, '--rebuild', src_rpm[0], '--no-cleanup-after', '--no-clean', extra_build_rpm_options, '--resultdir=' + output_dir])
+                subprocess.check_output([mock_binary, '--update', '--configdir', mock_config, '--rebuild', src_rpm[0], '--no-cleanup-after', '--no-clean', extra_build_rpm_options, '--resultdir=' + output_dir])
         except subprocess.CalledProcessError as e:
             print(e)
             sz = os.path.getsize(root_log)
@@ -333,11 +356,12 @@ def cleanup_all():
     remove_if_exist(output_dir)
 
 
-cleanup_all()
-clone_repo(git_repo, project_version)
-validate_spec(build_package)
-download_yml(build_package + '/' + '.abf.yml')
-build_rpm()
-#container_data()
-#validate_exclusive('get-skypeforlinux-8.44.0.40-1.src.rpm')
-#validate_exclusive('/home/fdrt/output/dos2unix-7.4.0-1.src.rpm')
+if __name__ == '__main__':
+    if rerun_tests == 'true':
+        relaunch_tests()
+    else:
+        cleanup_all()
+        clone_repo(git_repo, project_version)
+        validate_spec(build_package)
+        download_yml(build_package + '/' + '.abf.yml')
+        build_rpm()
