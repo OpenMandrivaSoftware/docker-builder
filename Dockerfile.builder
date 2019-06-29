@@ -5,12 +5,13 @@ RUN dnf --nogpgcheck --refresh --assumeyes --nodocs --setopt=install_weak_deps=F
  && rm -f /etc/localtime \
  && ln -s /usr/share/zoneinfo/UTC /etc/localtime \
  && dnf --nogpgcheck --assumeyes --setopt=install_weak_deps=False --nodocs install mock git coreutils curl sudo builder-c procps-ng tar \
- findutils util-linux wget rpmdevtools sed grep xz gnupg hostname \
+ findutils util-linux wget rpmdevtools sed grep xz gnupg hostname python-yaml \
  && sed -i -e "s/Defaults    requiretty.*/ #Defaults    requiretty/g" /etc/sudoers \
  && echo "%mock ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers \
  && adduser omv \
  && usermod -a -G mock omv \
  && chown -R omv:mock /etc/mock \
+ && dnf reinstall locales-en \
  && dnf --assumeyes autoremove \
  && dnf clean all \
  && rm -rf /var/cache/dnf/* \
