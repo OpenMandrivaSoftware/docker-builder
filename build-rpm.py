@@ -337,6 +337,9 @@ def build_rpm():
                         if i < tries - 1:
                             time.sleep(60)
                             continue
+                        else:
+                            # exit if no success after 3 attempts
+                            sys.exit(1)
                     else:
                         print('build failed')
                         # /usr/bin/python /mdv/check_error.py --file "${OUTPUT_FOLDER}"/root.log >> ~/build_fail_reason.log
