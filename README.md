@@ -9,7 +9,10 @@ Create builder image:
 
 ```bash
 cd docker-builder
-docker build --tag=openmandriva/builder --file $HOME/docker-builder/Dockerfile.builder .
+```
+
+```bash
+sudo sh docker-brew-openmandriva/mkimage-dnf.sh --rootfs=/tmp/ --version=cooker --arch=x86_64 --with-builder
 ```
 
 ## Remove stopped containers
@@ -19,36 +22,54 @@ docker rm -v $(docker ps -a -q -f status=exited)
 
 ## Run abf builder
 ```bash
-docker run -ti --rm --privileged=true -h <yourname>.openmandriva.org -e BUILD_TOKEN="your_token" \
-	-e BUILD_ARCH="x86_64 armv7hl i586 i686 aarch64" \
-	 -e BUILD_PLATFORM="cooker" openmandriva/builder
+docker run -ti --rm --privileged=true -h <yourname>.openmandriva.org \
+        -e BUILD_TOKEN="your_token" \
+        -e BUILD_ARCH="x86_64 armv7hl i586 i686 aarch64" \
+        -e BUILD_PLATFORM="cooker,4.0,rolling,rock" openmandriva/builder
 ```
 
-## Prepare Environment
-## ARMv7
-
-Add file
+## How to run ARMx or RISCV  builder
+Install QEMU
+```bash
+sudo dnf install qemu qemu-riscv64-static qemu-riscv64-static qemu-arm-static qemu-aarch64-static
+```
+Restart binfmt service
+```bash
+sudo systemctl restart systemd-binfmt
+```
+Run builder
 
 ```bash
-/etc/binfmt.d/arm.conf
+docker run -ti --rm --privileged=true -h <yourname>.openmandriva.org \
+        -e BUILD_TOKEN="your_token" \
+        -e BUILD_ARCH="riscv64" \
+        -e BUILD_PLATFORM="cooker,4.0,rolling,rock" openmandriva/builder
 ```
-```bash
-:arm:M::\x7fELF\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x28\x00:\xff\xff\xff\xff\xff\xff\xff\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff:/usr/bin/qemu-arm-binfmt:P
-```
-and this file
 
-## ARM64 (aarch64)
+## How to run build-rpm.py without docker
+* cook enviroment [enviroment](https://github.com/OpenMandrivaSoftware/docker-builder/blob/master/Dockerfile.builder#L6)
+* install mock
 ```bash
-/etc/binfmt.d/aarch64.conf
+sudo dnf install -y mock
 ```
 ```bash
-:aarch64:M::\x7fELF\x02\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\xb7\x00:\xff\xff\xff\xff\xff\xff\xff\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff:/usr/bin/qemu-aarch64-binfmt:P
+sudo echo "%mock ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+sudo usermod -a -G mock $USER
+sudo chown -R $USER:mock /etc/mock
+sudo dnf install -y mock git coreutils curl sudo rpmdevtools python-yaml
 ```
-Then you need to restart binfmt service
+
 
 ```bash
-systemctl restart systemd-binfmt.service
+PACKAGE=htop GIT_REPO=git://github.com/OpenMandrivaAssociation/htop.git \
+USE_EXTRA_TESTS=true PLATFORM_ARCH=x86_64 PLATFORM_NAME=cooker \
+UNAME=fdrt EMAIL=fdrt@fdrt.com USE_MOCK_CACHE= EXTRA_CFG_OPTIONS= \
+REPO_NAMES='cooker_main_release cooker_main_updates' \
+REPO_URL='http://abf-downloads.openmandriva.org/cooker/repository/x86_64/main/release \
+http://abf-downloads.openmandriva.org/cooker/repository/x86_64/main/updates'\
+PROJECT_VERSION=master /usr/bin/python build-rpm.py
 ```
-screencast:
-
-[![demo](https://asciinema.org/a/9c5mzq43h15kmeg4roiq8yvok.png)](https://asciinema.org/a/9c5mzq43h15kmeg4roiq8yvok?autoplay=1)
+## How to remove stopped containers
+```bash
+docker rm -v $(docker ps -a -q -f status=exited)
+```
