@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import os
+import shutil
 import subprocess
 import yaml
 import requests
@@ -343,6 +344,10 @@ def build_rpm():
 
 def cleanup_all():
     print('Cleaning up...')
+    # wipe letfovers
+    for dirpath, dirnames, filenames in os.walk(get_home):
+        for name in dirnames:
+            shutil.rmtree(os.path.join(dirpath, name))
     # files
     remove_if_exist('/etc/rpm/platform')
 #    remove_if_exist('/etc/mock/default.cfg')
