@@ -261,7 +261,7 @@ def relaunch_tests():
     config_generator.generate_config()
     # clone repo and generate config
     clone_repo(git_repo, project_version)
-    print(os.environ.keys())
+    # print(os.environ.keys())
     packages = os.getenv('PACKAGES')
     for package in packages.split():
         print('downloading {}'.format(package))
