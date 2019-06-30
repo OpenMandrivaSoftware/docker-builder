@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 import os
 import shutil
 import subprocess
@@ -49,6 +50,7 @@ spec_name = []
 rpm_packages = []
 src_rpm = []
 
+
 def download_hash(hashsum):
     fstore_json_url = '{}/api/v1/file_stores.json?hash={}'.format(
         file_store_base, hashsum)
@@ -68,6 +70,7 @@ def download_hash(hashsum):
             for chunk in download_file.iter_content(chunk_size=1048576):
                 if chunk:
                     f.write(chunk)
+
 
 def validate_spec(path):
     spec_counter = len([f for f in os.listdir(path) if f.endswith('.spec')])
@@ -123,8 +126,10 @@ def clone_repo(git_repo, project_version):
     tries = 5
     for i in range(tries):
         try:
-            print('cloning [{}], branch: [{}] to [{}]'.format(git_repo, project_version, build_package))
-            subprocess.check_output(['/usr/bin/git', 'clone', '-b', project_version, '--depth', '100', git_repo, build_package])
+            print('cloning [{}], branch: [{}] to [{}]'.format(
+                git_repo, project_version, build_package))
+            subprocess.check_output(
+                ['/usr/bin/git', 'clone', '-b', project_version, '--depth', '100', git_repo, build_package])
         except subprocess.CalledProcessError:
             if i < tries - 1:
                 time.sleep(5)
@@ -185,17 +190,19 @@ def container_data():
         version = hdr['version'].decode('utf-8')
         release = hdr['release'].decode('utf-8')
         if hdr['epoch']:
-            epoch = hdr['epoch'].decode('utf-8')
+            epoch = hdr['epoch']
         else:
             epoch = 0
         shasum = hash_file(pkg)
         try:
-            dependencies = subprocess.check_output(['dnf', 'repoquery', '-q', '--latest-limit=1', '--qf', '%{NAME}', '--whatrequires', name])
+            dependencies = subprocess.check_output(
+                ['dnf', 'repoquery', '-q', '--latest-limit=1', '--qf', '%{NAME}', '--whatrequires', name])
             # just a list of deps
             full_list = dependencies.decode().split('\n')
         except subprocess.CalledProcessError:
-            print('some problem with dnf repoquery for %s' % name )
-        package_info = dict([('name', name), ('version', version), ('release', release), ('epoch', epoch), ('fullname', pkg.split('/')[-1]), ('sha1', shasum), ('dependent_packages', ' '.join(full_list))])
+            print('some problem with dnf repoquery for %s' % name)
+        package_info = dict([('name', name), ('version', version), ('release', release), ('epoch', epoch), (
+            'fullname', pkg.split('/')[-1]), ('sha1', shasum), ('dependent_packages', ' '.join(full_list))])
 
 #        print(package_info)
         app_json = json.dumps(package_info, sort_keys=True, indent=4)
@@ -204,13 +211,15 @@ def container_data():
     with open(c_data, 'w') as out_json:
         json.dump(multikeys, out_json, sort_keys=True, indent=4)
 
+
 def extra_tests():
     only_rpms = set(rpm_packages) - set(src_rpm)
     # check_package
     try:
         # mock --init --configdir /etc/mock/ --install $(ls "$OUTPUT_FOLDER"/*.rpm | grep -v .src.rpm) >> "${test_log}".tmp 2>&1
-#        print(' '.join(only_rpms))
-        subprocess.check_call([mock_binary, '--init', '--configdir', mock_config, '--install'] + list(only_rpms))
+        #        print(' '.join(only_rpms))
+        subprocess.check_call(
+            [mock_binary, '--init', '--configdir', mock_config, '--install'] + list(only_rpms))
     except subprocess.CalledProcessError as e:
         print('failed to install packages')
         print(e)
@@ -233,8 +242,10 @@ def extra_tests():
             else:
                 epoch = 0
             evr = '{}:{}-{}'.format(epoch, version, release)
-            check_string = 'LC_ALL=C dnf repoquery -q --qf %{{EPOCH}}:%{{VERSION}}-%{{RELEASE}} --latest-limit=1 {}'.format(name)
-            inrepo_version = subprocess.check_output([mock_binary, '--quiet', '--shell', check_string]).decode('utf-8')
+            check_string = 'LC_ALL=C dnf repoquery -q --qf %{{EPOCH}}:%{{VERSION}}-%{{RELEASE}} --latest-limit=1 {}'.format(
+                name)
+            inrepo_version = subprocess.check_output(
+                [mock_binary, '--quiet', '--shell', check_string]).decode('utf-8')
             # rpmdev-vercmp 0:7.4.0-1 0:7.4.0-1
             if inrepo_version:
                 print('repo version is: %s' % inrepo_version)
@@ -242,9 +253,11 @@ def extra_tests():
                 inrepo_version = 0
             try:
                 print('run rpmdev-vercmp %s %s' % (evr, str(inrepo_version)))
-                a = subprocess.check_call(['rpmdev-vercmp', evr, str(inrepo_version)])
+                a = subprocess.check_call(
+                    ['rpmdev-vercmp', evr, str(inrepo_version)])
                 if a == 0:
-                    print('Package {} is either the same, older, or another problem. Extra tests failed'.format(name))
+                    print(
+                        'Package {} is either the same, older, or another problem. Extra tests failed'.format(name))
                     sys.exit(5)
             except subprocess.CalledProcessError as e:
                 exit_code = e.returncode
@@ -257,6 +270,7 @@ def extra_tests():
         print(e)
         print('failed to check packages')
         sys.exit(5)
+
 
 def relaunch_tests():
     config_generator.generate_config()
@@ -271,11 +285,12 @@ def relaunch_tests():
         # build package is /home/omv/pkg_name
     for r, d, f in os.walk(build_package):
         for rpm_pkg in f:
-             if '.rpm' in rpm_pkg:
-                 rpm_packages.append(build_package + '/' + rpm_pkg)
+            if '.rpm' in rpm_pkg:
+                rpm_packages.append(build_package + '/' + rpm_pkg)
     try:
         print(list(rpm_packages))
-        subprocess.check_call([mock_binary, '--init', '--configdir', mock_config, '--install'] + list(rpm_packages))
+        subprocess.check_call(
+            [mock_binary, '--init', '--configdir', mock_config, '--install'] + list(rpm_packages))
         print('packages %s installed successfully' % list(rpm_packages))
     except subprocess.CalledProcessError as e:
         print('failed to rerun tests')
@@ -305,9 +320,11 @@ def build_rpm():
     for i in range(tries):
         try:
             if os.environ.get("EXTRA_BUILD_RPM_OPTIONS") == '':
-                subprocess.check_call([mock_binary, '--update', '--configdir', mock_config, '--rebuild', src_rpm[0], '--no-cleanup-after', '--no-clean', '--resultdir=' + output_dir])
+                subprocess.check_call([mock_binary, '--update', '--configdir', mock_config, '--rebuild',
+                                       src_rpm[0], '--no-cleanup-after', '--no-clean', '--resultdir=' + output_dir])
             else:
-                subprocess.check_output([mock_binary, '--update', '--configdir', mock_config, '--rebuild', src_rpm[0], '--no-cleanup-after', '--no-clean', extra_build_rpm_options, '--resultdir=' + output_dir])
+                subprocess.check_output([mock_binary, '--update', '--configdir', mock_config, '--rebuild', src_rpm[0],
+                                         '--no-cleanup-after', '--no-clean', extra_build_rpm_options, '--resultdir=' + output_dir])
         except subprocess.CalledProcessError as e:
             print(e)
             sz = os.path.getsize(root_log)
@@ -339,7 +356,6 @@ def build_rpm():
     # and not src.rpm
     if os.environ.get("USE_EXTRA_TESTS"):
         extra_tests()
-
 
 
 def cleanup_all():
