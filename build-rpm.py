@@ -26,6 +26,7 @@ if os.environ.get("EXTRA_BUILD_SRC_RPM_OPTIONS") is None:
     extra_build_src_rpm_options = ''
 else:
     extra_build_src_rpm_options = os.environ.get('EXTRA_BUILD_SRC_RPM_OPTIONS')
+
 if os.environ.get("EXTRA_BUILD_RPM_OPTIONS") is None:
     extra_build_rpm_options = ''
 else:
@@ -36,6 +37,7 @@ platform_arch = os.getenv('PLATFORM_ARCH')
 platform_name = os.getenv('PLATFORM_NAME')
 rerun_tests = os.environ.get('RERUN_TESTS')
 print('rerun tests is %s' % rerun_tests)
+#print(os.environ.keys())
 
 # static
 # /home/omv/output
@@ -276,7 +278,6 @@ def relaunch_tests():
     config_generator.generate_config()
     # clone repo and generate config
     clone_repo(git_repo, project_version)
-    # print(os.environ.keys())
     packages = os.getenv('PACKAGES')
     for package in packages.split():
         print('downloading {}'.format(package))
@@ -304,8 +305,13 @@ def build_rpm():
     # pattern for retry
     pattern_for_retry = 'No matching package to install: (.*)'
     try:
-        subprocess.check_output([mock_binary, '--update', '--configdir', mock_config, '--buildsrpm', '--spec=' + build_package + '/' + spec_name[0], '--source=' + build_package, '--no-cleanup-after', extra_build_src_rpm_options,
+        if os.environ.get("EXTRA_BUILD_SRC_RPM_OPTIONS") == '':
+            subprocess.check_output([mock_binary, '--update', '--configdir', mock_config, '--buildsrpm', '--spec=' + build_package + '/' + spec_name[0], '--source=' + build_package, '--no-cleanup-after',
                                  '--resultdir=' + output_dir])
+        else:
+            subprocess.check_output([mock_binary, '--update', '--configdir', mock_config, '--buildsrpm', '--spec=' + build_package + '/' + spec_name[0], '--source=' + build_package, '--no-cleanup-after', extra_build_src_rpm_options,
+                                 '--resultdir=' + output_dir])
+
     except subprocess.CalledProcessError as e:
         print(e)
         sys.exit(1)
