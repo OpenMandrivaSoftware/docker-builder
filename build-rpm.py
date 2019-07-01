@@ -341,11 +341,11 @@ def build_rpm():
                     # probably metadata not ready
                     if error:
                         if i < tries - 1:
+                            print('no needed package in repo, restarting build in 60 seconds')
                             time.sleep(60)
                             continue
-                        else:
-                            # exit if no success after 3 attempts
-                            sys.exit(1)
+                        if i == tries -1:
+                            raise
                     else:
                         print('build failed')
                         # /usr/bin/python /mdv/check_error.py --file "${OUTPUT_FOLDER}"/root.log >> ~/build_fail_reason.log
