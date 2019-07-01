@@ -326,10 +326,10 @@ def build_rpm():
     for i in range(tries):
         try:
             if os.environ.get("EXTRA_BUILD_RPM_OPTIONS") == '':
-                subprocess.check_call([mock_binary, '--update', '--configdir', mock_config, '--rebuild',
+                subprocess.check_call([mock_binary, '-v', '--update', '--configdir', mock_config, '--rebuild',
                                        src_rpm[0], '--no-cleanup-after', '--no-clean', '--resultdir=' + output_dir])
             else:
-                subprocess.check_output([mock_binary, '--update', '--configdir', mock_config, '--rebuild', src_rpm[0],
+                subprocess.check_output([mock_binary, '-v', '--update', '--configdir', mock_config, '--rebuild', src_rpm[0],
                                          '--no-cleanup-after', '--no-clean', extra_build_rpm_options, '--resultdir=' + output_dir])
         except subprocess.CalledProcessError as e:
             print(e)
