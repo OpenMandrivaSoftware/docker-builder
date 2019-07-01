@@ -240,7 +240,7 @@ def extra_tests():
             version = hdr['version'].decode('utf-8')
             release = hdr['release'].decode('utf-8')
             if hdr['epoch']:
-                epoch = hdr['epoch'].decode('utf-8')
+                epoch = hdr['epoch']
             else:
                 epoch = 0
             evr = '{}:{}-{}'.format(epoch, version, release)
