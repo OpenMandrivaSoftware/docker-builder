@@ -391,10 +391,10 @@ def cleanup_all():
 
 
 if __name__ == '__main__':
+        cleanup_all()
     if rerun_tests == 'true':
         relaunch_tests()
     else:
-        cleanup_all()
         clone_repo(git_repo, project_version)
         validate_spec(build_package)
         download_yml(build_package + '/' + '.abf.yml')
