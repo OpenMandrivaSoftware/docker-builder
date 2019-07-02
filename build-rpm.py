@@ -170,12 +170,14 @@ def validate_exclusive(srpm):
                 print("Architecture is excluded per package spec file (ExcludeArch tag)")
                 sys.exit(6)
     if hdr['exclusivearch']:
-        for a in hdr['exclusivearch']:
-            if a == platform_arch:
-                break
-            else:
-                print("exclusive arch for package is %s" % (a.decode()))
-                sys.exit(6)
+        linted_arch = []
+        for excl_arch in hdr['exclusivearch']:
+            linted_arch.append(excl_arch.decode('utf-8'))
+        if platform_arch in linted_arch:
+            print('exclusivearch header passed for %s' % platform_arch)
+        else:
+            print("exclusive arch for package is %s" % (a))
+            sys.exit(6)
 
 
 def container_data():
