@@ -391,7 +391,7 @@ def cleanup_all():
 
 
 if __name__ == '__main__':
-        cleanup_all()
+    cleanup_all()
     if rerun_tests == 'true':
         relaunch_tests()
     else:
