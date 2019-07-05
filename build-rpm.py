@@ -52,6 +52,15 @@ spec_name = []
 rpm_packages = []
 src_rpm = []
 
+def print_log(message):
+    logfile = output_dir + '/' + 'test.' + time.strftime("%Y%m%d-%H%M%S") + '.log'
+    try:
+        logger = open(logfile, 'a')
+        logger.write(message + '\n')
+        logger.close()
+    except:
+        print("Can't write to log file: " + conf)
+    print(message)
 
 def download_hash(hashsum):
     fstore_json_url = '{}/api/v1/file_stores.json?hash={}'.format(
@@ -226,8 +235,8 @@ def extra_tests():
         subprocess.check_call(
             [mock_binary, '--init', '--configdir', mock_config, '--install'] + list(only_rpms))
     except subprocess.CalledProcessError as e:
-        print('failed to install packages')
-        print(e)
+        print_log('failed to install packages')
+        print_log(e)
         # tests failed
         sys.exit(5)
     # stage2
@@ -253,27 +262,27 @@ def extra_tests():
                 [mock_binary, '--quiet', '--shell', check_string]).decode('utf-8')
             # rpmdev-vercmp 0:7.4.0-1 0:7.4.0-1
             if inrepo_version:
-                print('repo version is: %s' % inrepo_version)
+                print_log('repo version is: %s' % inrepo_version)
             else:
                 inrepo_version = 0
             try:
-                print('run rpmdev-vercmp %s %s' % (evr, str(inrepo_version)))
+                print_log('run rpmdev-vercmp %s %s' % (evr, str(inrepo_version)))
                 a = subprocess.check_call(
                     ['rpmdev-vercmp', evr, str(inrepo_version)])
                 if a == 0:
-                    print(
+                    print_log(
                         'Package {} is either the same, older, or another problem. Extra tests failed'.format(name))
                     sys.exit(5)
             except subprocess.CalledProcessError as e:
                 exit_code = e.returncode
                 if exit_code == 11:
-                    print('package newer than in repo')
+                    print_log('package newer than in repo')
                     sys.exit(0)
-                print('package older, same or other issue')
+                print_log('package older, same or other issue')
                 sys.exit(5)
     except subprocess.CalledProcessError as e:
-        print(e)
-        print('failed to check packages')
+        print_log(e)
+        print_log('failed to check packages')
         sys.exit(5)
 
 
@@ -283,7 +292,7 @@ def relaunch_tests():
     clone_repo(git_repo, project_version)
     packages = os.getenv('PACKAGES')
     for package in packages.split():
-        print('downloading {}'.format(package))
+        print_log('downloading {}'.format(package))
         # download packages to /home/omv/pkg_name/
         download_hash(package)
         # build package is /home/omv/pkg_name
@@ -292,13 +301,13 @@ def relaunch_tests():
             if '.rpm' in rpm_pkg:
                 rpm_packages.append(build_package + '/' + rpm_pkg)
     try:
-        print(list(rpm_packages))
+        print_log(list(rpm_packages))
         subprocess.check_call(
             [mock_binary, '--init', '--configdir', mock_config, '--install'] + list(rpm_packages))
-        print('packages %s installed successfully' % list(rpm_packages))
+        print_log('packages %s installed successfully' % list(rpm_packages))
     except subprocess.CalledProcessError as e:
-        print('failed to rerun tests')
-        print(e)
+        print_log('failed to rerun tests')
+        print_log(e)
         sys.exit(5)
 
 
