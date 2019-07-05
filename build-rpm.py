@@ -186,8 +186,6 @@ def container_data():
 #    rpm_packages = ['/home/fdrt/output/libinput10-1.13.2-1-omv4000.i686.rpm']
     for pkg in rpm_packages:
         # Do not check src.srm
-        if os.path.basename(pkg).endswith("src.rpm"):
-            continue
         fdno = os.open(pkg, os.O_RDONLY)
         hdr = ts.hdrFromFdno(fdno)
         name = hdr['name'].decode('utf-8')
@@ -198,13 +196,16 @@ def container_data():
         else:
             epoch = 0
         shasum = hash_file(pkg)
-        try:
-            dependencies = subprocess.check_output(
-                ['dnf', 'repoquery', '-q', '--latest-limit=1', '--qf', '%{NAME}', '--whatrequires', name])
-            # just a list of deps
-            full_list = dependencies.decode().split('\n')
-        except subprocess.CalledProcessError:
-            print('some problem with dnf repoquery for %s' % name)
+        # init empty list
+        full_list = []
+        if not os.path.basename(pkg).endswith("src.rpm"):
+            try:
+                dependencies = subprocess.check_output(
+                    ['dnf', 'repoquery', '-q', '--latest-limit=1', '--qf', '%{NAME}', '--whatrequires', name])
+                # just a list of deps
+                full_list = dependencies.decode().split('\n')
+            except subprocess.CalledProcessError:
+                print('some problem with dnf repoquery for %s' % name)
         package_info = dict([('name', name), ('version', version), ('release', release), ('epoch', epoch), (
             'fullname', pkg.split('/')[-1]), ('sha1', shasum), ('dependent_packages', ' '.join(full_list))])
 
