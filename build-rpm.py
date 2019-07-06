@@ -232,8 +232,10 @@ def extra_tests():
     try:
         # mock --init --configdir /etc/mock/ --install $(ls "$OUTPUT_FOLDER"/*.rpm | grep -v .src.rpm) >> "${test_log}".tmp 2>&1
         #        print(' '.join(only_rpms))
+        print_log('installing %s' % list(only_rpms))
         subprocess.check_call(
             [mock_binary, '--init', '--configdir', mock_config, '--install'] + list(only_rpms))
+        print_log('all packages successfully installed')
     except subprocess.CalledProcessError as e:
         print_log('failed to install packages')
         print_log(e)
