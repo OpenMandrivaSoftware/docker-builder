@@ -185,7 +185,8 @@ def validate_exclusive(srpm):
         if platform_arch in linted_arch:
             print('exclusivearch header passed for %s' % platform_arch)
         else:
-            print("exclusive arch for package is %s" % (a))
+            print('exclusive arch test failed')
+            print('Check spec for ExclusiveArch tag')
             sys.exit(6)
 
 
