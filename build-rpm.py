@@ -53,13 +53,13 @@ rpm_packages = []
 src_rpm = []
 
 def print_log(message):
-    logfile = output_dir + '/' + 'test.' + time.strftime("%Y%m%d-%H%M%S") + '.log'
+    logfile = output_dir + '/' + 'test.' + time.strftime("%Y-%m-%d-%H%h") + '.log'
     try:
         logger = open(logfile, 'a')
         logger.write(message + '\n')
         logger.close()
     except:
-        print("Can't write to log file: " + conf)
+        print("Can't write to log file: " + logfile)
     print(message)
 
 def download_hash(hashsum):
@@ -379,7 +379,7 @@ def build_rpm():
     container_data()
     # only rpms mean that here only arch.rpm packages
     # and not src.rpm
-    if os.environ.get("USE_EXTRA_TESTS"):
+    if os.environ.get("USE_EXTRA_TESTS") == 'true':
         extra_tests()
 
 
