@@ -294,6 +294,8 @@ def extra_tests():
 
 
 def relaunch_tests():
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
     config_generator.generate_config()
     # clone repo and generate config
     clone_repo(git_repo, project_version)
@@ -314,7 +316,7 @@ def relaunch_tests():
     # exclude src.rpm
     only_rpms = set(rpm_packages) - set(src_rpm)
     try:
-        print_log(list(rpm_packages))
+        print_log('\n'.join(rpm_packages))
         subprocess.check_call(
             [mock_binary, '--init', '--configdir', mock_config, '--install'] + list(only_rpms))
         print_log('packages %s installed successfully' % list(only_rpms))
