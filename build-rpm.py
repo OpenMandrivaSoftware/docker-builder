@@ -37,7 +37,7 @@ platform_arch = os.getenv('PLATFORM_ARCH')
 platform_name = os.getenv('PLATFORM_NAME')
 rerun_tests = os.environ.get('RERUN_TESTS')
 print('rerun tests is %s' % rerun_tests)
-#print(os.environ.keys())
+# print(os.environ.keys())
 
 # static
 # /home/omv/output
@@ -52,8 +52,10 @@ spec_name = []
 rpm_packages = []
 src_rpm = []
 
+
 def print_log(message):
-    logfile = output_dir + '/' + 'test.' + time.strftime("%Y-%m-%d-%H%h") + '.log'
+    logfile = output_dir + '/' + 'test.' + \
+        time.strftime("%Y-%m-%d-%H%h") + '.log'
     try:
         logger = open(logfile, 'a')
         logger.write(message + '\n')
@@ -61,6 +63,7 @@ def print_log(message):
     except:
         print("Can't write to log file: " + logfile)
     print(message)
+
 
 def download_hash(hashsum):
     fstore_json_url = '{}/api/v1/file_stores.json?hash={}'.format(
@@ -269,7 +272,8 @@ def extra_tests():
             else:
                 inrepo_version = 0
             try:
-                print_log('run rpmdev-vercmp %s %s' % (evr, str(inrepo_version)))
+                print_log('run rpmdev-vercmp %s %s' %
+                          (evr, str(inrepo_version)))
                 a = subprocess.check_call(
                     ['rpmdev-vercmp', evr, str(inrepo_version)])
                 if a == 0:
@@ -303,11 +307,17 @@ def relaunch_tests():
         for rpm_pkg in f:
             if '.rpm' in rpm_pkg:
                 rpm_packages.append(build_package + '/' + rpm_pkg)
+    for r, d, f in os.walk(build_package):
+        for srpm in f:
+            if '.src.rpm' in srpm:
+                src_rpm.append(build_package + '/' + srpm)
+    # exclude src.rpm
+    only_rpms = set(rpm_packages) - set(src_rpm)
     try:
         print_log(list(rpm_packages))
         subprocess.check_call(
-            [mock_binary, '--init', '--configdir', mock_config, '--install'] + list(rpm_packages))
-        print_log('packages %s installed successfully' % list(rpm_packages))
+            [mock_binary, '--init', '--configdir', mock_config, '--install'] + list(only_rpms))
+        print_log('packages %s installed successfully' % list(only_rpms))
     except subprocess.CalledProcessError as e:
         print_log('failed to rerun tests')
         print_log(e)
@@ -322,10 +332,10 @@ def build_rpm():
     try:
         if os.environ.get("EXTRA_BUILD_SRC_RPM_OPTIONS") == '':
             subprocess.check_output([mock_binary, '--update', '--configdir', mock_config, '--buildsrpm', '--spec=' + build_package + '/' + spec_name[0], '--source=' + build_package, '--no-cleanup-after',
-                                 '--resultdir=' + output_dir])
+                                     '--resultdir=' + output_dir])
         else:
             subprocess.check_output([mock_binary, '--update', '--configdir', mock_config, '--buildsrpm', '--spec=' + build_package + '/' + spec_name[0], '--source=' + build_package, '--no-cleanup-after', extra_build_src_rpm_options,
-                                 '--resultdir=' + output_dir])
+                                     '--resultdir=' + output_dir])
 
     except subprocess.CalledProcessError as e:
         print(e)
@@ -357,10 +367,11 @@ def build_rpm():
                     if error:
                         print(error.group().decode())
                         if i < tries - 1:
-                            print('no needed package in repo, restarting build in 60 seconds')
+                            print(
+                                'no needed package in repo, restarting build in 60 seconds')
                             time.sleep(60)
                             continue
-                        if i == tries -1:
+                        if i == tries - 1:
                             raise
                     else:
                         print('build failed')
