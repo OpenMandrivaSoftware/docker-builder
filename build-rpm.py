@@ -65,7 +65,7 @@ def print_log(message):
     print(message)
 
 
-def download_hash(hashsum):
+def download_hash(hashsum, pkg_name=''):
     fstore_json_url = '{}/api/v1/file_stores.json?hash={}'.format(
         file_store_base, hashsum)
     fstore_file_url = '{}/api/v1/file_stores/{}'.format(
@@ -79,7 +79,7 @@ def download_hash(hashsum):
         page2 = json.loads(page)
         name = page2[0]['file_name']
         download_file = requests.get(fstore_file_url, stream=True)
-        source_tarball = build_package + '/' + name
+        source_tarball = build_package + '/' + pkg_name
         with open(source_tarball, 'wb') as f:
             for chunk in download_file.iter_content(chunk_size=1048576):
                 if chunk:
@@ -107,7 +107,7 @@ def download_yml(yaml_file):
             data = yaml.safe_load(open(yaml_file))
             for key, value in data['sources'].items():
                 print('downloading %s' % key)
-                download_hash(value)
+                download_hash(value, key)
         except yaml.YAMLError as exc:
             print(exc)
     else:
