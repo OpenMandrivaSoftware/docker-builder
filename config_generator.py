@@ -58,7 +58,7 @@ def generate_config():
             "config_opts['legal_host_arches'] = ('i586', 'i686', 'x86_64', 'armv8hcnl', 'armv8hnl', 'armv8hl', 'armv7hnl', 'armv7hl', 'armv7l', 'aarch64')")
     if platform_arch == "riscv64":
         print_conf(
-            "config_opts['target_arch'] = '%s --without check'" % platform_arch)
+            "config_opts['target_arch'] = '%s --without check --without pgo'" % platform_arch)
         print_conf(
             "config_opts['legal_host_arches'] = ('i586', 'i686', 'x86_64', 'riscv64')")
     if platform_arch == "znver1":
