@@ -111,7 +111,7 @@ def generate_config():
         "config_opts['plugin_conf']['root_cache_opts']['compress_program'] = ''")
     print_conf(
         "config_opts['plugin_conf']['root_cache_opts']['extension'] = ''")
-    print_conf("config_opts['plugin_conf']['root_cache_enable'] = True")
+    print_conf("config_opts['plugin_conf']['root_cache_enable'] = False")
     print_conf(
         "config_opts['plugin_conf']['root_cache_opts']['age_check'] = True")
     print_conf(
