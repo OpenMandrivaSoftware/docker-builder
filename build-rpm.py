@@ -77,7 +77,7 @@ def download_hash(hashsum, pkg_name=''):
     if resp.status_code == 200:
         page = resp.content.decode('utf-8')
         page2 = json.loads(page)
-        name = page2[0]['file_name']
+        # name = page2[0]['file_name']
         download_file = requests.get(fstore_file_url, stream=True)
         source_tarball = build_package + '/' + pkg_name
         with open(source_tarball, 'wb') as f:
