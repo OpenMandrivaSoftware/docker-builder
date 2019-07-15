@@ -330,7 +330,7 @@ def build_rpm():
     config_generator.generate_config()
     tries = 3
     # pattern for retry
-    pattern_for_retry = 'No matching package to install: (.*)'
+    pattern_for_retry = 'No more mirrors to try (.*)'
     try:
         if os.environ.get("EXTRA_BUILD_SRC_RPM_OPTIONS") == '':
             subprocess.check_output([mock_binary, '--update', '--configdir', mock_config, '--buildsrpm', '--spec=' + build_package + '/' + spec_name[0], '--source=' + build_package, '--no-cleanup-after',
