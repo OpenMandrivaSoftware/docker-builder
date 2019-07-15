@@ -414,6 +414,7 @@ def cleanup_all():
     remove_if_exist(build_package)
     remove_if_exist('/home/omv/build_fail_reason.log')
     remove_if_exist(output_dir)
+    print('run dnf clean metadata')
     try:
         subprocess.check_output(['/usr/bin/sudo', 'dnf', 'clean', 'metadata'])
     except subprocess.CalledProcessError as e:
