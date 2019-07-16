@@ -416,7 +416,7 @@ def cleanup_all():
     remove_if_exist(output_dir)
     print('run dnf clean metadata')
     try:
-        subprocess.check_output(['/usr/bin/sudo', 'dnf', 'clean', 'metadata'])
+        subprocess.check_output(['/usr/bin/sudo', 'dnf', 'clean', 'all'])
     except subprocess.CalledProcessError as e:
         print(e.output)
         pass
