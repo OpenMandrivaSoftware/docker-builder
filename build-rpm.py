@@ -331,17 +331,24 @@ def build_rpm():
     tries = 3
     # pattern for retry
     pattern_for_retry = 'No more mirrors to try (.*)'
-    try:
-        if os.environ.get("EXTRA_BUILD_SRC_RPM_OPTIONS") == '':
-            subprocess.check_output([mock_binary, '--update', '--configdir', mock_config, '--buildsrpm', '--spec=' + build_package + '/' + spec_name[0], '--source=' + build_package, '--no-cleanup-after',
-                                     '--resultdir=' + output_dir])
-        else:
-            subprocess.check_output([mock_binary, '--update', '--configdir', mock_config, '--buildsrpm', '--spec=' + build_package + '/' + spec_name[0], '--source=' + build_package, '--no-cleanup-after', extra_build_src_rpm_options,
-                                     '--resultdir=' + output_dir])
+    for i in range(tries):
+        try:
+            if os.environ.get("EXTRA_BUILD_SRC_RPM_OPTIONS") == '':
+                subprocess.check_output([mock_binary, '--update', '--configdir', mock_config, '--buildsrpm', '--spec=' + build_package + '/' + spec_name[0], '--source=' + build_package, '--no-cleanup-after',
+                                         '--resultdir=' + output_dir])
+            else:
+                subprocess.check_output([mock_binary, '--update', '--configdir', mock_config, '--buildsrpm', '--spec=' + build_package + '/' + spec_name[0], '--source=' + build_package, '--no-cleanup-after', extra_build_src_rpm_options,
+                                         '--resultdir=' + output_dir])
+        except subprocess.CalledProcessError as e:
+            if i < tries - 1:
+                print('bad cache data')
+                # remove cache dir
+                remove_if_exist('/var/cache/mock/{}-{}/dnf_cache/'.format(platform_name, platform_arch))
+                continue
+            if i == tries - 1:
+                raise
+        break
 
-    except subprocess.CalledProcessError as e:
-        print(e)
-        sys.exit(1)
     for r, d, f in os.walk(output_dir):
         for srpm in f:
             if '.src.rpm' in srpm:
