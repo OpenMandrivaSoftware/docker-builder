@@ -407,6 +407,8 @@ def build_rpm():
 def cleanup_all():
     print('Cleaning up...')
     # wipe letfovers
+    # MASK me if you run the script under your user
+    # it will wipe whole your /home/user dir
     for dirpath, dirnames, filenames in os.walk(get_home):
         for name in dirnames:
             shutil.rmtree(os.path.join(dirpath, name))
