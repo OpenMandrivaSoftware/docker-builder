@@ -14,6 +14,7 @@ import io
 import mmap
 import re
 import config_generator
+import check_error
 
 
 get_home = os.environ.get('HOME')
@@ -387,6 +388,7 @@ def build_rpm():
                         print('build failed')
                         # /usr/bin/python /mdv/check_error.py --file "${OUTPUT_FOLDER}"/root.log >> ~/build_fail_reason.log
                         # add here check_error.py
+                        check_error.known_errors(root_log, get_home + '/build_fail_reason.log')
                         sys.exit(1)
             else:
                 sys.exit(1)

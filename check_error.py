@@ -33,25 +33,34 @@ err_type = ['Segmentation fault',
             'Problem encountered: Man pages cannot be built: (.*)',
             'format string is not a string literal (.*)']
 
+def write_log(message, fail_log):
+    try:
+        logger = open(fail_log, 'a')
+        logger.write(message + '\n')
+        logger.close()
+    except IOError:
+        print("Can't write to log file: " + fail_log)
+    print(message)
 
-def known_errors(logfile):
+
+def known_errors(logfile, fail_log):
     sz = os.path.getsize(logfile)
     if os.path.exists(logfile) and sz > 0:
         with io.open(logfile, "r", encoding="utf-8") as msgf:
             mm = mmap.mmap(msgf.fileno(), sz, access=mmap.ACCESS_READ)
             for pat in err_type:
                 error = re.search(pat.encode("utf-8"), mm)
-                if not error:
-                    continue
-                elif error:
+                if error:
                     print(error.group(0).decode('utf-8'))
-                    return
+                    write_log(error.group(0).decode('utf-8'), fail_log)
+                    break
                 else:
                     common_pattern = 'error: (.*)'
                     error = re.search(common_pattern.encode("utf-8"), mm)
                     if error:
                         print(error.group(0).decode('utf-8'))
-                        return
+                        write_log(error.group(0).decode('utf-8'), fail_log)
+                        break
 
 
 if __name__ == '__main__':
