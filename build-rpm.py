@@ -51,16 +51,15 @@ root_log = output_dir + '/root.log'
 spec_name = []
 rpm_packages = []
 src_rpm = []
+logfile = output_dir + '/' + 'test.' + time.strftime("%Y-%m-%d-%H%h") + '.log'
 
 
 def print_log(message):
-    logfile = output_dir + '/' + 'test.' + \
-        time.strftime("%Y-%m-%d-%H%h") + '.log'
     try:
         logger = open(logfile, 'a')
         logger.write(message + '\n')
         logger.close()
-    except:
+    except IOError:
         print("Can't write to log file: " + logfile)
     print(message)
 
@@ -75,8 +74,11 @@ def download_hash(hashsum, pkg_name=''):
         print('requested package [{}] not found'.format(
             fstore_json_url))
     if resp.status_code == 200:
-        page = resp.content.decode('utf-8')
-        page2 = json.loads(page)
+        # this code responsible for fetching names from abf
+        # we not using it because of in names with +, + replaces with _
+        # e.g gtk-_3.0
+        # page = resp.content.decode('utf-8')
+        # page2 = json.loads(page)
         # name = page2[0]['file_name']
         download_file = requests.get(fstore_file_url, stream=True)
         source_tarball = build_package + '/' + pkg_name
@@ -234,15 +236,13 @@ def extra_tests():
     only_rpms = set(rpm_packages) - set(src_rpm)
     # check_package
     try:
-        # mock --init --configdir /etc/mock/ --install $(ls "$OUTPUT_FOLDER"/*.rpm | grep -v .src.rpm) >> "${test_log}".tmp 2>&1
-        #        print(' '.join(only_rpms))
-        print_log('installing %s' % list(only_rpms))
+        print('installing %s' % list(only_rpms))
         subprocess.check_call(
             [mock_binary, '--init', '--configdir', mock_config, '--install'] + list(only_rpms))
-        print_log('all packages successfully installed')
+        shutil.copy('/var/lib/mock/{}-{}/result/root.log'.format(platform_name, platform_arch), logfile)
+        print('all packages successfully installed')
     except subprocess.CalledProcessError as e:
-        print_log('failed to install packages')
-        print_log(e)
+        shutil.copy('/var/lib/mock/{}-{}/result/root.log'.format(platform_name, platform_arch), logfile)
         # tests failed
         sys.exit(5)
     # stage2
@@ -301,7 +301,7 @@ def relaunch_tests():
     clone_repo(git_repo, project_version)
     packages = os.getenv('PACKAGES')
     for package in packages.split():
-        print_log('downloading {}'.format(package))
+        print('downloading {}'.format(package))
         # download packages to /home/omv/pkg_name/
         download_hash(package)
         # build package is /home/omv/pkg_name
@@ -316,13 +316,13 @@ def relaunch_tests():
     # exclude src.rpm
     only_rpms = set(rpm_packages) - set(src_rpm)
     try:
-        print_log('\n'.join(rpm_packages))
+        print('\n'.join(rpm_packages))
         subprocess.check_call(
             [mock_binary, '--init', '--configdir', mock_config, '--install'] + list(only_rpms))
-        print_log('packages %s installed successfully' % list(only_rpms))
+        print('packages %s installed successfully' % list(only_rpms))
+        shutil.copy('/var/lib/mock/{}-{}/result/root.log'.format(platform_name, platform_arch), logfile)
     except subprocess.CalledProcessError as e:
-        print_log('failed to rerun tests')
-        print_log(e)
+        shutil.copy('/var/lib/mock/{}-{}/result/root.log'.format(platform_name, platform_arch), logfile)
         sys.exit(5)
 
 
