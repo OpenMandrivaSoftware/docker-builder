@@ -155,6 +155,9 @@ def clone_repo(git_repo, project_version):
                 print('some issues with cloning repo %s' % git_repo)
                 sys.exit(1)
         break
+    # generate commit_id
+    git_commit = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=build_package)
+    print(git_commit.decode('utf-8'), file=open(get_home + '/commit_hash', "a"))
 
 
 def hash_file(rpm):
@@ -425,6 +428,7 @@ def cleanup_all():
     # /home/omv/package_name
     remove_if_exist(build_package)
     remove_if_exist('/home/omv/build_fail_reason.log')
+    remove_if_exist('/home/omv/commit_hash')
     remove_if_exist(output_dir)
     print('run dnf clean metadata')
     try:
