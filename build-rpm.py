@@ -346,11 +346,13 @@ def build_rpm():
                                          '--resultdir=' + output_dir])
         except subprocess.CalledProcessError as e:
             if i < tries - 1:
-                print('bad cache data')
+                print('something went wrong with SRPM creation')
+                print('usually it is bad metadata or missed sources in .abf.yml')
                 # remove cache dir
                 remove_if_exist('/var/cache/mock/{}-{}/dnf_cache/'.format(platform_name, platform_arch))
                 continue
             if i == tries - 1:
+                print(e)
                 raise
         break
 
