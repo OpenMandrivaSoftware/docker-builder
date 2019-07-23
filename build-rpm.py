@@ -52,7 +52,7 @@ root_log = output_dir + '/root.log'
 spec_name = []
 rpm_packages = []
 src_rpm = []
-logfile = output_dir + '/' + 'test.' + time.strftime("%Y-%m-%d-%H%h") + '.log'
+logfile = output_dir + '/' + 'test.' + time.strftime("%m-%d-%Y-%H-%M-%S") + '.log'
 
 
 def print_log(message):
@@ -78,9 +78,10 @@ def download_hash(hashsum, pkg_name=''):
         # this code responsible for fetching names from abf
         # we not using it because of in names with +, + replaces with _
         # e.g gtk-_3.0
-        # page = resp.content.decode('utf-8')
-        # page2 = json.loads(page)
-        # name = page2[0]['file_name']
+        if not pkg_name:
+            page = resp.content.decode('utf-8')
+            page2 = json.loads(page)
+            pkg_name = page2[0]['file_name']
         download_file = requests.get(fstore_file_url, stream=True)
         source_tarball = build_package + '/' + pkg_name
         with open(source_tarball, 'wb') as f:
