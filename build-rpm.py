@@ -401,7 +401,7 @@ def build_rpm():
         break
     for r, d, f in os.walk(output_dir):
         for rpm_pkg in f:
-            if rpm_pkg.endswith('.rpm')
+            if rpm_pkg.endswith('.rpm'):
                 rpm_packages.append(output_dir + '/' + rpm_pkg)
     # rpm packages
     print(rpm_packages)
