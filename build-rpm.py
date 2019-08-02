@@ -312,7 +312,7 @@ def relaunch_tests():
         # build package is /home/omv/pkg_name
     for r, d, f in os.walk(build_package):
         for rpm_pkg in f:
-            if '.rpm' in rpm_pkg:
+            if rpm_pkg.endswith('.rpm'):
                 rpm_packages.append(build_package + '/' + rpm_pkg)
     for r, d, f in os.walk(build_package):
         for srpm in f:
@@ -401,7 +401,7 @@ def build_rpm():
         break
     for r, d, f in os.walk(output_dir):
         for rpm_pkg in f:
-            if '.rpm' in rpm_pkg:
+            if rpm_pkg.endswith('.rpm')
                 rpm_packages.append(output_dir + '/' + rpm_pkg)
     # rpm packages
     print(rpm_packages)
