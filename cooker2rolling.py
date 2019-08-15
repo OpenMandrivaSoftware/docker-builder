@@ -16,8 +16,10 @@ def request_builds():
     params = {'cooker': 28, 'status': 6000, 'time': threedaysago}
 
     abf_api = 'https://abf.openmandriva.org'
-    api_link = '{}/api/v1/build_lists?filter[build_for_platform_id]={}&filter[status]={}&filter[ownership]=everything&filter[updated_at_start]={}&per_page=100&page=55'.format(
-        abf_api, params['cooker'], params['status'], params['time'])
+    page = 1
+    api_link = '{}/api/v1/build_lists?filter[build_for_platform_id]={}&filter[status]={}&filter[ownership]=everything&filter[updated_at_start]={}&per_page=100&page={}'.format(
+        abf_api, params['cooker'], params['status'], params['time'], page)
+    print(api_link)
     resp = requests.get(api_link)
     if resp.status_code == 404:
         print('requested api [{}] not found'.format(api_link))
@@ -25,12 +27,13 @@ def request_builds():
         page = resp.content.decode('utf-8')
         page2 = json.loads(page)
         name = page2['build_lists']
+        print(name)
+        # list is empty
+        if not name:
+            print('we reached last page')
         for build_id in name:
-            print(build_id)
-            if build_id['url']:
+            if 'url' in build_id:
                 build_ids.append('{}'.format(abf_api) + build_id['url'])
-            else:
-                print('no build ids')
 
     for build_id in build_ids:
         print(build_id)
