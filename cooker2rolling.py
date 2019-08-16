@@ -12,7 +12,7 @@ import argparse
 
 build_ids = []
 tmp_names = []
-blacklist = ['llvm', 'gcc', 'binutils', 'glibc', 'boost']
+blacklist = ['llvm', 'gcc', 'binutils', 'glibc', 'boost', 'mesa', 'icu', 'poppler', 'x11-server']
 
 
 def request_builds():
