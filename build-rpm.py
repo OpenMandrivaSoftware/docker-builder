@@ -147,7 +147,7 @@ def clone_repo(git_repo, project_version):
             print('cloning [{}], branch: [{}] to [{}]'.format(
                 git_repo, project_version, build_package))
             subprocess.check_output(
-                ['/usr/bin/git', 'clone', '-b', project_version, '--depth', '100', git_repo, build_package])
+                ['/usr/bin/git', 'clone', '-b', project_version, git_repo, build_package])
         except subprocess.CalledProcessError:
             if i < tries - 1:
                 time.sleep(5)
