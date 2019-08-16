@@ -8,10 +8,12 @@ import time
 import shutil
 import os
 import subprocess
+import argparse
 
 build_ids = []
 tmp_names = []
 blacklist = ['llvm', 'gcc', 'binutils', 'glibc', 'boost']
+
 
 def request_builds():
     #    https://abf.openmandriva.org/api/v1/build_lists?filter[build_for_platform_id]=28&filter[status]=6000&filter[ownership]=everything&filter[updated_at_start]=1565540721&per_page=100&page=1
@@ -51,16 +53,18 @@ def request_builds():
 # которые получатся от реквест билд ид, которые имеют хеш
 # потом отфильтровать чтобы не было повторов
 
+
 def abf_build(package, repo_path):
     try:
-        subprocess.check_call(['abf', 'build', '-b', 'rolling', '--no-cached-chroot', '--auto-publish', '--update-type', 'enhancement'], cwd = repo_path)
+        subprocess.check_call(['abf', 'build', '-b', 'rolling', '--no-cached-chroot',
+                               '--auto-publish', '--update-type', 'enhancement'], cwd=repo_path)
     except subprocess.CalledProcessError as e:
         print(e)
         return False
 
 
 def request_build_id(page):
-    #print(page)
+    # print(page)
     resp = requests.get(page)
     build_page = resp.content.decode('utf-8')
     page_json = json.loads(build_page)
@@ -68,8 +72,10 @@ def request_build_id(page):
     package_fullname = page_json['build_list']['project']['fullname']
     package_git_url = page_json['build_list']['project']['git_url']
     package_hash = page_json['build_list']['commit_hash']
-    print('package name [{}], fullname [{}], git url [{}], hash [{}]'.format(package_name, package_fullname, package_git_url, package_hash))
+    print('package name [{}], fullname [{}], git url [{}], hash [{}]'.format(
+        package_name, package_fullname, package_git_url, package_hash))
     tmp_names.append(package_name)
+
 
 def git_work(project):
     git_repo = 'git@github.com:OpenMandrivaAssociation/{}.git'.format(project)
@@ -77,32 +83,65 @@ def git_work(project):
     if os.path.exists(repo_path) and os.path.isdir(repo_path):
         shutil.rmtree(repo_path)
     try:
-        subprocess.check_output(['/usr/bin/git', 'clone', '-b', 'master', git_repo, repo_path])
+        subprocess.check_output(
+            ['/usr/bin/git', 'clone', '-b', 'master', git_repo, repo_path])
     except subprocess.CalledProcessError:
         print('something went wrong')
     try:
-        git_checkout = subprocess.check_output(['git', 'checkout', 'rolling'], cwd=repo_path)
+        git_checkout = subprocess.check_output(
+            ['git', 'checkout', 'rolling'], cwd=repo_path)
     except subprocess.CalledProcessError:
         print('looks like no rolling branch detected')
-        git_checkout = subprocess.check_output(['git', 'checkout', '-b', 'rolling'], cwd=repo_path)
+        git_checkout = subprocess.check_output(
+            ['git', 'checkout', '-b', 'rolling'], cwd=repo_path)
     try:
-        git_merge = subprocess.check_output(['git', 'merge', 'master'], cwd=repo_path)
+        git_merge = subprocess.check_output(
+            ['git', 'merge', 'master'], cwd=repo_path)
     except subprocess.CalledProcessError:
         print('problems with merge master')
     try:
         git_push = subprocess.check_output(['git', 'push'], cwd=repo_path)
     except subprocess.CalledProcessError:
         print('problems with pushing')
-        git_push = subprocess.check_output(['git', 'push', '-u', 'origin', 'rolling'], cwd=repo_path)
+        git_push = subprocess.check_output(
+            ['git', 'push', '-u', 'origin', 'rolling'], cwd=repo_path)
     abf_build(project, repo_path)
 
 
-request_builds()
-print('{} build list scheduled for processing'.format(len(build_ids)))
-for build_id in build_ids:
-    request_build_id(build_id)
-#request_build_id('https://abf.openmandriva.org/api/v1/build_lists/591808')
-package_names = set(tmp_names) - set(blacklist)
-#print(package_names)
-for pkg in package_names:
-    git_work(pkg)
+# request_builds()
+#print('{} build list scheduled for processing'.format(len(build_ids)))
+# for build_id in build_ids:
+#    request_build_id(build_id)
+# request_build_id('https://abf.openmandriva.org/api/v1/build_lists/591808')
+
+#package_names = set(tmp_names) - set(blacklist)
+
+# print(package_names)
+
+# for pkg in package_names:
+#    git_work(pkg)
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--package', nargs='+',
+                        help='package to merge and build into rolling')
+    parser.add_argument('--file', help='file with packages list')
+    parser.add_argument(
+        '--buildall', action='store_true', help='fetch from abf.openmandriva.org cooker all packages that built in last 24h and merge it to rolling')
+    args = parser.parse_args()
+    if args.file is not None:
+        with open(args.file) as file:
+            for line in file:
+                print(line.strip())
+                package = line.strip()
+                git_work(package)
+    if args.package is not None:
+        packages = [i for i in args.package if i is not None]
+        for package in packages:
+            git_work(package)
+    if args.buildall is not None:
+        request_builds()
+        for build_id in build_ids:
+            request_build_id(build_id)
+        for pkg in package_names:
+            git_work(pkg)
