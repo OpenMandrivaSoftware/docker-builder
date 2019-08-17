@@ -86,6 +86,7 @@ def generate_config():
     print_conf("config_opts['basedir'] = '/var/lib/mock/'")
     print_conf("config_opts['cache_topdir'] = '/var/cache/mock/'")
     print_conf("config_opts['nosync'] = True")
+    print_conf("config_opts['nosync_force'] = True")
     # enable tmpfs for builder with 64gb+
     print_conf("config_opts['plugin_conf']['tmpfs_enable'] = True")
     print_conf("config_opts['plugin_conf']['tmpfs_opts'] = {}")
