@@ -103,6 +103,13 @@ if [ -z "${pkgmgr}" ]; then
         pkgmgr="dnf"
 fi
 
+if [ ! -z "${systemd}" ]; then
+    printf '%b\n' '--------------------------------------'
+    printf '%b\n' 'Creating image with systemd support.'
+    printf '%b\n' '--------------------------------------'
+    systemd="systemd passwd"
+fi
+
 # run me here
 install_chroot(){
     dnf \
@@ -122,51 +129,7 @@ install_chroot(){
     fi
 }
 
-arm_platform_detector(){
-
-probe_cpu() {
-cpu="$(uname -m)"
-case "${cpu}" in
-   i386|i486|i586|i686|i86pc|BePC|x86_64)
-      cpu="i386"
-   ;;
-   armv[4-9]*)
-      cpu="arm"
-   ;;
-   aarch64)
-      cpu="aarch64"
-   ;;
-esac
-
-# create path
-if [ "${arch}" = 'aarch64' ]; then
-    if [ "${cpu}" != 'aarch64' ]; then
-	mkdir -p "${target}"/usr/bin/
-	sudo sh -c "echo '${arch}-mandriva-linux-gnueabi' > /etc/rpm/platform"
-	cp /usr/bin/qemu-static-aarch64 "${target}"/usr/bin/
-    fi
-fi
-
-if echo "${arch}" |grep -qE '^arm'; then
-    if [ "${cpu}" != 'arm' -a "${cpu}" != "aarch64" ] ; then
-	mkdir -p "${target}"/usr/bin/
-	sudo sh -c "echo '${arch}-mandriva-linux-gnueabi' > /etc/rpm/platform"
-	cp /usr/bin/qemu-static-arm "${target}"/usr/bin/
-    fi
-fi
-}
-probe_cpu
-}
-
-arm_platform_detector
 install_chroot
-
-if [ ! -z "${systemd}" ]; then
-    printf '%b\n' '--------------------------------------'
-    printf '%b\n' 'Creating image with systemd support.'
-    printf '%b\n' '--------------------------------------'
-    systemd="systemd"
-fi
 
 if [ ! -z "${systemd}" ]; then
 # Prevent systemd from starting unneeded services
@@ -270,4 +233,3 @@ fi
 
 cd ..
 rm -rf "${target}"
-rm -fv /etc/rpm/platform
