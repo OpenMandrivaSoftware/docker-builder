@@ -114,7 +114,6 @@ def git_work(project):
 #    request_build_id(build_id)
 # request_build_id('https://abf.openmandriva.org/api/v1/build_lists/591808')
 
-#package_names = set(tmp_names) - set(blacklist)
 
 # print(package_names)
 
@@ -143,5 +142,6 @@ if __name__ == '__main__':
         request_builds()
         for build_id in build_ids:
             request_build_id(build_id)
+        package_names = set(tmp_names) - set(blacklist)
         for pkg in package_names:
             git_work(pkg)
