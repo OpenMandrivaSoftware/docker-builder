@@ -113,6 +113,7 @@ def download_yml(yaml_file):
                 print('downloading %s' % key)
                 download_hash(value, key)
         except yaml.YAMLError as exc:
+            print('.abf.yml probably damaged')
             print(exc)
     else:
         print('abf.yml not found')
