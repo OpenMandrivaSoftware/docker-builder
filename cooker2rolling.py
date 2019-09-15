@@ -57,7 +57,7 @@ def request_builds():
 def abf_build(package, repo_path):
     try:
         subprocess.check_call(['abf', 'build', '-b', 'rolling', '--no-cached-chroot',
-                               '--auto-publish', '--update-type', 'enhancement'], cwd=repo_path)
+                               '--auto-publish-status=testing', '--update-type', 'enhancement'], cwd=repo_path)
     except subprocess.CalledProcessError as e:
         print(e)
         return False
