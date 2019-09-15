@@ -268,10 +268,11 @@ def extra_tests():
             else:
                 epoch = 0
             evr = '{}:{}-{}'.format(epoch, version, release)
-            check_string = 'LC_ALL=C dnf repoquery -q --qf %{{EPOCH}}:%{{VERSION}}-%{{RELEASE}} --latest-limit=1 {}'.format(
-                name)
-            inrepo_version = subprocess.check_output(
-                [mock_binary, '--quiet', '--shell', check_string]).decode('utf-8')
+            check_string = 'LC_ALL=C dnf repoquery -q --qf %{{EPOCH}}:%{{VERSION}}-%{{RELEASE}} --latest-limit=1 {}'.format(name)
+            try:
+                inrepo_version = subprocess.check_output([mock_binary, '--quiet', '--shell', check_string]).decode('utf-8')
+            except subprocess.CalledProcessError:
+                sys.exit(5)
             # rpmdev-vercmp 0:7.4.0-1 0:7.4.0-1
             if inrepo_version:
                 print_log('repo version is: %s' % inrepo_version)
