@@ -56,7 +56,7 @@ def request_builds():
 
 def abf_build(package, repo_path):
     try:
-        subprocess.check_call(['abf', 'build', '-b', 'rolling', '--no-cached-chroot',
+        subprocess.check_call(['abf', 'build', '--arch', 'znver1', '--arch', 'x86_64', '--arch', 'i686', '-b', 'rolling', '--no-cached-chroot',
                                '--auto-publish-status=testing', '--update-type', 'enhancement'], cwd=repo_path)
     except subprocess.CalledProcessError as e:
         print(e)
@@ -122,11 +122,9 @@ def git_work(project):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--package', nargs='+',
-                        help='package to merge and build into rolling')
+    parser.add_argument('--package', nargs='+',help='package to merge and build into rolling')
     parser.add_argument('--file', help='file with packages list')
-    parser.add_argument(
-        '--buildall', action='store_true', help='fetch from abf.openmandriva.org cooker all packages that built in last 24h and merge it to rolling')
+    parser.add_argument('--buildall', action='store_true', default=False, help='fetch from abf.openmandriva.org cooker all packages that built in last 24h and merge it to rolling')
     args = parser.parse_args()
     if args.file is not None:
         with open(args.file) as file:
@@ -138,7 +136,7 @@ if __name__ == '__main__':
         packages = [i for i in args.package if i is not None]
         for package in packages:
             git_work(package)
-    if args.buildall is not None:
+    if args.buildall is True:
         request_builds()
         for build_id in build_ids:
             request_build_id(build_id)
