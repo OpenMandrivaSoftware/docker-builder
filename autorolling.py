@@ -28,9 +28,9 @@ def request_build_id(page):
     return package_name, package_hash
 
 
-def abf_build(package, repo_path, arch):
+def abf_build(package, arch):
     try:
-        subprocess.check_call(['abf', 'build', '--arch', arch, '-b', 'rolling', '--testing', '--no-cached-chroot', '--auto-publish-status=testing', '--update-type', 'enhancement'], cwd=repo_path)
+        subprocess.check_call(['abf', 'build', '--arch', arch, '-b', 'rolling', '--testing', '--no-cached-chroot', '--auto-publish-status=testing', '--update-type', 'enhancement', '-p', 'openmandriva/%s' % package])
     except subprocess.CalledProcessError as e:
         print(e)
         return False
@@ -41,37 +41,37 @@ def git_work(pkg_name, arch, package_hash):
     repo_path = '/tmp/{}'.format(pkg_name)
     if os.path.exists(repo_path) and os.path.isdir(repo_path):
         shutil.rmtree(repo_path)
-    try:
-        subprocess.check_output(['/usr/bin/git', 'clone', '-b', 'master', git_repo, repo_path])
-    except subprocess.CalledProcessError:
-        print('something went wrong')
-    try:
-        master_branch_hash = subprocess.check_output(['/usr/bin/git', 'rev-parse', 'master'], cwd=repo_path)
-        if master_branch_hash.decode('utf-8').strip() != package_hash:
-            print('hash from build list not equal for master branch hash')
-            return False
-    except subprocess.CalledProcessError:
-        print('error with git rev-parse')
-    try:
-        # checkout to rolling without -b
-        subprocess.check_output(
-            ['git', 'checkout', 'rolling'], cwd=repo_path)
-    except subprocess.CalledProcessError:
-        print('looks like no rolling branch detected')
-        # git checkout to rolling
-        subprocess.check_output(['git', 'checkout', '-b', 'rolling'], cwd=repo_path)
-    try:
-        # git merge
-        subprocess.check_output(['git', 'merge', 'master'], cwd=repo_path)
-    except subprocess.CalledProcessError:
-        print('problems with merge master')
-    try:
-        subprocess.check_output(['git', 'push'], cwd=repo_path)
-    except subprocess.CalledProcessError:
-        print('problems with pushing')
-        subprocess.check_output(['git', 'push', '-u', 'origin', 'rolling'], cwd=repo_path)
-    abf_build(pkg_name, repo_path, arch)
-    shutil.rmtree(repo_path)
+    # git ls-remote git://github.com/OpenMandrivaAssociation/dos2unix.git refs/heads/master
+    master_hash = subprocess.check_output(['/usr/bin/git', 'ls-remote', git_repo, 'refs/heads/master']).decode().split()
+    rolling_hash = subprocess.check_output(['/usr/bin/git', 'ls-remote', git_repo, 'refs/heads/rolling']).decode().split()
+    if master_hash[0] != package_hash:
+        print('hash from build list not equal for master branch hash')
+        return False
+    if rolling_hash[0] == master_hash[0]:
+        print('rolling branch already synced with master')
+    elif rolling_hash[0] != master_hash[0]:
+        subprocess.check_output(['/usr/bin/git', 'clone', git_repo, repo_path], stderr=subprocess.DEVNULL)
+        try:
+            subprocess.check_output(['git', 'checkout', 'rolling'], cwd=repo_path)
+        except subprocess.CalledProcessError:
+            print('looks like no rolling branch detected')
+            # git checkout to rolling with -b
+            subprocess.check_output(['git', 'checkout', '-b', 'rolling'], cwd=repo_path)
+        try:
+            # git merge
+            subprocess.check_output(['git', 'merge', 'master'], cwd=repo_path, stderr=subprocess.DEVNULL)
+        except subprocess.CalledProcessError:
+            print('problems with merge master')
+        try:
+            subprocess.check_output(['git', 'push'], cwd=repo_path)
+        except subprocess.CalledProcessError:
+            print('problems with pushing, let me push it with -u origin rolling')
+            subprocess.check_output(['git', 'push', '-u', 'origin', 'rolling'], cwd=repo_path, stderr=subprocess.DEVNULL)
+
+    abf_build(pkg_name, arch)
+    if os.path.exists(repo_path) and os.path.isdir(repo_path):
+        shutil.rmtree(repo_path)
+    print('======================================================================')
 
 
 def redis_request():
