@@ -37,6 +37,7 @@ else:
 platform_arch = os.getenv('PLATFORM_ARCH')
 platform_name = os.getenv('PLATFORM_NAME')
 rerun_tests = os.environ.get('RERUN_TESTS')
+save_buildroot = os.environ.get('SAVE_BUILDROOT')
 print('rerun tests is %s' % rerun_tests)
 # print(os.environ.keys())
 
@@ -247,7 +248,7 @@ def extra_tests():
             [mock_binary, '--init', '--configdir', mock_config, '--install'] + list(only_rpms))
         shutil.copy('/var/lib/mock/{}-{}/result/root.log'.format(platform_name, platform_arch), logfile)
         print('all packages successfully installed')
-    except subprocess.CalledProcessError as e:
+    except subprocess.CalledProcessError:
         shutil.copy('/var/lib/mock/{}-{}/result/root.log'.format(platform_name, platform_arch), logfile)
         # tests failed
         sys.exit(5)
@@ -410,6 +411,12 @@ def build_rpm():
     container_data()
     # only rpms mean that here only arch.rpm packages
     # and not src.rpm
+    if save_buildroot == 'true':
+        saveroot = '/var/lib/mock/{}-{}/root/'.format(platform_name, platform_arch)
+        try:
+            subprocess.check_output(['sudo', 'tar', '-czf', output_dir + '/buildroot.tar.gz', saveroot])
+        except subprocess.CalledProcessError:
+            print_log('failed to make buildroot.tar.gz')
     if os.environ.get("USE_EXTRA_TESTS") == 'true':
         extra_tests()
 
@@ -441,6 +448,7 @@ def cleanup_all():
     except subprocess.CalledProcessError as e:
         print(e.output)
         pass
+
 
 if __name__ == '__main__':
     cleanup_all()

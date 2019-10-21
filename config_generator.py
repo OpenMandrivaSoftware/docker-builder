@@ -47,6 +47,7 @@ def generate_config():
     repo_names = os.getenv('REPO_NAMES')
     rebuild_cache = os.getenv('REBUILD_CACHE')
     extra_cfg_options = os.getenv('EXTRA_CFG_OPTIONS')
+    save_buildroot = os.environ.get('SAVE_BUILDROOT')
 
     if platform_arch == 'aarch64':
         print_conf("config_opts['target_arch'] = '%s'" % platform_arch)
@@ -88,15 +89,14 @@ def generate_config():
     print_conf("config_opts['nosync'] = True")
     print_conf("config_opts['nosync_force'] = True")
     # enable tmpfs for builder with 64gb+
-    print_conf("config_opts['plugin_conf']['tmpfs_enable'] = True")
-    print_conf("config_opts['plugin_conf']['tmpfs_opts'] = {}")
-    print_conf(
-        "config_opts['plugin_conf']['tmpfs_opts']['required_ram_mb'] = 64000")
-    print_conf(
-        "config_opts['plugin_conf']['tmpfs_opts']['max_fs_size'] = '80%'")
-    print_conf("config_opts['plugin_conf']['tmpfs_opts']['mode'] = '0755'")
-    print_conf(
-        "config_opts['plugin_conf']['tmpfs_opts']['keep_mounted'] = False")
+    # only if save_buildroot is false
+    if save_buildroot != 'true':
+        print_conf("config_opts['plugin_conf']['tmpfs_enable'] = True")
+        print_conf("config_opts['plugin_conf']['tmpfs_opts'] = {}")
+        print_conf("config_opts['plugin_conf']['tmpfs_opts']['required_ram_mb'] = 64000")
+        print_conf("config_opts['plugin_conf']['tmpfs_opts']['max_fs_size'] = '80%'")
+        print_conf("config_opts['plugin_conf']['tmpfs_opts']['mode'] = '0755'")
+        print_conf("config_opts['plugin_conf']['tmpfs_opts']['keep_mounted'] = False")
 
     print_conf("config_opts['dist'] = '%s'" % platform_name)
     print_conf(
@@ -135,8 +135,8 @@ def generate_config():
     # and yes, mock recreates whole cache
     # if default.cfg were changed
     st = os.stat(conf)
-    atime = st[ST_ATIME] #access time
-    mtime = st[ST_MTIME] #modification time
+    atime = st[ST_ATIME]  # access time
+    mtime = st[ST_MTIME]  # modification time
     # rebuild cache every 4 hours
     new_mtime = mtime - (4*3600)
-    os.utime(conf,(atime,new_mtime))
+    os.utime(conf, (atime, new_mtime))

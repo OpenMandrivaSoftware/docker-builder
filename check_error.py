@@ -33,6 +33,7 @@ err_type = ['Segmentation fault',
             'Problem encountered: Man pages cannot be built: (.*)',
             'format string is not a string literal (.*)']
 
+
 def write_log(message, fail_log):
     try:
         logger = open(fail_log, 'a')
