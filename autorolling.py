@@ -9,6 +9,7 @@ import os
 import subprocess
 
 blacklist = [line.rstrip('\n') for line in open('blacklist.txt')]
+print(blacklist)
 
 def request_build_id(page):
     # print(page)

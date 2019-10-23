@@ -8,7 +8,6 @@ icu
 poppler
 x11-server
 kernel-release
-
 qt5-qtbase
 qt5-qtdeclarative
 qt5-qtxmlpatterns
@@ -17,42 +16,124 @@ qt5-qtsvg
 qt5-qtmultimedia
 qt5-qttools
 qt5-qtdoc
-qt5-qtquickcontrols qt5-qtquickcontrols2 qt5-qtlocation qt5-qtimageformats qt5-qtgraphicaleffects qt5-qtconnectivity qt5-qtx11extras qt5-qtserialport qt5-qtsensors qt5-qtwayland qt5-qtwebsockets
+qt5-qtquickcontrols
+qt5-qtquickcontrols2
+qt5-qtlocation
+qt5-qtimageformats
+qt5-qtgraphicaleffects
+qt5-qtconnectivity
+qt5-qtx11extras
+qt5-qtserialport
+qt5-qtsensors
+qt5-qtwayland
+qt5-qtwebsockets
 qt5-qtwebchannel
 qt5-qtwebengine
-qt5-qttranslations qt5-qt3d qt5-qtlottie qt5-qtwebview qt5-qtvirtualkeyboard qt5-qtspeech qt5-qtscxml qt5-qtremoteobjects qt5-qtpurchasing qt5-qtnetworkauth qt5-qtgamepad qt5-qtdatavis3d qt5-qtcharts qt5-qtwebglplugin qt5-qtserialbus
-
+qt5-qttranslations
+qt5-qt3d
+qt5-qtlottie
+qt5-qtwebview
+qt5-qtvirtualkeyboard
+qt5-qtspeech
+qt5-qtscxml
+qt5-qtremoteobjects
+qt5-qtpurchasing
+qt5-qtnetworkauth
+qt5-qtgamepad
+qt5-qtdatavis3d
+qt5-qtcharts
+qt5-qtwebglplugin
+qt5-qtserialbus
 extra-cmake-modules
-attica bluez-qt oxygen-icons kwayland
-networkmanager-qt modemmanager-qt kitemmodels kitemviews karchive kcodecs kconfig kcoreaddons kdbusaddons kguiaddons kidletime kplotting kwidgetsaddons kwindowsystem solid sonnet threadweaver ki18n prison
+attica
+bluez-qt
+oxygen-icons
+kwayland
+networkmanager-qt
+modemmanager-qt
+kitemmodels
+kitemviews
+karchive
+kcodecs
+kconfig
+kcoreaddons
+kdbusaddons
+kguiaddons
+kidletime
+kplotting
+kwidgetsaddons
+kwindowsystem
+solid
+sonnet
+threadweaver
+ki18n
+prison
 kimageformats
 kdoctools
 kcrash
 kservice
-kglobalaccel kjs kdnssd
-kauth kcompletion kjobwidgets kunitconversion kpty
-kjsembed kconfigwidgets
-kdesu kemoticons kiconthemes kapidox
-knotifications ktextwidgets
-kxmlgui kwallet breeze-icons
+kglobalaccel
+kjs
+kdnssd
+kauth
+kcompletion
+kjobwidgets
+kunitconversion
+kpty
+kjsembed
+kconfigwidgets
+kdesu
+kemoticons
+kiconthemes
+kapidox
+knotifications
+ktextwidgets
+kxmlgui
+kwallet
+breeze-icons
 kbookmarks
 kio
 kirigami
 knewstuff
-kxmlrpcclient kparts kpeople kinit kpackage
-kmediaplayer kdeclarative kded
-kcmutils knotifyconfig syntax-highlighting
-kactivities frameworkintegration khtml ktexteditor kdewebkit kross
-kdesignerplugin plasma-framework kactivities-stats
-krunner kdelibs4support kfilemetadata
+kxmlrpcclient
+kparts
+kpeople
+kinit
+kpackage
+kmediaplayer
+kdeclarative
+kded
+kcmutils
+knotifyconfig
+syntax-highlighting
+kactivities
+frameworkintegration
+khtml
+ktexteditor
+kdewebkit
+kross
+kdesignerplugin
+plasma-framework
+kactivities-stats
+krunner
+kdelibs4support
+kfilemetadata
 baloo
-kholidays purpose syndication qqc2-desktop-style
-kcalendarcore kcontacts
-
-akonadi khelpcenter
-kmime kontactinterface
-kimap kmbox kpimtextedit
-kldap kidentitymanagement
+kholidays
+purpose
+syndication
+qqc2-desktop-style
+kcalendarcore
+kcontacts
+akonadi
+khelpcenter
+kmime
+kontactinterface
+kimap
+kmbox
+kpimtextedit
+kldap
+kidentitymanagement
 kcalutils
 ktnef
 kalarmcal
@@ -62,7 +143,8 @@ ksmtp
 libkgapi
 kmailtransport
 akonadi-notes
-akonadi-calendar akonadi-search
+akonadi-calendar
+akonadi-search
 libkdepim
 pimcommon
 grantleetheme
@@ -73,48 +155,228 @@ mailimporter
 libgravatar
 messagelib
 mailcommon
-baloo-widgets dolphin akonadi-calendar-tools akonadi-import-wizard
+baloo-widgets
+dolphin
+akonadi-calendar-tools
+akonadi-import-wizard
 kblog
 kdegraphics-mobipocket
 kdav
 kdepim-runtime
 eventviews
 incidenceeditor
-libksieve kpkpass
+libksieve
+kpkpass
 kitinerary
 kdepim-addons
 kdeedu-data
 libkeduvocdocument
 libkexiv2
 libkipi
-kqtquickcharts artikulate marble konsole libkdcraw libksane analitza ark blinken cantor filelight gwenview spectacle kalgebra kalzium kamera kanagram kate kbruch kcalc kcharselect kcolorchooser okular kdegraphics-thumbnailers kdf kfloppy
-libkdegames libkgeomap
+kqtquickcharts
+artikulate
+marble
+konsole
+libkdcraw
+libksane
+analitza
+ark
+blinken
+cantor
+filelight
+gwenview
+spectacle
+kalgebra
+kalzium
+kamera
+kanagram
+kate
+kbruch
+kcalc
+kcharselect
+kcolorchooser
+okular
+kdegraphics-thumbnailers
+kdf
+kfloppy
+libkdegames
+libkgeomap
 libkmahjongg
 kmahjongg
-libkcddb libkcompactdisc
-audiocd-kio bomber bovo cervisia dolphin-plugins dragon ffmpegthumbs granatier juk kajongg kapman kapptemplate katomic kleopatra akregator grantlee-editor keditbookmarks kfind kmail kmail-account-wizard konqueror kontact kaddressbook knotes korganizer kwave mbox-importer pim-data-exporter pim-sieve-editor kalarm kdialog akonadiconsole
-kblackbox kblocks kbounce kbreakout kcachegrind kcron kde-dev-scripts kde-dev-utils kdenetwork-filesharing kdenlive kdesdk-kioslaves kdesdk-thumbnailers kdiamond
-kfourinline kgeography kget kgoldrunner kgpg khangman kig kigo killbots kiriki kiten kjumpingcube
-klettres klickety klines kmag kmines kmix kmousetool kmouth kmplot knavalbattle knetwalk kolf kollision kolourpaint
-konquest kpat krdc kreversi krfb kruler kshisen ksirk ksnakeduel kspaceduel ksquares ksudoku
-ksystemlog kteatime ktimer ktouch ktuberling kturtle kubrick kwalletmanager kwordquiz libkomparediff2 lokalize
-lskat palapeli parley picmi poxml print-manager rocs step svgpart sweeper umbrello kio-extras zeroconf-ioslave kaccounts-integration kaccounts-providers kross-interpreters signon-kwallet-extension kdebugsettings minuet kompare k3b
+libkcddb
+libkcompactdisc
+audiocd-kio
+bomber
+bovo
+cervisia
+dolphin-plugins
+dragon
+ffmpegthumbs
+granatier
+juk
+kajongg
+kapman
+kapptemplate
+katomic
+kleopatra
+akregator
+grantlee-editor
+keditbookmarks
+kfind
+kmail
+kmail-account-wizard
+konqueror
+kontact
+kaddressbook
+knotes
+korganizer
+kwave
+mbox-importer
+pim-data-exporter
+pim-sieve-editor
+kalarm
+kdialog
+akonadiconsole
+kblackbox
+kblocks
+kbounce
+kbreakout
+kcachegrind
+kcron
+kde-dev-scripts
+kde-dev-utils
+kdenetwork-filesharing
+kdenlive
+kdesdk-kioslaves
+kdesdk-thumbnailers
+kdiamond
+kfourinline
+kgeography
+kget
+kgoldrunner
+kgpg
+khangman
+kig
+kigo
+killbots
+kiriki
+kiten
+kjumpingcube
+klettres
+klickety
+klines
+kmag
+kmines
+kmix
+kmousetool
+kmouth
+kmplot
+knavalbattle
+knetwalk
+kolf
+kollision
+kolourpaint
+konquest
+kpat
+krdc
+kreversi
+krfb
+kruler
+kshisen
+ksirk
+ksnakeduel
+kspaceduel
+ksquares
+ksudoku
+ksystemlog
+kteatime
+ktimer
+ktouch
+ktuberling
+kturtle
+kubrick
+kwalletmanager
+kwordquiz
+libkomparediff2
+lokalize
+lskat
+palapeli
+parley
+picmi
+poxml
+print-manager
+rocs
+step
+svgpart
+sweeper
+umbrello
+kio-extras
+zeroconf-ioslave
+kaccounts-integration
+kaccounts-providers
+kross-interpreters
+signon-kwallet-extension
+kdebugsettings
+minuet
+kompare
+k3b
 ktp-common-internals
-ktp-approver ktp-auth-handler ktp-contact-list ktp-filetransfer-handler ktp-kded-module ktp-send-file ktp-text-ui ktp-call-ui ktp-desktop-applets ktp-contact-runner ktp-accounts-kcm
-kamoso kopete kbackup kimagemapeditor
-
-drkonqi kwallet-pam plasma-pa user-manager kgamma5
-libkscreen libksysguard
+ktp-approver
+ktp-auth-handler
+ktp-contact-list
+ktp-filetransfer-handler
+ktp-kded-module
+ktp-send-file
+ktp-text-ui
+ktp-call-ui
+ktp-desktop-applets
+ktp-contact-runner
+ktp-accounts-kcm
+kamoso
+kopete
+kbackup
+kimagemapeditor
+drkonqi
+kwallet-pam
+plasma-pa
+user-manager
+kgamma5
+libkscreen
+libksysguard
 bluedevil
-kdecoration kde-gtk-config
+kdecoration
+kde-gtk-config
 kinfocenter
-kmenuedit kscreen ksshaskpass ksysguard
-breeze kwrited milou discover
+kmenuedit
+kscreen
+ksshaskpass
+ksysguard
+breeze
+kwrited
+milou
+discover
 kscreenlocker
-oxygen kwayland-integration kwin breeze-gtk kactivitymanagerd
+oxygen
+kwayland-integration
+kwin
+breeze-gtk
+kactivitymanagerd
 plasma-workspace
-kde-cli-tools khotkeys
+kde-cli-tools
+khotkeys
 plasma-desktop
 plasma-nm
-kdeplasma-addons polkit-kde-agent-1 powerdevil sddm-kcm systemsettings plasma-sdk plasma-integration plasma-workspace-wallpapers breeze-grub breeze-plymouth plasma-browser-integration plasma-vault plymouth-kcm xdg-desktop-portal-kde
-
+kdeplasma-addons
+polkit-kde-agent-1
+powerdevil
+sddm-kcm
+systemsettings
+plasma-sdk
+plasma-integration
+plasma-workspace-wallpapers
+breeze-grub
+breeze-plymouth
+plasma-browser-integration
+plasma-vault
+plymouth-kcm
+xdg-desktop-portal-kde
