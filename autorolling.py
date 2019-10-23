@@ -12,7 +12,7 @@ blacklist = ['llvm', 'gcc',
              'binutils', 'glibc',
              'boost', 'mesa',
              'icu', 'poppler',
-             'x11-server', 'kernel-release']
+             'x11-server', 'kernel-release', 'qt5']
 
 
 def request_build_id(page):
