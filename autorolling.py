@@ -8,12 +8,8 @@ import shutil
 import os
 import subprocess
 
-blacklist = ['llvm', 'gcc',
-             'binutils', 'glibc',
-             'boost', 'mesa',
-             'icu', 'poppler',
-             'x11-server', 'kernel-release']
 
+blacklist = [line.rstrip('\n') for line in open('blacklist.txt')]
 
 def request_build_id(page):
     # print(page)
