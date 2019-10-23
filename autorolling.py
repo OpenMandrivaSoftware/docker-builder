@@ -11,6 +11,7 @@ import subprocess
 blacklist = [line.rstrip('\n') for line in open('blacklist.txt')]
 print(blacklist)
 
+
 def request_build_id(page):
     # print(page)
     resp = requests.get(page)
@@ -39,7 +40,14 @@ def git_work(pkg_name, arch, package_hash):
         shutil.rmtree(repo_path)
     # git ls-remote git://github.com/OpenMandrivaAssociation/dos2unix.git refs/heads/master
     master_hash = subprocess.check_output(['/usr/bin/git', 'ls-remote', git_repo, 'refs/heads/master']).decode().split()
+    # issue here if no rolling branch no hash to return
     rolling_hash = subprocess.check_output(['/usr/bin/git', 'ls-remote', git_repo, 'refs/heads/rolling']).decode().split()
+    if not rolling_hash:
+        print('looks like no rolling branch in the repo')
+        # git checkout to rolling with -b
+        subprocess.check_output(['/usr/bin/git', 'clone', git_repo, repo_path], stderr=subprocess.DEVNULL)
+        subprocess.check_output(['git', 'checkout', '-b', 'rolling'], cwd=repo_path)
+        subprocess.check_output(['git', 'push', '-u', 'rolling'], cwd=repo_path)
     if master_hash[0] != package_hash:
         print('hash from build list not equal for master branch hash')
         return False
@@ -47,12 +55,7 @@ def git_work(pkg_name, arch, package_hash):
         print('rolling branch already synced with master')
     elif rolling_hash[0] != master_hash[0]:
         subprocess.check_output(['/usr/bin/git', 'clone', git_repo, repo_path], stderr=subprocess.DEVNULL)
-        try:
-            subprocess.check_output(['git', 'checkout', 'rolling'], cwd=repo_path)
-        except subprocess.CalledProcessError:
-            print('looks like no rolling branch detected')
-            # git checkout to rolling with -b
-            subprocess.check_output(['git', 'checkout', '-b', 'rolling'], cwd=repo_path)
+        subprocess.check_output(['git', 'checkout', 'rolling'], cwd=repo_path)
         try:
             # git merge
             subprocess.check_output(['git', 'merge', 'master'], cwd=repo_path, stderr=subprocess.DEVNULL)
