@@ -47,7 +47,7 @@ def git_work(pkg_name, arch, package_hash):
         # git checkout to rolling with -b
         subprocess.check_output(['/usr/bin/git', 'clone', git_repo, repo_path], stderr=subprocess.DEVNULL)
         subprocess.check_output(['git', 'checkout', '-b', 'rolling'], cwd=repo_path)
-        subprocess.check_output(['git', 'push', '-u', 'rolling'], cwd=repo_path)
+        subprocess.check_output(['git', 'push', '-u', 'origin', 'rolling'], cwd=repo_path)
     if master_hash[0] != package_hash:
         print('hash from build list not equal for master branch hash')
         return False
