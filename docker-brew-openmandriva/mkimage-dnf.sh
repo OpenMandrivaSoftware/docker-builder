@@ -214,8 +214,10 @@ fi
 
 if [ "${arch}" = 'x86_64' ]; then
 	docker run -i -t --rm openmandriva/$installversion:latest /bin/bash -c 'echo success'
+	docker push openmandriva/$installversion:latest
 else
 	docker run -i -t --rm openmandriva/$installversion:$arch /bin/bash -c 'echo success'
+	docker push openmandriva/$installversion:$arch
 fi
 
 if [ ! -z "${builder}" ]; then
