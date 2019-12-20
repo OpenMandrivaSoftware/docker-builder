@@ -340,6 +340,9 @@ def build_rpm():
     tries = 3
     # pattern for retry
     pattern_for_retry = 'No more mirrors to try (.*)'
+    if not os.environ.get('MOCK_CACHE'):
+        # /var/cache/mock/cooker-x86_64/root_cache/
+        remove_if_exist('/var/cache/mock/{}-{}/root_cache/'.format(platform_name, platform_arch))
     for i in range(tries):
         try:
             if os.environ.get("EXTRA_BUILD_SRC_RPM_OPTIONS") == '':
