@@ -342,7 +342,7 @@ def build_rpm():
     pattern_for_retry = 'No more mirrors to try (.*)'
     if not os.environ.get('MOCK_CACHE'):
         # /var/cache/mock/cooker-x86_64/root_cache/
-        print_log("MOCK_CACHE is none, than need to clear platform cache")
+        print("MOCK_CACHE is none, than need to clear platform cache")
         remove_if_exist('/var/cache/mock/{}-{}/root_cache/'.format(platform_name, platform_arch))
     for i in range(tries):
         try:

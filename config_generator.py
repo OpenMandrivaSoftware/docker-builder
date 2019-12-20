@@ -73,7 +73,7 @@ def generate_config():
 
     print_conf("config_opts['root'] = '%s-%s'" %
                (platform_name, platform_arch))
-    print_conf("config_opts['chroot_setup_cmd'] = ('install', 'basesystem-minimal', 'locales', 'locales-en', 'distro-release-OpenMandriva', 'gnupg', 'shadow', 'rpm-build', 'glibc-devel' ,'wget', 'task-devel', 'openmandriva-repos-pkgprefs', 'rpmlint-distro-policy', 'dwz', 'dnf')")
+    print_conf("config_opts['chroot_setup_cmd'] = ('install', 'basesystem-minimal', 'locales', 'locales-en', 'distro-release-OpenMandriva', 'gnupg', 'shadow', 'rpm-build', 'glibc-devel' ,'wget', 'task-devel', 'openmandriva-repos-pkgprefs', 'rpmlint-distro-policy', 'dwz')")
     print_conf("config_opts['package_manager'] = 'dnf'")
     print_conf(
         "config_opts['dnf_common_opts'] = ['--refresh', '--disableplugin=local', '--setopt=deltarpm=False', '--forcearch=%s']" % platform_arch)
