@@ -53,28 +53,32 @@ def git_work(pkg_name, arch, package_hash):
         return False
     if rolling_hash[0] == master_hash[0]:
         print('rolling branch already synced with master')
+        return False
     elif rolling_hash[0] != master_hash[0]:
+        print('just skip')
         subprocess.check_output(['/usr/bin/git', 'clone', git_repo, repo_path], stderr=subprocess.DEVNULL)
         subprocess.check_output(['git', 'checkout', 'rolling'], cwd=repo_path)
         try:
             # git merge
-            subprocess.check_output(['git', 'merge', 'master'], cwd=repo_path, stderr=subprocess.DEVNULL)
+            print('just skip')
+            #subprocess.check_output(['git', 'merge', 'master'], cwd=repo_path, stderr=subprocess.DEVNULL)
         except subprocess.CalledProcessError:
             print('problems with merge master')
         try:
-            subprocess.check_output(['git', 'push'], cwd=repo_path)
+            print('do not push')
+#            subprocess.check_output(['git', 'push'], cwd=repo_path)
         except subprocess.CalledProcessError:
             print('problems with pushing, let me push it with -u origin rolling')
-            subprocess.check_output(['git', 'push', '-u', 'origin', 'rolling'], cwd=repo_path, stderr=subprocess.DEVNULL)
+#            subprocess.check_output(['git', 'push', '-u', 'origin', 'rolling'], cwd=repo_path, stderr=subprocess.DEVNULL)
 
-    abf_build(pkg_name, arch)
+    #abf_build(pkg_name, arch)
     if os.path.exists(repo_path) and os.path.isdir(repo_path):
         shutil.rmtree(repo_path)
     print('======================================================================')
 
 
 def redis_request():
-    redis_request = redis.Redis(host='abf.openmandriva.org', password='')
+    redis_request = redis.Redis(host='abf.openmandriva.org', password='newpassword')
 #    data = redis_request.lrange('cooker_published', 0, -1)
 #    print(data)
     to_do = redis_request.blpop(["cooker_published"])
