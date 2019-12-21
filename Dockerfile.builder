@@ -25,8 +25,4 @@ RUN rm -rf /var/lib/dnf/yumdb/* \
  && rm -rf /var/cache/dnf/* \
  && rm -rf /var/lib/rpm/__db.*
 
-## put me in RUN if you have more than 16gb of RAM
-# && echo "tmpfs /var/lib/mock/ tmpfs defaults,size=4096m,uid=$(id -u omv),gid=$(id -g omv),mode=0700 0 0" >> /etc/fstab \
-#
-
 ENTRYPOINT ["/usr/bin/builder"]
