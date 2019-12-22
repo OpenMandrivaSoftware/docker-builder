@@ -210,9 +210,9 @@ def container_data():
         # Do not check src.srm
         fdno = os.open(pkg, os.O_RDONLY)
         hdr = ts.hdrFromFdno(fdno)
-        name = hdr['name'].decode('utf-8')
-        version = hdr['version'].decode('utf-8')
-        release = hdr['release'].decode('utf-8')
+        name = hdr['name']
+        version = hdr['version']
+        release = hdr['release']
         if hdr['epoch']:
             epoch = hdr['epoch']
         else:
