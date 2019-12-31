@@ -193,7 +193,7 @@ def validate_exclusive(srpm):
     if hdr['exclusivearch']:
         linted_arch = []
         for excl_arch in hdr['exclusivearch']:
-            linted_arch.append(excl_arch.decode('utf-8'))
+            linted_arch.append(excl_arch)
         if platform_arch in linted_arch:
             print('exclusivearch header passed for %s' % platform_arch)
         else:

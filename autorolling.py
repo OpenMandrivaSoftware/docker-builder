@@ -61,15 +61,15 @@ def git_work(pkg_name, arch, package_hash):
         try:
             # git merge
             print('just skip')
-            #subprocess.check_output(['git', 'merge', 'master'], cwd=repo_path, stderr=subprocess.DEVNULL)
+            subprocess.check_output(['git', 'merge', 'master'], cwd=repo_path, stderr=subprocess.DEVNULL)
         except subprocess.CalledProcessError:
             print('problems with merge master')
         try:
             print('do not push')
-#            subprocess.check_output(['git', 'push'], cwd=repo_path)
+            subprocess.check_output(['git', 'push'], cwd=repo_path)
         except subprocess.CalledProcessError:
             print('problems with pushing, let me push it with -u origin rolling')
-#            subprocess.check_output(['git', 'push', '-u', 'origin', 'rolling'], cwd=repo_path, stderr=subprocess.DEVNULL)
+            subprocess.check_output(['git', 'push', '-u', 'origin', 'rolling'], cwd=repo_path, stderr=subprocess.DEVNULL)
 
     #abf_build(pkg_name, arch)
     if os.path.exists(repo_path) and os.path.isdir(repo_path):
@@ -78,7 +78,7 @@ def git_work(pkg_name, arch, package_hash):
 
 
 def redis_request():
-    redis_request = redis.Redis(host='abf.openmandriva.org', password='newpassword')
+    redis_request = redis.Redis(host='abf.openmandriva.org', password='')
 #    data = redis_request.lrange('cooker_published', 0, -1)
 #    print(data)
     to_do = redis_request.blpop(["cooker_published"])
