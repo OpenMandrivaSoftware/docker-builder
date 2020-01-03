@@ -21,7 +21,13 @@ get_home = os.environ.get('HOME')
 package = os.environ.get('PACKAGE')
 git_repo = os.environ.get('GIT_REPO')
 build_package = get_home + '/' + package
-project_version = os.environ.get('PROJECT_VERSION')
+
+if os.environ.get("PROJECT_VERSION") is None:
+    # only in ROSA abf
+    project_version = os.environ.get('COMMIT_HASH')
+else:
+    # only in OMV because of github api limitations
+    project_version = os.environ.get('PROJECT_VERSION')
 
 if os.environ.get("EXTRA_BUILD_SRC_RPM_OPTIONS") is None:
     extra_build_src_rpm_options = ''
@@ -146,10 +152,9 @@ def clone_repo(git_repo, project_version):
     tries = 5
     for i in range(tries):
         try:
-            print('cloning [{}], branch: [{}] to [{}]'.format(
-                git_repo, project_version, build_package))
-            subprocess.check_output(
-                ['/usr/bin/git', 'clone', '-b', project_version, git_repo, build_package])
+            print('cloning [{}], branch: [{}] to [{}]'.format(git_repo, project_version, build_package))
+            subprocess.check_output(['/usr/bin/git', 'clone', git_repo, build_package])
+            subprocess.check_output(['git', 'checkout', project_version], cwd=build_package)
         except subprocess.CalledProcessError:
             if i < tries - 1:
                 time.sleep(5)
