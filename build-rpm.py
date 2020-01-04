@@ -20,6 +20,7 @@ import check_error
 get_home = os.environ.get('HOME')
 package = os.environ.get('PACKAGE')
 git_repo = os.environ.get('GIT_REPO')
+file_store_base = os.environ.get('FILE_STORE_ADDR')
 build_package = get_home + '/' + package
 
 if os.environ.get("PROJECT_VERSION") is None:
@@ -51,7 +52,6 @@ print(os.environ.keys())
 # /home/omv/output
 mock_binary = '/usr/bin/mock'
 mock_config = '/etc/mock/'
-file_store_base = 'http://file-store.openmandriva.org'
 output_dir = get_home + '/output'
 c_data = output_dir + '/container_data.json'
 root_log = output_dir + '/root.log'
