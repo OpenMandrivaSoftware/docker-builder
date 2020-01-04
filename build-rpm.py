@@ -23,12 +23,10 @@ git_repo = os.environ.get('GIT_REPO')
 file_store_base = os.environ.get('FILE_STORE_ADDR')
 build_package = get_home + '/' + package
 
-if os.environ.get("PROJECT_VERSION") is None:
-    # only in ROSA abf
-    project_version = os.environ.get('COMMIT_HASH')
-else:
-    # only in OMV because of github api limitations
+if os.environ.get("COMMIT_HASH") is None:
     project_version = os.environ.get('PROJECT_VERSION')
+else:
+    project_version = os.environ.get('COMMIT_HASH')
 
 if os.environ.get("EXTRA_BUILD_SRC_RPM_OPTIONS") is None:
     extra_build_src_rpm_options = ''
