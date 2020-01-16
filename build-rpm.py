@@ -305,6 +305,16 @@ def extra_tests():
         sys.exit(5)
 
 
+def save_build_root():
+    if save_buildroot == 'true':
+        saveroot = '/var/lib/mock/{}-{}/root/'.format(platform_name, platform_arch)
+        try:
+            subprocess.check_output(['sudo', 'tar', '-czf', output_dir + '/buildroot.tar.gz', saveroot])
+        except subprocess.CalledProcessError as e:
+            print_log(e)
+            print_log('failed to make buildroot.tar.gz')
+
+
 def relaunch_tests():
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
@@ -384,6 +394,7 @@ def build_rpm():
                 subprocess.check_output([mock_binary, '-v', '--update', '--configdir', mock_config, '--rebuild', src_rpm[0],
                                          '--no-cleanup-after', '--no-clean', extra_build_rpm_options, '--resultdir=' + output_dir])
         except subprocess.CalledProcessError as e:
+            # check here that problem not related to metadata
             print(e)
             sz = os.path.getsize(root_log)
             if os.path.exists(root_log) and sz > 0:
@@ -406,6 +417,8 @@ def build_rpm():
                         # /usr/bin/python /mdv/check_error.py --file "${OUTPUT_FOLDER}"/root.log >> ~/build_fail_reason.log
                         # add here check_error.py
                         check_error.known_errors(root_log, get_home + '/build_fail_reason.log')
+                        # function to make tar.xz of target platform
+                        save_build_root()
                         sys.exit(1)
             else:
                 sys.exit(1)
@@ -417,14 +430,7 @@ def build_rpm():
     # rpm packages
     print(rpm_packages)
     container_data()
-    # only rpms mean that here only arch.rpm packages
-    # and not src.rpm
-    if save_buildroot == 'true':
-        saveroot = '/var/lib/mock/{}-{}/root/'.format(platform_name, platform_arch)
-        try:
-            subprocess.check_output(['sudo', 'tar', '-czf', output_dir + '/buildroot.tar.gz', saveroot])
-        except subprocess.CalledProcessError:
-            print_log('failed to make buildroot.tar.gz')
+    save_build_root()
     if os.environ.get("USE_EXTRA_TESTS") == 'true':
         extra_tests()
 
