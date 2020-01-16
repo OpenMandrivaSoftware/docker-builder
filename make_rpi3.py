@@ -6,6 +6,7 @@ import requests
 rootfs_dir = '/tmp/rpi3_dir/'
 boot_dir = '/tmp/rpi3_dir/boot'
 
+
 def prepare_rpi_disk():
     disk_image = 'disk_image.img'
     # dd if=/dev/zero of=rpi3_disk.img bs=1M count=1024
@@ -55,6 +56,7 @@ def make_chroot(release, arch):
     subprocess.check_output(['/usr/bin/sudo', 'dnf', '-y', 'install', '--nogpgcheck', '--installroot=' + rootfs_dir, '--releasever=' + release, '--forcearch=' + arch] + pkgs.split())
     umount_boot = subprocess.check_output(['/usr/bin/sudo', 'umount', boot_dir])
     umount_root = subprocess.check_output(['/usr/bin/sudo', 'umount', rootfs_dir])
+
 
 prepare_rpi_disk()
 make_chroot('cooker', 'aarch64')
