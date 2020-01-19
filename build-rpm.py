@@ -70,6 +70,11 @@ def print_log(message):
     print(message)
 
 
+def get_size(filename):
+    file_stats = os.stat(filename)
+    return '{:4.3}mb'.format(file_stats.st_size / (1024 * 1024))
+
+
 def download_hash(hashsum, pkg_name=''):
     fstore_json_url = '{}/api/v1/file_stores.json?hash={}'.format(
         file_store_base, hashsum)
@@ -231,8 +236,7 @@ def container_data():
                 full_list = dependencies.decode().split('\n')
             except subprocess.CalledProcessError:
                 print('some problem with dnf repoquery for %s' % name)
-        package_info = dict([('name', name), ('version', version), ('release', release), ('epoch', epoch), (
-            'fullname', pkg.split('/')[-1]), ('sha1', shasum), ('dependent_packages', ' '.join(full_list))])
+        package_info = dict([('name', name), ('version', version), ('release', release), ('size', get_size(pkg)), ('epoch', epoch), ('fullname', pkg.split('/')[-1]), ('sha1', shasum), ('dependent_packages', ' '.join(full_list))])
 
 #        print(package_info)
         app_json = json.dumps(package_info, sort_keys=True, indent=4)
