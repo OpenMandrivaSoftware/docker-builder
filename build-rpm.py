@@ -72,7 +72,7 @@ def print_log(message):
 
 def get_size(filename):
     file_stats = os.stat(filename)
-    return '{:4.3}mb'.format(file_stats.st_size / (1024 * 1024))
+    return file_stats.st_size
 
 
 def download_hash(hashsum, pkg_name=''):
