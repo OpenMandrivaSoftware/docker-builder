@@ -354,7 +354,7 @@ def relaunch_tests():
 
 def build_rpm():
     config_generator.generate_config()
-    tries = 3
+    tries = 5
     # pattern for retry
     pattern_for_retry = 'Failed to download metadata for repo (.*)'
     if not os.environ.get('MOCK_CACHE'):
