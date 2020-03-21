@@ -423,6 +423,7 @@ def build_rpm():
                         check_error.known_errors(root_log, get_home + '/build_fail_reason.log')
                         # function to make tar.xz of target platform
                         save_build_root()
+                        remove_if_exist(build_package)
                         sys.exit(1)
             else:
                 sys.exit(1)
