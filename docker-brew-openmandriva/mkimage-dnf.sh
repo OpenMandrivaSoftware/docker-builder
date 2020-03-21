@@ -196,8 +196,7 @@ else
     tarFile="${rootfsdir}"/rootfs-"${installversion}".tar.xz
 fi
 
-cd "${target}"
-rm -fv usr/bin/qemu-*
+pushd "${target}"
 
 if [ "${arch}" = 'x86_64' ]; then
         tar --numeric-owner -caf "${tarFile}" -c .
@@ -233,5 +232,5 @@ if [ ! -z "${builder}" ]; then
 	fi
 fi
 
-cd ..
+popd
 rm -rf "${target}"
