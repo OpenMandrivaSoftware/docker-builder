@@ -10,6 +10,7 @@ icu
 poppler
 x11-server
 kernel-release
+kernel-release-clang
 qt5-qtbase
 qt5-qtdeclarative
 qt5-qtxmlpatterns
