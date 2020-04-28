@@ -79,10 +79,8 @@ def generate_config():
         "config_opts['dnf_common_opts'] = ['--refresh', '--disableplugin=local', '--setopt=deltarpm=False', '--forcearch=%s']" % platform_arch)
     print_conf(
         "config_opts['dnf_builddep_opts'] = ['--refresh', '--forcearch=%s']" % platform_arch)
-    print_conf(
-        "config_opts['useradd'] = '/usr/sbin/useradd -o -m -u %(uid)s -g %(gid)s -d %(home)s %(user)s'")
+    print_conf("config_opts['useradd'] = '/usr/sbin/useradd -o -m -u {{chrootuid}} -g {{chrootgid}} -d {{chroothome}} {{chrootuser}}'")
     print_conf("config_opts['releasever'] = '0'")
-    print_conf("config_opts['use_nspawn'] = False")
     print_conf("config_opts['use_host_resolv'] = True")
     print_conf("config_opts['tar'] = 'bsdtar'")
     print_conf("config_opts['basedir'] = '/var/lib/mock/'")
