@@ -1,5 +1,5 @@
-FROM openmandriva/cooker:ARCH_REL
-ENV RARCH ARCH_TARGET
+FROM openmandriva/cooker:latest
+ENV RARCH x86_64
 
 RUN dnf --nogpgcheck --refresh --assumeyes --nodocs --setopt=install_weak_deps=False upgrade \
  && rm -f /etc/localtime \
