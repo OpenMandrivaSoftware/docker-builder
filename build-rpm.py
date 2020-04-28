@@ -279,6 +279,7 @@ def extra_tests():
             check_string = 'LC_ALL=C dnf repoquery -q --qf %{{EPOCH}}:%{{VERSION}}-%{{RELEASE}} --latest-limit=1 {}'.format(name)
             try:
                 inrepo_version = subprocess.check_output([mock_binary, '--quiet', '--shell', '-v', check_string]).decode('utf-8')
+                print_log('repo version is : {}'.format(inrepo_version))
             except subprocess.CalledProcessError as e:
                 print(e)
                 sys.exit(5)
