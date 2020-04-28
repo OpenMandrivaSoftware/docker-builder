@@ -83,6 +83,7 @@ def generate_config():
         "config_opts['useradd'] = '/usr/sbin/useradd -o -m -u %(uid)s -g %(gid)s -d %(home)s %(user)s'")
     print_conf("config_opts['releasever'] = '0'")
     print_conf("config_opts['use_nspawn'] = False")
+    print_conf("config_opts['use_host_resolv'] = True")
     print_conf("config_opts['tar'] = 'bsdtar'")
     print_conf("config_opts['basedir'] = '/var/lib/mock/'")
     print_conf("config_opts['cache_topdir'] = '/var/cache/mock/'")
