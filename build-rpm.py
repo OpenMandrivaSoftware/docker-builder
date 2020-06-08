@@ -101,16 +101,13 @@ def download_hash(hashsum, pkg_name=''):
 
 
 def validate_spec(path):
-    spec_counter = len([f for f in os.listdir(path) if f.endswith('.spec')])
-    if spec_counter > 1:
+    spec = [f for f in os.listdir(path) if f.endswith('.spec')]
+    if len(spec) > 1:
         print('more than 1 specfile in %s' % path)
         sys.exit(1)
     else:
-        for _, _, f in os.walk(path):
-            for spec in f:
-                if spec.endswith('.spec'):
-                    print('spec_name is %s' % spec)
-                    spec_name.append(spec)
+        print('spec_name is %s' % spec[0])
+        spec_name.append(spec[0])
 
         print('single spec in repo, check passed')
 
