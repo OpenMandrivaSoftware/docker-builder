@@ -106,9 +106,9 @@ def validate_spec(path):
         print('more than 1 specfile in %s' % path)
         sys.exit(1)
     else:
-        for r, d, f in os.walk(path):
+        for _, _, f in os.walk(path):
             for spec in f:
-                if '.spec' in spec:
+                if spec.endswith('.spec'):
                     print('spec_name is %s' % spec)
                     spec_name.append(spec)
 
