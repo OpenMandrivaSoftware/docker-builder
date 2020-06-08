@@ -108,7 +108,6 @@ def validate_spec(path):
     else:
         print('spec_name is %s' % spec[0])
         spec_name.append(spec[0])
-
         print('single spec in repo, check passed')
 
 
