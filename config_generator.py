@@ -29,7 +29,7 @@ def print_conf(message):
         logFile.close()
     except:
         print("Can't write to log file: " + conf)
-    print(message)
+    # print(message)
 
 
 def generate_config():
