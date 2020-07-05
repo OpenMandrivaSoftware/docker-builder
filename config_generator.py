@@ -93,6 +93,9 @@ def generate_config():
     print_conf("config_opts['nosync'] = True")
     print_conf("config_opts['dynamic_buildrequires'] = True")
     print_conf("config_opts['nosync_force'] = True")
+    # compress logs
+    print_conf("config_opts['plugin_conf']['compress_logs_enable'] = True")
+    print_conf("config_opts['plugin_conf']['compress_logs_opts']['command'] = '/usr/bin/gzip -9 --force'")
     # enable tmpfs for builder with 64gb+
     # only if save_buildroot is false
     if save_buildroot != 'true':
