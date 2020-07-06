@@ -397,8 +397,7 @@ def build_rpm():
         except subprocess.CalledProcessError as e:
             # check here that problem not related to metadata
             print(e)
-            sz = os.path.getsize(root_log)
-            if os.path.exists(root_log) and sz > 0:
+            if os.path.exists(root_log) and os.path.getsize(root_log) > 0:
                 with io.open(root_log, "r", encoding="utf-8") as msgf:
                     mm = mmap.mmap(msgf.fileno(), sz, access=mmap.ACCESS_READ)
                     error = re.search(pattern_for_retry.encode(), mm)
