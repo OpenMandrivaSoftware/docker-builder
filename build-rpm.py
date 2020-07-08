@@ -398,6 +398,7 @@ def build_rpm():
             # check here that problem not related to metadata
             print(e)
             if os.path.exists(root_log) and os.path.getsize(root_log) > 0:
+                sz = os.path.getsize(root_log)
                 with io.open(root_log, "r", encoding="utf-8") as msgf:
                     mm = mmap.mmap(msgf.fileno(), sz, access=mmap.ACCESS_READ)
                     error = re.search(pattern_for_retry.encode(), mm)
