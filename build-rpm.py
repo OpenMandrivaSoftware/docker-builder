@@ -52,7 +52,7 @@ mock_binary = '/usr/bin/mock'
 mock_config = '/etc/mock/'
 output_dir = get_home + '/output'
 c_data = output_dir + '/container_data.json'
-root_log = output_dir + '/root.log'
+root_log = output_dir + '/root.log.gz'
 
 spec_name = []
 rpm_packages = []
