@@ -449,9 +449,9 @@ def cleanup_all():
     # wipe letfovers
     # MASK me if you run the script under your user
     # it will wipe whole your /home/user dir
-#     for dirpath, dirnames, filenames in os.walk(get_home):
-#         for name in dirnames:
-#             shutil.rmtree(os.path.join(dirpath, name))
+    for dirpath, dirnames, filenames in os.walk(get_home):
+        for name in dirnames:
+            shutil.rmtree(os.path.join(dirpath, name))
     # files
     remove_if_exist('/etc/rpm/platform')
 #    remove_if_exist('/etc/mock/default.cfg')
