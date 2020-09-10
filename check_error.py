@@ -5,7 +5,8 @@ import os
 import sys
 import io
 import argparse
-
+import magic
+import gzip
 
 err_type = ['Segmentation fault',
             'A fatal error has been detected by the Java Runtime Environment',
@@ -47,21 +48,26 @@ def write_log(message, fail_log):
 def known_errors(logfile, fail_log):
     sz = os.path.getsize(logfile)
     if os.path.exists(logfile) and sz > 0:
-        with io.open(logfile, "r", encoding="utf-8") as msgf:
-            mm = mmap.mmap(msgf.fileno(), sz, access=mmap.ACCESS_READ)
-            for pat in err_type:
-                error = re.search(pat.encode("utf-8"), mm)
+        if magic.from_file(logfile, mime=True) == 'application/gzip':
+            msgf = gzip.open(logfile, "r", encoding="utf-8")
+        else:
+            msgf = io.open(logfile, "r", encoding="utf-8")
+        mm = mmap.mmap(msgf.fileno(), sz, access=mmap.ACCESS_READ)
+        for pat in err_type:
+            error = re.search(pat.encode("utf-8"), mm)
+            if error:
+                print(error.group(0).decode('utf-8'))
+                write_log(error.group(0).decode('utf-8'), fail_log)
+                break
+            else:
+                common_pattern = 'error: (.*)'
+                error = re.search(common_pattern.encode("utf-8"), mm)
                 if error:
                     print(error.group(0).decode('utf-8'))
                     write_log(error.group(0).decode('utf-8'), fail_log)
                     break
-                else:
-                    common_pattern = 'error: (.*)'
-                    error = re.search(common_pattern.encode("utf-8"), mm)
-                    if error:
-                        print(error.group(0).decode('utf-8'))
-                        write_log(error.group(0).decode('utf-8'), fail_log)
-                        break
+        msgf.close()
+        mm.close()
 
 
 if __name__ == '__main__':
