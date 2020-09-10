@@ -15,7 +15,8 @@ import mmap
 import re
 import config_generator
 import check_error
-
+import magic
+import gzip
 
 get_home = os.environ.get('HOME')
 package = os.environ.get('PACKAGE')
@@ -399,29 +400,35 @@ def build_rpm():
             print(e)
             if os.path.exists(root_log) and os.path.getsize(root_log) > 0:
                 sz = os.path.getsize(root_log)
-                with io.open(root_log, "r", encoding="utf-8") as msgf:
-                    mm = mmap.mmap(msgf.fileno(), sz, access=mmap.ACCESS_READ)
-                    error = re.search(pattern_for_retry.encode(), mm)
-                    # probably metadata not ready
-                    if error:
-                        print(error.group().decode())
-                        if i < tries - 1:
-                            print('no needed package in repo, restarting build in 60 seconds')
-                            # remove cache dir
-                            remove_if_exist('/var/cache/mock/{}-{}/dnf_cache/'.format(platform_name, platform_arch))
-                            time.sleep(60)
-                            continue
-                        if i == tries - 1:
-                            raise
-                    else:
-                        print('build failed')
-                        # /usr/bin/python /mdv/check_error.py --file "${OUTPUT_FOLDER}"/root.log >> ~/build_fail_reason.log
-                        # add here check_error.py
-                        check_error.known_errors(root_log, get_home + '/build_fail_reason.log')
-                        # function to make tar.xz of target platform
-                        save_build_root()
-                        remove_if_exist(build_package)
-                        sys.exit(1)
+                # Added file type check
+                if magic.form_file(root_log) == 'application/gzip':
+                    msgf = gzip.open(root_log, "r", encoding="utf-8")
+                else:
+                    msgf = io.open(root_log, "r", encoding="utf-8")
+                mm = mmap.mmap(msgf.fileno(), sz, access=mmap.ACCESS_READ)
+                error = re.search(pattern_for_retry.encode(), mm)
+                msgf.close()
+                mm.close()
+                # probably metadata not ready
+                if error:
+                    print(error.group().decode())
+                    if i < tries - 1:
+                        print('no needed package in repo, restarting build in 60 seconds')
+                        # remove cache dir
+                        remove_if_exist('/var/cache/mock/{}-{}/dnf_cache/'.format(platform_name, platform_arch))
+                        time.sleep(60)
+                        continue
+                    if i == tries - 1:
+                        raise
+                else:
+                    print('build failed')
+                    # /usr/bin/python /mdv/check_error.py --file "${OUTPUT_FOLDER}"/root.log >> ~/build_fail_reason.log
+                    # add here check_error.py
+                    check_error.known_errors(root_log, get_home + '/build_fail_reason.log')
+                    # function to make tar.xz of target platform
+                    save_build_root()
+                    remove_if_exist(build_package)
+                    sys.exit(1)
             else:
                 sys.exit(1)
         break
@@ -455,8 +462,8 @@ def cleanup_all():
 #    remove_if_exist('/var/cache/dnf/')
     # /home/omv/package_name
     remove_if_exist(build_package)
-    remove_if_exist('/home/omv/build_fail_reason.log')
-    remove_if_exist('/home/omv/commit_hash')
+    remove_if_exist(get_home + '/build_fail_reason.log')
+    remove_if_exist(get_home + '/commit_hash')
     remove_if_exist(output_dir)
     print('run dnf clean metadata')
     try:
