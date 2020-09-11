@@ -399,16 +399,23 @@ def build_rpm():
             # check here that problem not related to metadata
             print(e)
             if os.path.exists(root_log) and os.path.getsize(root_log) > 0:
-                sz = os.path.getsize(root_log)
-                # Added file type check
                 if magic.detect_from_filename(root_log).mime_type == 'application/gzip':
-                    msgf = gzip.open(root_log, "r", encoding="utf-8")
+                    handle = open(root_log, "r")
+                    # let's mmap piece of memory
+                    # as we unpacked gzip
+                    tmp_mm = mmap.mmap(handle.fileno(), sz, access=mmap.ACCESS_READ)
+                    real_sz = struct.unpack("@I", tmp_mm[-4:])[0]
+                    mm = mmap.mmap(-1, real_sz, prot=mmap.PROT_READ | mmap.PROT_WRITE)
+                    gz = gzip.GzipFile(fileobj=tmp_mm)
+                    for line in gz:
+                        mm.write(line)
+                    tmp_mm.close()
+                    gz.close()
+                    handle.close
                 else:
                     msgf = io.open(root_log, "r", encoding="utf-8")
-                mm = mmap.mmap(msgf.fileno(), sz, access=mmap.ACCESS_READ)
-                error = re.search(pattern_for_retry.encode(), mm)
-                msgf.close()
-                mm.close()
+                    mm = mmap.mmap(msgf.fileno(), sz, access=mmap.ACCESS_READ)
+                    msgf.close()
                 # probably metadata not ready
                 if error:
                     print(error.group().decode())
