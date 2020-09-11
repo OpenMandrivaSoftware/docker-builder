@@ -17,6 +17,7 @@ import config_generator
 import check_error
 import magic
 import gzip
+import struct
 
 get_home = os.environ.get('HOME')
 package = os.environ.get('PACKAGE')
