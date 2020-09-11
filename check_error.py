@@ -7,6 +7,7 @@ import io
 import argparse
 import magic
 import gzip
+import struct
 
 err_type = ['Segmentation fault',
             'A fatal error has been detected by the Java Runtime Environment',
@@ -48,11 +49,23 @@ def write_log(message, fail_log):
 def known_errors(logfile, fail_log):
     sz = os.path.getsize(logfile)
     if os.path.exists(logfile) and sz > 0:
-        if magic.from_file(logfile, mime=True) == 'application/gzip':
-            msgf = gzip.open(logfile, "r", encoding="utf-8")
+        if magic.detect_from_filename(logfile).mime_type == 'application/gzip':
+            handle = open(logfile, "r")
+            # let's mmap piece of memory
+            # as we unpacked gzip
+            tmp_mm = mmap.mmap(handle.fileno(), sz, access=mmap.ACCESS_READ)
+            real_sz = struct.unpack("@I", tmp_mm[-4:])[0]
+            mm = mmap.mmap(-1, real_sz, prot=mmap.PROT_READ | mmap.PROT_WRITE)
+            gz = gzip.GzipFile(fileobj=tmp_mm)
+            for line in gz:
+                mm.write(line)
+            tmp_mm.close()
+            gz.close()
+            handle.close
         else:
             msgf = io.open(logfile, "r", encoding="utf-8")
-        mm = mmap.mmap(msgf.fileno(), sz, access=mmap.ACCESS_READ)
+            mm = mmap.mmap(msgf.fileno(), sz, access=mmap.ACCESS_READ)
+            msgf.close()
         for pat in err_type:
             error = re.search(pat.encode("utf-8"), mm)
             if error:
@@ -66,23 +79,22 @@ def known_errors(logfile, fail_log):
                     print(error.group(0).decode('utf-8'))
                     write_log(error.group(0).decode('utf-8'), fail_log)
                     break
-        msgf.close()
         mm.close()
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Run me over the buildlog')
-    parser.add_argument(
-        '-f', '--file', help='build.log requires', required=True)
+    parser.add_argument('-f', '--file', help='build.log requires', required=True)
     args = vars(parser.parse_args())
     if args['file']:
         try:
-            known_errors(args['file'])
+            known_errors(args['file'], 'fail.log')
         except OSError as o:
             print('Sorry the file you asked does not exists!')
             print(str(o))
 
-# known_errors('cannot_allocate.log')
+# known_errors('build.log.gz', 'fail.log')
+# known_errors('build.log', 'fail.log')
 # known_errors('no_file_topatch.log')
 # known_errors('no_package_to_install.log')
 # known_errors('no_such_package_in_repo.log')
