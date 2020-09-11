@@ -399,6 +399,7 @@ def build_rpm():
             # check here that problem not related to metadata
             print(e)
             if os.path.exists(root_log) and os.path.getsize(root_log) > 0:
+                sz = os.path.getsize(root_log)
                 if magic.detect_from_filename(root_log).mime_type == 'application/gzip':
                     handle = open(root_log, "r")
                     # let's mmap piece of memory
