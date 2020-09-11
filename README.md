@@ -69,7 +69,7 @@ USE_EXTRA_TESTS=true PLATFORM_ARCH=x86_64 PLATFORM_NAME=cooker \
 UNAME=fdrt EMAIL=fdrt@fdrt.com USE_MOCK_CACHE= EXTRA_CFG_OPTIONS= \
 REPO_NAMES='cooker_main_release cooker_main_updates' \
 REPO_URL='http://abf-downloads.openmandriva.org/cooker/repository/x86_64/main/release \
-http://abf-downloads.openmandriva.org/cooker/repository/x86_64/main/updates'\
+http://abf-downloads.openmandriva.org/cooker/repository/x86_64/main/updates' \
 PROJECT_VERSION=master FILE_STORE_ADDR=https://file-store.openmandriva.org/ \
 /usr/bin/python build-rpm.py
 ```
