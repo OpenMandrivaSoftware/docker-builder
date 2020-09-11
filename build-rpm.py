@@ -354,7 +354,7 @@ def build_rpm():
     config_generator.generate_config()
     tries = 5
     # pattern for retry
-    pattern_for_retry = '(.*)Cannot download(.*)'
+    pattern_for_retry = '(.*)Failed to download(.*)'
     if not os.environ.get('MOCK_CACHE'):
         # /var/cache/mock/cooker-x86_64/root_cache/
         print("MOCK_CACHE is none, than need to clear platform cache")
