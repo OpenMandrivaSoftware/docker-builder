@@ -401,7 +401,7 @@ def build_rpm():
             if os.path.exists(root_log) and os.path.getsize(root_log) > 0:
                 sz = os.path.getsize(root_log)
                 # Added file type check
-                if magic.from_file(root_log, mime=True) == 'application/gzip':
+                if magic.detect_from_filename(root_log).mime_type == 'application/gzip':
                     msgf = gzip.open(root_log, "r", encoding="utf-8")
                 else:
                     msgf = io.open(root_log, "r", encoding="utf-8")
