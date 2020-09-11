@@ -61,6 +61,9 @@ sudo dnf install -y mock git coreutils curl sudo rpmdevtools python-yaml
 
 
 ```bash
+!!!DO NOT RUN IT OUT OF CONTAINER!!!
+
+
 PACKAGE=htop GIT_REPO=git://github.com/OpenMandrivaAssociation/htop.git \
 USE_EXTRA_TESTS=true PLATFORM_ARCH=x86_64 PLATFORM_NAME=cooker \
 UNAME=fdrt EMAIL=fdrt@fdrt.com USE_MOCK_CACHE= EXTRA_CFG_OPTIONS= \
