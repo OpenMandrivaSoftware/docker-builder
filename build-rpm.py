@@ -412,12 +412,16 @@ def build_rpm():
                     for line in gz:
                         mm.write(line)
                     tmp_mm.close()
+                    error = re.search(pattern_for_retry.encode(), mm)
                     gz.close()
                     handle.close
+                    mm.close()
                 else:
                     msgf = io.open(root_log, "r", encoding="utf-8")
                     mm = mmap.mmap(msgf.fileno(), sz, access=mmap.ACCESS_READ)
+                    error = re.search(pattern_for_retry.encode(), mm)
                     msgf.close()
+                    mm.close()
                 # probably metadata not ready
                 if error:
                     print(error.group().decode())
