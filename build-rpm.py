@@ -342,8 +342,7 @@ def relaunch_tests():
     only_rpms = set(rpm_packages) - set(src_rpm)
     try:
         print('\n'.join(rpm_packages))
-        subprocess.check_call(
-            [mock_binary, '--init', '--configdir', mock_config, '--install'] + list(only_rpms))
+        subprocess.check_call([mock_binary, '--init', '--configdir', mock_config, '--install'] + list(only_rpms))
         print('packages %s installed successfully' % list(only_rpms))
         shutil.copy('/var/lib/mock/{}-{}/result/root.log'.format(platform_name, platform_arch), logfile)
     except subprocess.CalledProcessError as e:
