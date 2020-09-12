@@ -414,7 +414,7 @@ def build_rpm():
                     tmp_mm.close()
                     error = re.search(pattern_for_retry.encode(), mm)
                     gz.close()
-                    handle.close
+                    handle.close()
                     mm.close()
                 else:
                     msgf = io.open(root_log, "r", encoding="utf-8")
@@ -424,9 +424,9 @@ def build_rpm():
                     mm.close()
                 # probably metadata not ready
                 if error:
-                    print(error.group().decode())
+                    # print(error.group().decode())
                     if i < tries - 1:
-                        print('no needed package in repo, restarting build in 60 seconds')
+                        print('problems with metadata in repo, restarting build in 60 seconds')
                         # remove cache dir
                         remove_if_exist('/var/cache/mock/{}-{}/dnf_cache/'.format(platform_name, platform_arch))
                         time.sleep(60)
