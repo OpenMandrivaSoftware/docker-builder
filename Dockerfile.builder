@@ -1,5 +1,5 @@
-FROM rosalab/rosa2019.1:aarch64
-ENV RARCH aarch64
+FROM openmandriva/cooker:ARCH_REL
+ENV RARCH ARCH_TARGET
 
 RUN dnf --nogpgcheck --refresh --assumeyes --nodocs --setopt=install_weak_deps=False upgrade \
  && rm -f /etc/localtime \
