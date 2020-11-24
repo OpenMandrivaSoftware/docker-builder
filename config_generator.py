@@ -90,7 +90,7 @@ def generate_config():
     print_conf("config_opts['use_bootstrap'] = False")
     print_conf("config_opts['basedir'] = '/var/lib/mock/'")
     print_conf("config_opts['cache_topdir'] = '/var/cache/mock/'")
-    print_conf("config_opts['nosync'] = True")
+    print_conf("config_opts['nosync'] = False")
     print_conf("config_opts['dynamic_buildrequires'] = True")
     # https://github.com/rpm-software-management/mock/issues/661
     print_conf("config_opts['nosync_force'] = False")
