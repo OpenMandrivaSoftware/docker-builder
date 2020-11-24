@@ -92,7 +92,8 @@ def generate_config():
     print_conf("config_opts['cache_topdir'] = '/var/cache/mock/'")
     print_conf("config_opts['nosync'] = True")
     print_conf("config_opts['dynamic_buildrequires'] = True")
-    print_conf("config_opts['nosync_force'] = True")
+    # https://github.com/rpm-software-management/mock/issues/661
+    print_conf("config_opts['nosync_force'] = False")
     # compress logs
     print_conf("config_opts['plugin_conf']['compress_logs_enable'] = True")
     print_conf("config_opts['plugin_conf']['compress_logs_opts']['command'] = '/usr/bin/gzip -9 --force'")

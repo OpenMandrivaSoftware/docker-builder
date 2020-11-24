@@ -1,5 +1,5 @@
-FROM openmandriva/cooker:ARCH_REL
-ENV RARCH ARCH_TARGET
+FROM rosalab/rosa2019.1:aarch64
+ENV RARCH aarch64
 
 RUN dnf --nogpgcheck --refresh --assumeyes --nodocs --setopt=install_weak_deps=False upgrade \
  && rm -f /etc/localtime \
@@ -11,7 +11,6 @@ RUN dnf --nogpgcheck --refresh --assumeyes --nodocs --setopt=install_weak_deps=F
  && adduser omv \
  && usermod -a -G mock omv \
  && chown -R omv:mock /etc/mock \
- && dnf reinstall -y locales-en \
  && dnf --assumeyes autoremove \
  && dnf clean all \
  && rm -rf /var/cache/dnf/* \
