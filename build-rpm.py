@@ -117,14 +117,17 @@ def download_yml(yaml_file):
     if os.path.exists(yaml_file) and os.path.isfile(yaml_file):
         try:
             data = yaml.safe_load(open(yaml_file))
+        except yaml.YAMLError as e:
+            print('Error parsing .abf.yml: %s' % e)
+            sys.exit(1)
+        if ('sources' not in data) or len(data['sources']) == 0:
+            print("WARNING: .abf.yml contains no or empty sources section")
+        else:
             for key, value in data['sources'].items():
                 print('downloading %s' % key)
                 download_hash(value, key)
-        except yaml.YAMLError as exc:
-            print('.abf.yml probably damaged')
-            print(exc)
     else:
-        print('abf.yml not found')
+        print('.abf.yml not found')
 
 # func to remove leftovers
 # from prev. build
@@ -229,19 +232,15 @@ def container_data():
         if not os.path.basename(pkg).endswith("src.rpm"):
             try:
                 dependencies = subprocess.check_output(
-                    ['dnf', 'repoquery', '-q', '--latest-limit=1', '--qf', '%{NAME}', '--whatrequires', name])
-                # just a list of deps
+                    ['dnf', 'repoquery', '-q', '--latest-limit=1', '--qf', '%{NAME}', '--whatrequires', name]
+                )
                 full_list = dependencies.decode().split('\n')
             except subprocess.CalledProcessError:
                 print('some problem with dnf repoquery for %s' % name)
         package_info = dict([('name', name), ('version', version), ('release', release), ('size', get_size(pkg)), ('epoch', epoch), ('fullname', pkg.split('/')[-1]), ('sha1', shasum), ('dependent_packages', ' '.join(full_list))])
-
-#        print(package_info)
-        app_json = json.dumps(package_info, sort_keys=True, indent=4)
         multikeys.append(package_info)
-#    print(multikeys)
     with open(c_data, 'w') as out_json:
-        json.dump(multikeys, out_json, sort_keys=True, indent=4)
+        json.dump(multikeys, out_json, sort_keys=True, separators=(',', ':'))
 
 
 def extra_tests():
