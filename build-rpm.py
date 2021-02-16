@@ -107,6 +107,9 @@ def validate_spec(path):
     if len(spec) > 1:
         print('more than 1 specfile in %s' % path)
         sys.exit(1)
+    elif len(spec) == 0:
+        print('no spec found')
+        sys.exit(1)
     else:
         print('spec_name is %s' % spec[0])
         spec_name.append(spec[0])
