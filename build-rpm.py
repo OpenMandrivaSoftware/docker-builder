@@ -367,8 +367,8 @@ def build_rpm():
                 subprocess.check_output([mock_binary, '--update', '--configdir', mock_config, '--buildsrpm', '--spec=' + build_package + '/' + spec_name[0], '--source=' + build_package, '--no-cleanup-after',
                                          '--resultdir=' + output_dir])
             else:
-                subprocess.check_output([mock_binary, '--update', '--configdir', mock_config, '--buildsrpm', '--spec=' + build_package + '/' + spec_name[0], '--source=' + build_package, '--no-cleanup-after', extra_build_src_rpm_options,
-                                         '--resultdir=' + output_dir])
+                subprocess.check_output([mock_binary, '--update', '--configdir', mock_config, '--buildsrpm', '--spec=' + build_package + '/' + spec_name[0], '--source=' + build_package, '--no-cleanup-after'] + extra_build_src_rpm_options.split(' ') +
+                                         ['--resultdir=' + output_dir])
         except subprocess.CalledProcessError as e:
             if i < tries - 1:
                 print('something went wrong with SRPM creation')
@@ -396,7 +396,7 @@ def build_rpm():
                                        src_rpm[0], '--no-cleanup-after', '--no-clean', '--resultdir=' + output_dir])
             else:
                 subprocess.check_output([mock_binary, '-v', '--update', '--configdir', mock_config, '--rebuild', src_rpm[0],
-                                         '--no-cleanup-after', '--no-clean', extra_build_rpm_options, '--resultdir=' + output_dir])
+                    '--no-cleanup-after', '--no-clean'] + extra_build_rpm_options.split(' ') + ['--resultdir=' + output_dir])
         except subprocess.CalledProcessError as e:
             # check here that problem not related to metadata
             print(e)
