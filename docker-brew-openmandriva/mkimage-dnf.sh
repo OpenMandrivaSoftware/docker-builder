@@ -38,7 +38,23 @@ while true; do
 	esac
 done
 
+if [ -z "${installversion}" ]; then
+	# Attempt to match host version
+	if grep -q Cooker /etc/os-release; then
+		installversion=cooker
+	elif grep -q Rolling /etc/os-release; then
+		installversion=rolling
+	else
+		installversion="$(rpm --eval %distro_release)"
+	fi
+	if [ -z "${installversion}" ]; then
+		echo "Error: no version supplied and unable to detect host openmandriva version"
+		exit 1
+	fi
+fi
+
 [ -z "$arch" ] && arch="`uname -m`"
+[ -z "$rootfsdir" ] && rootfsdir="$common_pwd/docker-brew-openmandriva/${installversion}"
 
 target=$(mktemp -d --tmpdir $(basename $0).XXXXXX)
 mkdir -m 755 "$target"/dev
@@ -60,21 +76,6 @@ errorCatch() {
 }
 
 trap errorCatch ERR SIGHUP SIGINT SIGTERM
-
-if [ -z "${installversion}" ]; then
-	# Attempt to match host version
-	if grep -q Cooker /etc/os-release; then
-		installversion=cooker
-	elif grep -q Rolling /etc/os-release; then
-		installversion=rolling
-	else
-		installversion="$(rpm --eval %distro_release)"
-	fi
-	if [ -z "${installversion}" ]; then
-		echo "Error: no version supplied and unable to detect host openmandriva version"
-		exit 1
-	fi
-fi
 
 if [ -n "${mirror}" ]; then
 	# If mirror provided, use it exclusively
