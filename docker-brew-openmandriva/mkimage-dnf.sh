@@ -213,6 +213,7 @@ docker manifest create openmandriva/cooker:latest \
 	--amend openmandriva/cooker:aarch64
 docker manifest annotate openmandriva/cooker:latest openmandriva/cooker:x86_64 --os linux --arch amd64
 docker manifest annotate openmandriva/cooker:latest openmandriva/cooker:aarch64 --os linux --arch arm64
+docker manifest push openmandriva/cooker:latest
 
 if [ ! -z "${builder}" ]; then
 	cd $common_pwd
@@ -228,6 +229,7 @@ if [ ! -z "${builder}" ]; then
 		--amend openmandriva/builder:aarch64
 	docker manifest annotate openmandriva/builder:latest openmandriva/builder:x86_64 --os linux --arch amd64
 	docker manifest annotate openmandriva/builder:latest openmandriva/builder:aarch64 --os linux --arch arm64
+	docker manifest push openmandriva/builder:latest
 fi
 
 popd
