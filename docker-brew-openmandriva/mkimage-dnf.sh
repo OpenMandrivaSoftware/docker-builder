@@ -70,7 +70,7 @@ mknod -m 666 "$target"/dev/urandom c 1 9
 mknod -m 666 "$target"/dev/zero c 1 5
 
 errorCatch() {
-	echo "Error catched. Exiting"
+	echo "Error caught. Exiting"
 	rm -rf "${target}"
 	exit 1
 }
@@ -202,7 +202,7 @@ fi
 pushd "${target}"
 
 tar --numeric-owner -caf "${tarFile}" -c .
-mv -f "${tarFile}" $common_pwd/docker-brew-openmandriva/$installversion/
+[ "${rootfsdir}" = "$common_pwd/docker-brew-openmandriva/$installversion" ] || mv -f "${tarFile}" $common_pwd/docker-brew-openmandriva/$installversion/
 pushd $common_pwd/docker-brew-openmandriva/$installversion/
 docker build --tag=openmandriva/$installversion:$arch --file Dockerfile .
 
@@ -223,6 +223,7 @@ if [ ! -z "${builder}" ]; then
 	fi
 	sed -i "s/ARCH_REL/${arch}/g" Dockerfile.builder
 	docker build --tag=openmandriva/builder:$arch --file Dockerfile.builder .
+	docker push openmandriva/builder:$arch
 	git checkout Dockerfile.builder
 
 	docker manifest create openmandriva/builder:latest \
