@@ -7,11 +7,13 @@ mkimg="$(basename "$0")"
 common_pwd="$PWD"
 
 usage() {
-    echo >&2 "usage: $mkimg --rootfs=rootfs_path --version=openmandriva_version [--mirror=url]"
-    echo >&2 "       $mkimg --rootfs=/tmp/rootfs --version=openmandriva2014.0 --arch=x86_64"
-    echo >&2 "       $mkimg --rootfs=. --version=cooker --mirror=http://abf-downloads.openmandriva.org/cooker/repository/x86_64/main/release/"
-    echo >&2 "       $mkimg --rootfs=. --version=cooker"
-    exit 1
+	cat >&2 <<EOF
+usage: $mkimg --rootfs=rootfs_path --version=openmandriva_version [--mirror=url]
+       $mkimg --rootfs=/tmp/rootfs --version=openmandriva2014.0 --arch=x86_64
+       $mkimg --rootfs=. --version=cooker --mirror=http://abf-downloads.openmandriva.org/cooker/repository/x86_64/main/release/
+       $mkimg --rootfs=. --version=cooker
+EOF
+	exit 1
 }
 
 optTemp=$(getopt --options '+d,v:,m:,a:,s,b,U,p,h,+x' --longoptions 'rootfs:,version:,mirror:,arch:,with-systemd,with-builder,without-user,with-passwd,help,extra-package:' --name mkimage-dnf -- "$@")
@@ -21,7 +23,7 @@ unset optTemp
 extra_packages=""
 
 while true; do
-    case "$1" in
+	case "$1" in
 	-d|--rootfs) rootfsdir=$2 ; shift 2 ;;
 	-v|--version) installversion="$2" ; shift 2 ;;
 	-m|--mirror) mirror="$2" ; shift 2 ;;
@@ -33,8 +35,10 @@ while true; do
 	-h|--help) usage ;;
 	-x|--extra-package) extra_packages="$extra_packages $2" ; shift 2 ;;
 	--) shift ; break ;;
-    esac
+	esac
 done
+
+[ -z "$arch" ] && arch="`uname -m`"
 
 target=$(mktemp -d --tmpdir $(basename $0).XXXXXX)
 mkdir -m 755 "$target"/dev
@@ -50,31 +54,34 @@ mknod -m 666 "$target"/dev/urandom c 1 9
 mknod -m 666 "$target"/dev/zero c 1 5
 
 errorCatch() {
-    echo "Error catched. Exiting"
-    rm -rf "${target}"
-    exit 1
+	echo "Error catched. Exiting"
+	rm -rf "${target}"
+	exit 1
 }
 
 trap errorCatch ERR SIGHUP SIGINT SIGTERM
 
 if [ -z "${installversion}" ]; then
-# Attempt to match host version
-    if [ -r /etc/distro-release ]; then
-	installversion="$(rpm --eval %distro_release)"
-    else
-	echo "Error: no version supplied and unable to detect host openmandriva version"
-	exit 1
-    fi
+	# Attempt to match host version
+	if grep -q Cooker /etc/os-release; then
+		installversion=cooker
+	elif grep -q Rolling /etc/os-release; then
+		installversion=rolling
+	else
+		installversion="$(rpm --eval %distro_release)"
+	fi
+	if [ -z "${installversion}" ]; then
+		echo "Error: no version supplied and unable to detect host openmandriva version"
+		exit 1
+	fi
 fi
 
-if [ ! -z "${mirror}" ]; then
-        # If mirror provided, use it exclusively
-        reposetup="--disablerepo=* --repofrompath=omvrel,$mirror/media/main/release/ --repofrompath=omvup,$mirror/media/main/updates/ --enablerepo=omvrel --enablerepo=omvup"
-fi
-
-if [ -z "${mirror}" ]; then
-        # If mirror is *not* provided, use mirrorlist
-        reposetup="--disablerepo=* --enablerepo=openmandriva-${arch} --enablerepo=updates-${arch}"
+if [ -n "${mirror}" ]; then
+	# If mirror provided, use it exclusively
+	reposetup="--disablerepo=* --repofrompath=omvrel,$mirror/$installversion/repository/$arch/main/release/ --repofrompath=omvup,$mirror/$installversion/repository/$arch/main/updates/ --enablerepo=omvrel --enablerepo=omvup"
+else
+	# If mirror is *not* provided, use mirrorlist
+	reposetup="--disablerepo=* --enablerepo=openmandriva-${arch} --enablerepo=updates-${arch}"
 
 	mkdir -p ${target}/etc/yum.repos.d
 	cat >${target}/etc/yum.repos.d/openmandriva-${arch}.repo <<EOF
@@ -98,42 +105,37 @@ EOF
 	cat ${target}/etc/yum.repos.d/openmandriva-${arch}.repo >/dev/stderr
 fi
 
-# Must be after the non-empty check or otherwise this will fail
-if [ -z "${pkgmgr}" ]; then
-        pkgmgr="dnf"
-fi
-
 if [ ! -z "${systemd}" ]; then
-    printf '%b\n' '--------------------------------------'
-    printf '%b\n' 'Creating image with systemd support.'
-    printf '%b\n' '--------------------------------------'
-    systemd="systemd passwd"
+	printf '%b\n' '--------------------------------------'
+	printf '%b\n' 'Creating image with systemd support.'
+	printf '%b\n' '--------------------------------------'
+	systemd="systemd passwd"
 fi
 
 # run me here
 install_chroot(){
-    dnf \
-    --refresh \
-    ${reposetup} \
-    --installroot="${target}" \
-    --nogpgcheck \
-    --forcearch="${arch}" \
-    --releasever="${installversion}" \
-    --setopt=install_weak_deps=False \
-    --nodocs --assumeyes \
-    install basesystem-minimal openmandriva-repos ${pkgmgr} locales locales-en ${systemd}
+	dnf \
+		--refresh \
+		${reposetup} \
+		--installroot="${target}" \
+		--nogpgcheck \
+		--forcearch="${arch}" \
+		--releasever="${installversion}" \
+		--setopt=install_weak_deps=False \
+		--nodocs --assumeyes \
+		install basesystem-minimal openmandriva-repos dnf locales locales-en ${systemd}
 
-    if [ $? != 0 ]; then
-	echo "Creating dnf chroot failed."
-	errorCatch
-    fi
+	if [ $? != 0 ]; then
+		echo "Creating dnf chroot failed."
+		errorCatch
+	fi
 }
 
 install_chroot
 
 if [ ! -z "${systemd}" ]; then
 # Prevent systemd from starting unneeded services
-    (cd "${target}"/lib/systemd/system/sysinit.target.wants/; for i in *; do [ "$i" = 'systemd-tmpfiles-setup.service' ] || rm -f "${i}"; done); \
+	(cd "${target}"/lib/systemd/system/sysinit.target.wants/; for i in *; do [ "$i" = 'systemd-tmpfiles-setup.service' ] || rm -f "${i}"; done); \
 	rm -f "${target}"/lib/systemd/system/multi-user.target.wants/*;\
 	rm -f "${target}"/etc/systemd/system/*.wants/*;\
 	rm -f "${target}"/lib/systemd/system/local-fs.target.wants/*; \
@@ -191,45 +193,41 @@ EOF
 fi
 
 if [ ! -z "${systemd}" ]; then
-    tarFile="${rootfsdir}"/rootfs-"${installversion}"-systemd.tar.xz
+	tarFile="${rootfsdir}"/rootfs-"${installversion}"-systemd.tar.xz
 else
-    tarFile="${rootfsdir}"/rootfs-"${installversion}".tar.xz
+	tarFile="${rootfsdir}"/rootfs-"${installversion}".tar.xz
 fi
 
 pushd "${target}"
 
-if [ "${arch}" = 'x86_64' ]; then
-        tar --numeric-owner -caf "${tarFile}" -c .
-        mv -f "${tarFile}" $common_pwd/docker-brew-openmandriva/$installversion/
-        pushd $common_pwd/docker-brew-openmandriva/$installversion/
-        docker build --tag=openmandriva/$installversion --file Dockerfile .
+tar --numeric-owner -caf "${tarFile}" -c .
+mv -f "${tarFile}" $common_pwd/docker-brew-openmandriva/$installversion/
+pushd $common_pwd/docker-brew-openmandriva/$installversion/
+docker build --tag=openmandriva/$installversion:$arch --file Dockerfile .
 
-else
-        tar --numeric-owner -caf "${tarFile}" -c .
-        mv -f "${tarFile}" $common_pwd/docker-brew-openmandriva/$installversion/
-        pushd $common_pwd/docker-brew-openmandriva/$installversion/
-        docker build --tag=openmandriva/$installversion:$arch --file Dockerfile .
-fi
+docker run -i -t --rm openmandriva/$installversion:$arch /bin/bash -c 'echo success'
+docker push openmandriva/$installversion:$arch
 
-if [ "${arch}" = 'x86_64' ]; then
-	docker run -i -t --rm openmandriva/$installversion:latest /bin/bash -c 'echo success'
-	docker push openmandriva/$installversion:latest
-else
-	docker run -i -t --rm openmandriva/$installversion:$arch /bin/bash -c 'echo success'
-	docker push openmandriva/$installversion:$arch
-fi
+docker manifest create openmandriva/cooker:latest \
+	--amend openmandriva/cooker:x86_64 \
+	--amend openmandriva/cooker:aarch64
+docker manifest annotate openmandriva/cooker:latest openmandriva/cooker:x86_64 --os linux --arch amd64
+docker manifest annotate openmandriva/cooker:latest openmandriva/cooker:aarch64 --os linux --arch arm64
 
 if [ ! -z "${builder}" ]; then
 	cd $common_pwd
 	if [ "${arch}" = 'x86_64' ]; then
-		sed -i "s/ARCH_REL/latest/g" Dockerfile.builder
 		sed -i "s/ARCH_TARGET/x86_64/g" Dockerfile.builder
-		docker build --tag=openmandriva/builder  --file Dockerfile.builder .
-	else
-		sed -i "s/ARCH_REL/${arch}/g" Dockerfile.builder
-		docker build --tag=openmandriva/builder:$arch --file Dockerfile.builder .
-		git checkout Dockerfile.builder
 	fi
+	sed -i "s/ARCH_REL/${arch}/g" Dockerfile.builder
+	docker build --tag=openmandriva/builder:$arch --file Dockerfile.builder .
+	git checkout Dockerfile.builder
+
+	docker manifest create openmandriva/builder:latest \
+		--amend openmandriva/builder:x86_64 \
+		--amend openmandriva/builder:aarch64
+	docker manifest annotate openmandriva/builder:latest openmandriva/builder:x86_64 --os linux --arch amd64
+	docker manifest annotate openmandriva/builder:latest openmandriva/builder:aarch64 --os linux --arch arm64
 fi
 
 popd
