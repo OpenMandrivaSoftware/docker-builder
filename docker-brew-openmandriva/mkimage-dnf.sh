@@ -209,12 +209,12 @@ docker build --tag=openmandriva/$installversion:$arch --file Dockerfile .
 docker run -i -t --rm openmandriva/$installversion:$arch /bin/bash -c 'echo success'
 docker push openmandriva/$installversion:$arch
 
-docker manifest create openmandriva/cooker:latest \
-	--amend openmandriva/cooker:x86_64 \
-	--amend openmandriva/cooker:aarch64
-docker manifest annotate openmandriva/cooker:latest openmandriva/cooker:x86_64 --os linux --arch amd64
-docker manifest annotate openmandriva/cooker:latest openmandriva/cooker:aarch64 --os linux --arch arm64
-docker manifest push openmandriva/cooker:latest
+docker manifest create openmandriva/$installversion:latest \
+	--amend openmandriva/$installversion:x86_64 \
+	--amend openmandriva/$installversion:aarch64
+docker manifest annotate openmandriva/$installversion:latest openmandriva/$installversion:x86_64 --os linux --arch amd64
+docker manifest annotate openmandriva/$installversion:latest openmandriva/$installversion:aarch64 --os linux --arch arm64
+docker manifest push openmandriva/$installversion:latest
 
 if [ ! -z "${builder}" ]; then
 	cd $common_pwd
