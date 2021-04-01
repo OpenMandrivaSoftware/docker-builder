@@ -1,3 +1,4 @@
+ARG ARCH_REL=x86_64
 FROM openmandriva/cooker:ARCH_REL
 ENV RARCH ARCH_TARGET
 
