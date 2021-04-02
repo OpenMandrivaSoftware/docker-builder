@@ -56,7 +56,7 @@ fi
 [ -z "$arch" ] && arch="`uname -m`"
 [ -z "$rootfsdir" ] && rootfsdir="$common_pwd/docker-brew-openmandriva/${installversion}"
 
-target=$(mktemp -d --tmpdir $(basename $0).XXXXXX)
+target=$(mktemp -d --tmpdir="$(realpath $(dirname $0))" $(basename $0).XXXXXX)
 mkdir -m 755 "$target"/dev
 mknod -m 600 "$target"/dev/console c 5 1
 mknod -m 600 "$target"/dev/initctl p
