@@ -221,7 +221,6 @@ if [ ! -z "${builder}" ]; then
 	if [ "${arch}" = 'x86_64' ]; then
 		sed -i "s/ARCH_TARGET/x86_64/g" Dockerfile.builder
 	fi
-	sed -i "s/ARCH_REL/${arch}/g" Dockerfile.builder
 	docker build --tag=openmandriva/builder:$arch --file Dockerfile.builder .
 	docker push openmandriva/builder:$arch
 	git checkout Dockerfile.builder
