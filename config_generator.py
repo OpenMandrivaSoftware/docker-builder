@@ -67,7 +67,7 @@ def generate_config():
         print_conf("config_opts['legal_host_arches'] = ('i586', 'i686', 'x86_64')")
 
     print_conf("config_opts['root'] = '%s-%s'" % (platform_name, platform_arch))
-    print_conf("config_opts['chroot_setup_cmd'] = ('install', '@buildsys-build')")
+    print_conf("config_opts['chroot_setup_cmd'] = ('install', '@buildsys-build', 'yum')")
     print_conf("config_opts['package_manager'] = 'dnf'")
     print_conf("config_opts['dnf_common_opts'] = ['--refresh', '--disableplugin=local', '--setopt=deltarpm=False', '--forcearch=%s']" % platform_arch)
     print_conf("config_opts['dnf_builddep_opts'] = ['--refresh', '--forcearch=%s']" % platform_arch)
