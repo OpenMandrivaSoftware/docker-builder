@@ -251,8 +251,7 @@ def extra_tests():
     # check_package
     try:
         print('installing %s' % list(only_rpms))
-        subprocess.check_call(
-            [mock_binary, '--init', '--configdir', mock_config, '--install'] + list(only_rpms))
+        subprocess.check_call([mock_binary, '--init', '--configdir', mock_config, '--install'] + list(only_rpms))
         shutil.copy('/var/lib/mock/{}-{}/result/root.log'.format(platform_name, platform_arch), logfile)
         print('all packages successfully installed')
     except subprocess.CalledProcessError:
@@ -276,9 +275,10 @@ def extra_tests():
             else:
                 epoch = 0
             evr = '{}:{}-{}'.format(epoch, version, release)
+            # obtain version of pkg name version from repository
             check_string = 'LC_ALL=C dnf repoquery -q --qf %{{EPOCH}}:%{{VERSION}}-%{{RELEASE}} --latest-limit=1 {}'.format(name)
             try:
-                inrepo_version = subprocess.check_output([mock_binary, '--quiet', '--shell', '-v', check_string]).decode('utf-8')
+                #inrepo_version = subprocess.check_output([mock_binary, '--quiet', '--shell', '-v', check_string]).decode('utf-8')
                 print_log('repo version is : {}'.format(inrepo_version))
             except subprocess.CalledProcessError as e:
                 print(e)
@@ -289,13 +289,10 @@ def extra_tests():
             else:
                 inrepo_version = 0
             try:
-                print_log('run rpmdev-vercmp %s %s' %
-                          (evr, str(inrepo_version)))
-                a = subprocess.check_call(
-                    ['rpmdev-vercmp', evr, str(inrepo_version)])
+                print_log('run rpmdev-vercmp %s %s' % (evr, str(inrepo_version)))
+                a = subprocess.check_call(['rpmdev-vercmp', evr, str(inrepo_version)])
                 if a == 0:
-                    print_log(
-                        'Package {} is either the same, older, or another problem. Extra tests failed'.format(name))
+                    print_log('Package {} is either the same, older, or another problem. Extra tests failed'.format(name))
                     sys.exit(5)
             except subprocess.CalledProcessError as e:
                 exit_code = e.returncode
