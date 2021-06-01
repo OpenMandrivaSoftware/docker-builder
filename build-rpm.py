@@ -472,7 +472,7 @@ def cleanup_all():
     # dirs
     remove_if_exist('/var/lib/mock/')
     # probably need to drop it and point in mock
-#    remove_if_exist('/var/cache/mock/')
+    remove_if_exist('/var/cache/mock/')
 #    remove_if_exist('/var/cache/dnf/')
     # /home/omv/package_name
     remove_if_exist(build_package)
