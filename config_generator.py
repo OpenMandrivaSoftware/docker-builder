@@ -97,11 +97,11 @@ def generate_config():
     # compress logs
     print_conf("config_opts['plugin_conf']['compress_logs_enable'] = True")
     print_conf("config_opts['plugin_conf']['compress_logs_opts']['command'] = '/usr/bin/gzip -9 --force'")
-    # Some packages (at the moment, only gcc - due to crosscompilers being
+    # Some packages (at the moment, gcc and llvm - due to crosscompilers being
     # built in the same source tree), require LOADS of space for the BUILD
     # and BUILDROOT directories - causing them to fail even on a rather
     # generous tmpfs
-    huge_packages = ['gcc']
+    huge_packages = ['gcc', 'llvm']
     # enable tmpfs for builder with 64gb+
     # only if save_buildroot is false and the package isn't blacklisted
     if save_buildroot != 'true' and not os.getenv('PACKAGE') in huge_packages:
