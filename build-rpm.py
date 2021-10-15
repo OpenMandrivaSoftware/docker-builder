@@ -261,8 +261,8 @@ def extra_tests():
         sys.exit(5)
     # stage2
     # check versions
-    # here only rpm packages, not debuginfo
-    skip_debuginfo = [s for s in only_rpms if "debuginfo" not in s]
+    # here only rpm packages, not debuginfo or debugsource
+    skip_debuginfo = [s for s in only_rpms if "debuginfo" not in s and "debugsource" not in s]
     ts = rpm.ts()
     try:
         for pkg in skip_debuginfo:
