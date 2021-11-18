@@ -140,15 +140,13 @@ def remove_if_exist(path):
     if os.path.exists(path):
         if os.path.isdir(path):
             try:
-                subprocess.check_output(
-                    ['/usr/bin/sudo', '-E', 'rm', '-rf', path])
+                subprocess.check_output(['/usr/bin/sudo', '-E', 'rm', '-rf', path])
             except subprocess.CalledProcessError as e:
                 print(e.output)
                 return
         if os.path.isfile(path):
             try:
-                subprocess.check_output(
-                    ['/usr/bin/sudo', '-E', 'rm', '-f', path])
+                subprocess.check_output(['/usr/bin/sudo', '-E', 'rm', '-f', path])
             except subprocess.CalledProcessError as e:
                 print(e.output)
                 return
@@ -234,9 +232,7 @@ def container_data():
         full_list = []
         if not os.path.basename(pkg).endswith("src.rpm"):
             try:
-                dependencies = subprocess.check_output(
-                    ['dnf', 'repoquery', '-q', '--latest-limit=1', '--qf', '%{NAME}', '--whatrequires', name]
-                )
+                dependencies = subprocess.check_output(['dnf', 'repoquery', '-q', '--latest-limit=1', '--qf', '%{NAME}', '--whatrequires', name])
                 full_list = dependencies.decode().split('\n')
             except subprocess.CalledProcessError:
                 print('some problem with dnf repoquery for %s' % name)
@@ -251,8 +247,7 @@ def extra_tests():
     # check_package
     try:
         print('installing %s' % list(only_rpms))
-        subprocess.check_call(
-            [mock_binary, '--init', '--configdir', mock_config, '--install'] + list(only_rpms))
+        subprocess.check_call([mock_binary, '--init', '--configdir', mock_config, '--install'] + list(only_rpms))
         shutil.copy('/var/lib/mock/{}-{}/result/root.log'.format(platform_name, platform_arch), logfile)
         print('all packages successfully installed')
     except subprocess.CalledProcessError:
@@ -291,11 +286,9 @@ def extra_tests():
             try:
                 print_log('run rpmdev-vercmp %s %s' %
                           (evr, str(inrepo_version)))
-                a = subprocess.check_call(
-                    ['rpmdev-vercmp', evr, str(inrepo_version)])
+                a = subprocess.check_call(['rpmdev-vercmp', evr, str(inrepo_version)])
                 if a == 0:
-                    print_log(
-                        'Package {} is either the same, older, or another problem. Extra tests failed'.format(name))
+                    print_log('Package {} is either the same, older, or another problem. Extra tests failed'.format(name))
                     sys.exit(5)
             except subprocess.CalledProcessError as e:
                 exit_code = e.returncode
@@ -364,11 +357,9 @@ def build_rpm():
     for i in range(tries):
         try:
             if os.environ.get("EXTRA_BUILD_SRC_RPM_OPTIONS") == '':
-                subprocess.check_output([mock_binary, '--update', '--configdir', mock_config, '--buildsrpm', '--spec=' + build_package + '/' + spec_name[0], '--source=' + build_package, '--no-cleanup-after',
-                                         '--resultdir=' + output_dir])
+                subprocess.check_output([mock_binary, '--update', '--configdir', mock_config, '--buildsrpm', '--spec=' + build_package + '/' + spec_name[0], '--source=' + build_package, '--no-cleanup-after', '--resultdir=' + output_dir])
             else:
-                subprocess.check_output([mock_binary, '--update', '--configdir', mock_config, '--buildsrpm', '--spec=' + build_package + '/' + spec_name[0], '--source=' + build_package, '--no-cleanup-after'] + extra_build_src_rpm_options.split(' ') +
-                                         ['--resultdir=' + output_dir])
+                subprocess.check_output([mock_binary, '--update', '--configdir', mock_config, '--buildsrpm', '--spec=' + build_package + '/' + spec_name[0], '--source=' + build_package, '--no-cleanup-after'] + extra_build_src_rpm_options.split(' ') + ['--resultdir=' + output_dir])
         except subprocess.CalledProcessError as e:
             if i < tries - 1:
                 print('something went wrong with SRPM creation')
