@@ -75,7 +75,7 @@ def generate_config():
     print_conf("config_opts['releasever'] = '0'")
     print_conf("config_opts['rpmbuild_networking'] = False")
     print_conf("config_opts['plugin_conf']['bind_mount_enable'] = True")
-    print_conf("config_opts['plugin_conf']['bind_mount_opts']['dirs'].append(('/etc/resolv.conf', '/etc/resolv.conf'))")
+    print_conf("config_opts['plugin_conf']['bind_mount_opts']['dirs'].append(('/etc/hosts', '/etc/resolv.conf'))")
     print_conf("config_opts['rpmbuild_timeout'] = 86400")
     print_conf("config_opts['isolation'] = 'simple'")
     print_conf("config_opts['use_nspawn'] = False")
