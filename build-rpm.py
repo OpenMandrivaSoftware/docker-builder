@@ -111,7 +111,7 @@ def remove_changelog(spec):
             pass
     time_string = time.strftime("%a %b %d %Y")
     with open(spec, "a") as spec_file:
-        print("* {} ROSA Build Platform (ABF) <support@rosalinux.ru>".format(time_string), file=text_file)
+        print("* {} ROSA Build Platform (ABF) <support@rosalinux.ru>".format(time_string), file=spec_file)
         print("- Собрано специалистами ООО \"НТЦ ИТ РОСА\" с использованием сборочной среды ABF", file=spec_file)
 
 
