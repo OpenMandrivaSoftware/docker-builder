@@ -102,6 +102,15 @@ def download_hash(hashsum, pkg_name=''):
                     f.write(chunk)
 
 
+def remove_changelog(spec):
+    if os.path.isfile(spec):
+        try:
+            subprocess.check_output(['sed', '-i', '/%changelog/,$d', spec])
+        except subprocess.CalledProcessError as e:
+            print(e.output)
+            pass
+
+
 def validate_spec(path):
     spec = [f for f in os.listdir(path) if f.endswith('.spec')]
     if len(spec) > 1:
@@ -114,6 +123,8 @@ def validate_spec(path):
         print('spec_name is %s' % spec[0])
         spec_name.append(spec[0])
         print('single spec in repo, check passed')
+        print("cleanup %changelog entries")
+        remove_changelog(path + '/' + spec[0])
 
 
 def download_yml(yaml_file):
