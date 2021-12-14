@@ -105,10 +105,14 @@ def download_hash(hashsum, pkg_name=''):
 def remove_changelog(spec):
     if os.path.isfile(spec):
         try:
-            subprocess.check_output(['sed', '-i', '/%changelog/,$d', spec])
+            subprocess.check_output(['sed', '-i', '/^%changelog/q', spec])
         except subprocess.CalledProcessError as e:
             print(e.output)
             pass
+    time_string = time.strftime("%a %b %d %Y")
+    with open(spec, "a") as spec_file:
+        print("* {} ROSA Build Platform (ABF) <support@rosalinux.ru>".format(time_string), file=text_file)
+        print("- Собрано специалистами ООО \"НТЦ ИТ РОСА\" с использованием сборочной среды ABF", file=spec_file)
 
 
 def validate_spec(path):
