@@ -103,7 +103,7 @@ def download_hash(hashsum, pkg_name=''):
 
 
 def remove_changelog(spec):
-    if os.path.isfile(path):
+    if os.path.isfile(spec):
         try:
             subprocess.check_output(['sed', '-i', '/%changelog/,$d', spec])
         except subprocess.CalledProcessError as e:
