@@ -122,8 +122,8 @@ def validate_spec(path):
         print('spec_name is %s' % spec[0])
         spec_name.append(spec[0])
         print('single spec in repo, check passed')
-        print("cleanup %changelog entries")
-        remove_changelog(path + '/' + spec[0])
+        # print("cleanup %changelog entries")
+        # remove_changelog(path + '/' + spec[0])
 
 
 def download_yml(yaml_file):
