@@ -90,13 +90,12 @@ def generate_config():
     # compress logs
     print_conf("config_opts['plugin_conf']['compress_logs_enable'] = True")
     print_conf("config_opts['plugin_conf']['compress_logs_opts']['command'] = '/usr/bin/gzip -9 --force'")
-    # Some packages (at the moment, gcc and llvm - due to crosscompilers being
-    # built in the same source tree), require LOADS of space for the BUILD
-    # and BUILDROOT directories - causing them to fail even on a rather
-    # generous tmpfs
-    # chromium is highly inefficient code, so it needs to be on the list
-    # as well
-    huge_packages = ['gcc', 'llvm', 'chromium-browser-stable', 'chromium-browser-beta', 'chromium-browser-dev']
+    # Some packages (at the moment, gcc, llvm and glibc - due to
+    # crosscompilers being built in the same source tree - and chromium
+    # because it's simply inefficient code), require LOADS of space for
+    # the BUILD and BUILDROOT directories - causing them to fail even
+    # on a rather generous tmpfs
+    huge_packages = ['gcc', 'llvm', 'glibc', 'chromium-browser-stable', 'chromium-browser-beta', 'chromium-browser-dev']
     # enable tmpfs for builder with 64gb+
     # only if save_buildroot is false and the package isn't blacklisted
     if save_buildroot != 'true' and not os.getenv('PACKAGE') in huge_packages:
