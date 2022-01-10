@@ -220,6 +220,8 @@ if [ ! -z "${builder}" ]; then
 	cd $common_pwd
 	if [ "${arch}" = 'x86_64' ]; then
 		sed -i "s/ARCH_TARGET/x86_64/g" Dockerfile.builder
+	elif [ "${arch}" = 'aarch64' ]; then
+		sed -i -e "s/ARCH_REL=.*/ARCH_REL=aarch64/g" Dockerfile.builder
 	fi
 	docker build --tag=openmandriva/builder:$arch --file Dockerfile.builder .
 	docker push openmandriva/builder:$arch
