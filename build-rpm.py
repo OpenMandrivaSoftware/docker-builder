@@ -25,7 +25,7 @@ git_repo = os.environ.get('GIT_REPO')
 # FIXME workaround for https://github.com/OpenMandrivaSoftware/rosa-build/issues/161
 if git_repo[0:17] == 'git://github.com/':
     git_repo='https://github.com/' + git_repo[17:]
-    
+
 file_store_base = os.environ.get('FILE_STORE_ADDR')
 build_package = get_home + '/' + package
 
