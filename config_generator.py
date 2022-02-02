@@ -17,7 +17,6 @@ syslog_ident=mock
 syslog_device=
 install_weak_deps=0
 metadata_expire=60s
-module_hotfixes=1
 best=1\n"""
 
 conf = '/etc/mock/default.cfg'
@@ -123,7 +122,7 @@ def generate_config():
     repo_names = repo_names.split()
     repo_urls = repo_url.split()
     repo_conf = dict(zip(repo_names, repo_urls))
-    print_conf("\n".join("[{}]\nname={}\nbaseurl={}{}\ngpgcheck=0\nenabled=1\n".format(
+    print_conf("\n".join("[{}]\nname={}\nbaseurl={}{}\ngpgcheck=0\nenabled=1\nmodule_hotfixes=1\n".format(
         k, k, k[:0], v) for k, v in repo_conf.items()))
     print_conf('"""')
     # it's a hack to modify time of /etc/mock/default.cfg
