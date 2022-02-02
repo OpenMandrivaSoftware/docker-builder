@@ -17,6 +17,7 @@ syslog_ident=mock
 syslog_device=
 install_weak_deps=0
 metadata_expire=60s
+module_hotfixes=1
 best=1\n"""
 
 conf = '/etc/mock/default.cfg'
