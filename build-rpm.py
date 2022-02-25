@@ -63,7 +63,6 @@ root_log = output_dir + '/root.log.gz'
 spec_name = []
 rpm_packages = []
 src_rpm = []
-only_rpms = set(rpm_packages) - set(src_rpm)
 logfile = output_dir + '/' + 'test.' + time.strftime("%m-%d-%Y-%H-%M-%S") + '.log'
 
 
@@ -347,6 +346,7 @@ def relaunch_tests():
             if '.src.rpm' in srpm:
                 src_rpm.append(build_package + '/' + srpm)
     # exclude src.rpm
+    only_rpms = set(rpm_packages) - set(src_rpm)
     extra_tests(only_rpms)
 
 
@@ -451,6 +451,7 @@ def build_rpm():
     container_data()
     save_build_root()
     if os.environ.get("USE_EXTRA_TESTS") == 'true':
+        only_rpms = set(rpm_packages) - set(src_rpm)
         extra_tests(only_rpms)
 
 
