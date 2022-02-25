@@ -63,6 +63,7 @@ root_log = output_dir + '/root.log.gz'
 spec_name = []
 rpm_packages = []
 src_rpm = []
+only_rpms = set(rpm_packages) - set(src_rpm)
 logfile = output_dir + '/' + 'test.' + time.strftime("%m-%d-%Y-%H-%M-%S") + '.log'
 
 
@@ -256,8 +257,7 @@ def container_data():
         json.dump(multikeys, out_json, sort_keys=True, separators=(',', ':'))
 
 
-def extra_tests():
-    only_rpms = set(rpm_packages) - set(src_rpm)
+def extra_tests(only_rpms):
     # check_package
     try:
         print('installing %s' % list(only_rpms))
@@ -298,8 +298,7 @@ def extra_tests():
             else:
                 inrepo_version = 0
             try:
-                print_log('run rpmdev-vercmp %s %s' %
-                          (evr, str(inrepo_version)))
+                print_log('run rpmdev-vercmp %s %s' % (evr, str(inrepo_version)))
                 a = subprocess.check_call(['rpmdev-vercmp', evr, str(inrepo_version)])
                 if a == 0:
                     print_log('Package {} is either the same, older, or another problem. Extra tests failed'.format(name))
@@ -348,15 +347,7 @@ def relaunch_tests():
             if '.src.rpm' in srpm:
                 src_rpm.append(build_package + '/' + srpm)
     # exclude src.rpm
-    only_rpms = set(rpm_packages) - set(src_rpm)
-    try:
-        print('\n'.join(rpm_packages))
-        subprocess.check_call([mock_binary, '--init', '--configdir', mock_config, '--install'] + list(only_rpms))
-        print('packages %s installed successfully' % list(only_rpms))
-        shutil.copy('/var/lib/mock/{}-{}/result/root.log'.format(platform_name, platform_arch), logfile)
-    except subprocess.CalledProcessError as e:
-        shutil.copy('/var/lib/mock/{}-{}/result/root.log'.format(platform_name, platform_arch), logfile)
-        sys.exit(5)
+    extra_tests(only_rpms)
 
 
 def build_rpm():
@@ -460,7 +451,7 @@ def build_rpm():
     container_data()
     save_build_root()
     if os.environ.get("USE_EXTRA_TESTS") == 'true':
-        extra_tests()
+        extra_tests(only_rpms)
 
 
 def cleanup_all():
