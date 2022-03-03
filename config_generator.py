@@ -61,6 +61,9 @@ def generate_config():
     if platform_arch == "znver1":
         print_conf("config_opts['target_arch'] = '%s'" % platform_arch)
         print_conf("config_opts['legal_host_arches'] = ('x86_64', 'znver1')")
+    if platform_arch == "e2k":
+        print_conf("config_opts['target_arch'] = '%s'" % platform_arch)
+        print_conf("config_opts['legal_host_arches'] = ('x86_64', 'e2k')")
     accepted_arches = {'x86_64', 'i686', 'i586'}
     if platform_arch in accepted_arches:
         print_conf("config_opts['target_arch'] = '%s'" % platform_arch)
