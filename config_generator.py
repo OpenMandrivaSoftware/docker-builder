@@ -65,7 +65,7 @@ def generate_config():
         # use e2kv4 march option
         print_conf("config_opts['target_arch'] = '%s --without check'" % platform_arch)
         print_conf("config_opts['legal_host_arches'] = ('x86_64', 'e2k', 'e2kv4')")
-        print_conf("config_opts['dnf_common_opts'] = ['--refresh', '--disableplugin=local', '--setopt=deltarpm=False', '--setopt=install_weak_deps=False', '--setopt=tsflags=nodocs']")
+        print_conf("config_opts['dnf_common_opts'] = ['--refresh', '--disableplugin=local', '--setopt=deltarpm=False', '--setopt=install_weak_deps=False', '--setopt=tsflags=nodocs', '--forcearch=e2k']")
     accepted_arches = {'x86_64', 'i686', 'i586'}
     if platform_arch in accepted_arches:
         print_conf("config_opts['target_arch'] = '%s'" % platform_arch)
