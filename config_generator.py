@@ -63,17 +63,19 @@ def generate_config():
         print_conf("config_opts['legal_host_arches'] = ('x86_64', 'znver1')")
     if platform_arch == "e2kv4":
         # use e2kv4 march option
-        print_conf("config_opts['target_arch'] = '%s'" % platform_arch)
+        print_conf("config_opts['target_arch'] = '%s --without check'" % platform_arch)
         print_conf("config_opts['legal_host_arches'] = ('x86_64', 'e2k', 'e2kv4')")
+        print_conf("config_opts['dnf_common_opts'] = ['--refresh', '--disableplugin=local', '--setopt=deltarpm=False', '--setopt=install_weak_deps=False', '--setopt=tsflags=nodocs']")
     accepted_arches = {'x86_64', 'i686', 'i586'}
     if platform_arch in accepted_arches:
         print_conf("config_opts['target_arch'] = '%s'" % platform_arch)
         print_conf("config_opts['legal_host_arches'] = ('i586', 'i686', 'x86_64')")
 
     print_conf("config_opts['root'] = '%s-%s'" % (platform_name, platform_arch))
-    print_conf("config_opts['chroot_setup_cmd'] = ('install', 'basesystem-build', 'dwz', 'dnf')")
+    print_conf("config_opts['chroot_setup_cmd'] = ('install', 'basesystem-build', 'dwz', 'dnf', 'magic-devel')")
     print_conf("config_opts['package_manager'] = 'dnf'")
-    print_conf("config_opts['dnf_common_opts'] = ['--refresh', '--disableplugin=local', '--setopt=deltarpm=False', '--setopt=install_weak_deps=False', '--setopt=tsflags=nodocs', '--forcearch=%s']" % platform_arch)
+    if platform_arch != 'e2kv4'
+        print_conf("config_opts['dnf_common_opts'] = ['--refresh', '--disableplugin=local', '--setopt=deltarpm=False', '--setopt=install_weak_deps=False', '--setopt=tsflags=nodocs', '--forcearch=%s']" % platform_arch)
     print_conf("config_opts['dnf_builddep_opts'] = ['--refresh', '--forcearch=%s']" % platform_arch)
     print_conf("config_opts['useradd'] = '/usr/sbin/useradd -o -m -u {{chrootuid}} -g {{chrootgid}} -d {{chroothome}} {{chrootuser}}'")
     print_conf("config_opts['releasever'] = '0'")
