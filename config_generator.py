@@ -125,7 +125,7 @@ def generate_config():
     print_conf("config_opts['plugin_conf']['root_cache_opts']['extension'] = ''")
     print_conf("config_opts['plugin_conf']['root_cache_enable'] = True")
     print_conf("config_opts['plugin_conf']['root_cache_opts']['age_check'] = True")
-    print_conf("config_opts['plugin_conf']['root_cache_opts']['max_age_days'] = 1")
+    print_conf("config_opts['plugin_conf']['root_cache_opts']['max_age_days'] = 3")
     print_conf("config_opts['plugin_conf']['package_state_enable'] = True")
     print_conf("config_opts['plugin_conf']['package_state_opts'] = {}")
     print_conf("config_opts['plugin_conf']['package_state_opts']['available_pkgs'] = False")
