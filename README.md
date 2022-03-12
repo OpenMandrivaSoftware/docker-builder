@@ -24,8 +24,8 @@ docker rm -v $(docker ps -a -q -f status=exited)
 ```bash
 docker run -ti --rm --privileged=true -h <yourname>.openmandriva.org \
         -e BUILD_TOKEN="your_token" \
-        -e BUILD_ARCH="x86_64 armv7hl i586 i686 aarch64" \
-        -e BUILD_PLATFORM="cooker,4.0,rolling,rock" openmandriva/builder
+        -e BUILD_ARCH="x86_64 armv7hl i686 aarch64" \
+        -e BUILD_PLATFORM="cooker,4.3,rolling,rock" openmandriva/builder
 ```
 
 ## How to run ARMx or RISCV  builder
@@ -43,7 +43,7 @@ Run builder
 docker run -ti --rm --privileged=true -h <yourname>.openmandriva.org \
         -e BUILD_TOKEN="your_token" \
         -e BUILD_ARCH="riscv64" \
-        -e BUILD_PLATFORM="cooker,4.0,rolling,rock" openmandriva/builder
+        -e BUILD_PLATFORM="cooker,4.3,rolling,rock" openmandriva/builder
 ```
 
 ## How to run build-rpm.py without docker

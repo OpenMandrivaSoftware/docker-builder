@@ -9,7 +9,7 @@ common_pwd="$PWD"
 usage() {
 	cat >&2 <<EOF
 usage: $mkimg --rootfs=rootfs_path --version=openmandriva_version [--mirror=url]
-       $mkimg --rootfs=/tmp/rootfs --version=openmandriva2014.0 --arch=x86_64
+       $mkimg --rootfs=/tmp/rootfs --version=4.3 --arch=x86_64
        $mkimg --rootfs=. --version=cooker --mirror=http://abf-downloads.openmandriva.org/cooker/repository/x86_64/main/release/
        $mkimg --rootfs=. --version=cooker
 EOF

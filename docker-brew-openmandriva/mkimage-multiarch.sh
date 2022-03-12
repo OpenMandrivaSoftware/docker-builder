@@ -8,7 +8,7 @@ common_pwd="$PWD"
 
 usage() {
     echo >&2 "usage: $mkimg --rootfs=rootfs_path --version=openmandriva_version [--mirror=url]"
-    echo >&2 "       $mkimg --rootfs=/tmp/rootfs --version=openmandriva2014.0 --arch=x86_64"
+    echo >&2 "       $mkimg --rootfs=/tmp/rootfs --version=4.3 --arch=x86_64"
     echo >&2 "       $mkimg --rootfs=. --version=cooker --mirror=http://abf-downloads.openmandriva.org/"
     echo >&2 "       $mkimg --rootfs=. --version=cooker"
     exit 1
