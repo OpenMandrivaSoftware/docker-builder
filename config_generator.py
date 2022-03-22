@@ -118,8 +118,8 @@ def generate_config():
     print_conf("config_opts['macros']['%_topdir'] = '%s/build' % config_opts['chroothome']")
     print_conf("config_opts['macros']['%_rpmfilename'] = '%%{NAME}-%%{VERSION}-%%{RELEASE}-%%{DISTTAG}.%%{ARCH}.rpm'")
     print_conf("config_opts['macros']['%cross_compiling'] = '0' # ABF should generally be considered native builds")
-    #if platform_arch == "e2kv4":
-    #    print_conf("config_opts['macros']['%debug_package'] = '%{nil}'")
+    if platform_arch == "e2kv4":
+        print_conf("config_opts['macros']['%debug_package'] = '%{nil}'")
     print_conf("config_opts['plugin_conf']['ccache_enable'] = False")
     print_conf("config_opts['plugin_conf']['root_cache_opts']['compress_program'] = ''")
     print_conf("config_opts['plugin_conf']['root_cache_opts']['extension'] = ''")
