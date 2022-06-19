@@ -257,10 +257,12 @@ def container_data():
 
 
 def extra_tests(only_rpms):
+    # here only rpm packages, not debuginfo or debugsource
+    skip_debuginfo = [s for s in only_rpms if "debuginfo" not in s and "debugsource" not in s]
     # check_package
     try:
         print('installing %s' % list(only_rpms))
-        subprocess.check_call([mock_binary, '--init', '--configdir', mock_config, '--install'] + list(only_rpms))
+        subprocess.check_call([mock_binary, '--init', '--configdir', mock_config, '--install'] + list(skip_debuginfo))
         shutil.copy('/var/lib/mock/{}-{}/result/root.log'.format(platform_name, platform_arch), logfile)
         print('all packages successfully installed')
     except subprocess.CalledProcessError:
@@ -269,8 +271,6 @@ def extra_tests(only_rpms):
         sys.exit(5)
     # stage2
     # check versions
-    # here only rpm packages, not debuginfo or debugsource
-    skip_debuginfo = [s for s in only_rpms if "debuginfo" not in s and "debugsource" not in s]
     ts = rpm.ts()
     try:
         for pkg in skip_debuginfo:
