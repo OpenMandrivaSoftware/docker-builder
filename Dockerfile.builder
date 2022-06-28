@@ -9,7 +9,6 @@ RUN dnf --nogpgcheck --refresh --assumeyes --nodocs --setopt=install_weak_deps=F
  findutils util-linux wget rpmdevtools sed grep xz gnupg hostname python-yaml nosync python-magic \
  && sed -i -e "s/Defaults    requiretty.*/ #Defaults    requiretty/g" /etc/sudoers \
  && echo "%mock ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers \
- && adduser omv \
  && usermod -a -G mock omv \
  && chown -R omv:mock /etc/mock \
  && dnf --assumeyes autoremove \
