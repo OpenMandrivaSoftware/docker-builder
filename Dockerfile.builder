@@ -10,6 +10,8 @@ RUN dnf --nogpgcheck --refresh --assumeyes --nodocs --setopt=install_weak_deps=F
  && sed -i -e "s/Defaults    requiretty.*/ #Defaults    requiretty/g" /etc/sudoers \
  && echo "%mock ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers \
  && usermod -a -G mock omv \
+ && cp -a /etc/skel /home/omv \
+ && chown -R omv:omv /home/omv \
  && chown -R omv:mock /etc/mock \
  && dnf --assumeyes autoremove \
  && dnf clean all \
