@@ -464,6 +464,16 @@ def cleanup_all():
         for name in dirnames:
             shutil.rmtree(os.path.join(dirpath, name))
     # files
+    # clean not umounted dirs by mock
+    umount_dirs = ["/root/var/cache/dnf", "/root/var/cache/yum", "/root/proc", "/root/sys", "/root/dev/pts", "/root/dev/shm"]
+    for dirs in ["/var/lib/mock/{}-{}".format(platform_name, platform_arch) + s for s in umount_dirs]:
+      if os.path.exists(dirs):
+        try:
+          subprocess.check_output(['sudo', 'umount', '-ql', dirs])
+        except subprocess.CalledProcessError as e:
+          print(e.output)
+          continue
+
     remove_if_exist('/etc/rpm/platform')
 #    remove_if_exist('/etc/mock/default.cfg')
     # dirs
