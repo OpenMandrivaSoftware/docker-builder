@@ -13,7 +13,7 @@ import argparse
 build_ids = []
 tmp_names = []
 #blacklist = ['llvm', 'gcc', 'binutils', 'glibc', 'boost', 'mesa', 'icu', 'poppler', 'x11-server', 'kernel']
-blacklist = []
+blacklist = ['distro-release', 'lsb-release', 'om-midna-sddm']
 
 
 def request_builds():
