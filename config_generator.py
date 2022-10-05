@@ -114,7 +114,7 @@ def generate_config():
     # because it's simply inefficient code), require LOADS of space for
     # the BUILD and BUILDROOT directories - causing them to fail even
     # on a rather generous tmpfs
-    huge_packages = ['gcc', 'llvm', 'glibc', 'chromium-browser-stable', 'chromium-browser-beta', 'chromium-browser-dev', 'qt6-qtwebengine', 'kernel', 'kernel-rc']
+    huge_packages = ['gcc', 'llvm', 'glibc', 'chromium-browser-stable', 'chromium-browser-beta', 'chromium-browser-dev', 'qt6-qtwebengine']
     # enable tmpfs for builder with 64gb+
     # only if save_buildroot is false and the package isn't blacklisted
     if save_buildroot != 'true' and not os.getenv('PACKAGE') in huge_packages:
