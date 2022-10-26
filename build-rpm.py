@@ -265,7 +265,9 @@ def extra_tests(only_rpms):
         subprocess.check_call([mock_binary, '--init', '--configdir', mock_config, '--install'] + list(skip_debuginfo))
         shutil.copy('/var/lib/mock/{}-{}/result/root.log'.format(platform_name, platform_arch), logfile)
         print('all packages successfully installed')
-    except subprocess.CalledProcessError:
+    except subprocess.CalledProcessError as cpe:
+        print('%s failed with exit status %u' % (cpe.cmd, cpe.returncode))
+        print('stderr: %s' % (cpe.stderr))
         shutil.copy('/var/lib/mock/{}-{}/result/root.log'.format(platform_name, platform_arch), logfile)
         # tests failed
         sys.exit(5)
