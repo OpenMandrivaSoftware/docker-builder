@@ -148,7 +148,9 @@ fi
 
 # effectively: febootstrap-minimize --keep-zoneinfo --keep-rpmdb --keep-services "$target".
 #  locales
-rm -rf "$target"/usr/{{lib,share}/locale,{lib,lib64}/gconv,bin/localedef,sbin/build-locale-archive}
+#  OM already aggressively splits locales into separate packages, and C.UTF-8 is needed by
+#  current versions of mock. Best not to try to save a few more bytes here.
+#rm -rf "$target"/usr/{{lib,share}/locale,{lib,lib64}/gconv,bin/localedef,sbin/build-locale-archive}
 #  docs and man pages
 rm -rf "$target"/usr/share/{man,doc,info,gnome/help}
 #  cracklib
