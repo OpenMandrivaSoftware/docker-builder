@@ -6,6 +6,7 @@ import redis
 import requests
 import shutil
 import os
+import time
 import subprocess
 
 blacklist = [line.rstrip('\n') for line in open('blacklist.txt')]
@@ -27,7 +28,8 @@ def request_build_id(page):
 
 def abf_build(package, arch):
     try:
-        subprocess.check_call(['abf', 'build', '--arch', arch, '-b', 'rolling', '--testing', '--no-cached-chroot', '--auto-publish-status=testing', '--update-type', 'enhancement', '-p', 'openmandriva/%s' % package])
+        #subprocess.check_call(['abf', 'build', '--arch', arch, '-b', 'rolling', '--testing', '--no-cached-chroot', '--auto-publish-status=testing', '--update-type', 'enhancement', '-p', 'openmandriva/%s' % package])
+        subprocess.check_call(['abf', 'build', '--arch', arch, '-b', 'rolling', '--testing', '--no-cached-chroot', '--update-type', 'enhancement', '-p', 'openmandriva/%s' % package])
     except subprocess.CalledProcessError as e:
         print(e)
         return False
@@ -53,36 +55,49 @@ def git_work(pkg_name, arch, package_hash):
         return False
     if rolling_hash[0] == master_hash[0]:
         print('rolling branch already synced with master')
+        print('building anyway...')
+        abf_build(pkg_name, arch)
         return False
     elif rolling_hash[0] != master_hash[0]:
-        print('just skip')
-        subprocess.check_output(['/usr/bin/git', 'clone', git_repo, repo_path], stderr=subprocess.DEVNULL)
+        for i in range(5):
+            try:
+                print('cloning...')
+                print(git_repo)
+                subprocess.check_output(['/usr/bin/git', 'clone', git_repo, repo_path], stderr=subprocess.DEVNULL)
+            except Exception as e:
+                tries = 5
+                if i < tries - 1:
+                    print(e)
+                    time.sleep(5)
+                    continue
+                else:
+                    print('failed')
+            break
+
         subprocess.check_output(['git', 'checkout', 'rolling'], cwd=repo_path)
         try:
             # git merge
-            print('just skip')
+            print('merge master branch')
             subprocess.check_output(['git', 'merge', 'master'], cwd=repo_path, stderr=subprocess.DEVNULL)
         except subprocess.CalledProcessError:
             print('problems with merge master')
         try:
-            print('do not push')
+            print('pushing...')
             subprocess.check_output(['git', 'push'], cwd=repo_path)
         except subprocess.CalledProcessError:
             print('problems with pushing, let me push it with -u origin rolling')
             subprocess.check_output(['git', 'push', '-u', 'origin', 'rolling'], cwd=repo_path, stderr=subprocess.DEVNULL)
 
-    #abf_build(pkg_name, arch)
+    abf_build(pkg_name, arch)
     if os.path.exists(repo_path) and os.path.isdir(repo_path):
         shutil.rmtree(repo_path)
     print('======================================================================')
 
 
 def redis_request():
-    redis_request = redis.Redis(host='abf.openmandriva.org', password='')
-#    data = redis_request.lrange('cooker_published', 0, -1)
-#    print(data)
+    redis_request = redis.Redis(host='abf.openmandriva.org', password='O86Ep96xC0y01Yy')
+    data = redis_request.lrange('cooker_published', 0, -1)
     to_do = redis_request.blpop(["cooker_published"])
-#    print(to_do)
     obtained_json = json.loads(to_do[1])
     build_id = obtained_json['id']
     build_arch = obtained_json['arch']
@@ -96,6 +111,7 @@ def redis_request():
         # probably need to remove it
         push_me_back = '{{"id":{}, "arch":"{}"}}'.format(build_id, build_arch)
         print("not pushing {} back to the redis".format(push_me_back))
+        print('==================================================================')
 #        torpush = ['cooker_published', push_me_back]
 #        redis_request.rpush(*torpush)
 
