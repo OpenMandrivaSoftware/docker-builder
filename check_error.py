@@ -79,6 +79,13 @@ def known_errors(logfile, fail_log):
                     print(error.group(0).decode('utf-8'))
                     write_log(error.group(0).decode('utf-8'), fail_log)
                     break
+                else:
+                    common_pattern = '(.*)Stop.'
+                    error = re.search(common_pattern.encode("utf-8"), mm)
+                    if error:
+                        print(error.group(0).decode('utf-8'))
+                        write_log(error.group(0).decode('utf-8'), fail_log)
+                        break
         mm.close()
 
 
