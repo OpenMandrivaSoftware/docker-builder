@@ -94,6 +94,7 @@ def generate_config():
     print_conf("config_opts['releasever'] = '0'")
     print_conf("config_opts['rpmbuild_networking'] = False")
     print_conf("config_opts['package_manager_max_attempts'] = 3")
+    print_conf("config_opts['package_manager_attempt_delay'] = 5")
     # print_conf("config_opts['plugin_conf']['bind_mount_enable'] = True")
     # print_conf("config_opts['plugin_conf']['bind_mount_opts']['dirs'].append(('/etc/hosts', '/etc/resolv.conf'))")
     print_conf("config_opts['rpmbuild_timeout'] = 86400")
