@@ -99,7 +99,7 @@ def generate_config():
     print_conf("config_opts['rpmbuild_timeout'] = 86400")
     print_conf("config_opts['isolation'] = 'simple'")
     print_conf("config_opts['use_nspawn'] = False")
-    print_conf("config_opts['tar'] = 'bsdtar'")
+    #print_conf("config_opts['tar'] = 'bsdtar'")
     print_conf("config_opts['use_bootstrap'] = False")
     print_conf("config_opts['basedir'] = '/var/lib/mock/'")
     print_conf("config_opts['cache_topdir'] = '/var/cache/mock/'")
