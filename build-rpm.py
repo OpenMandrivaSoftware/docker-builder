@@ -288,15 +288,16 @@ def extra_tests(only_rpms):
             evr = '{}:{}-{}'.format(epoch, version, release)
             tries = 0
             while tries < 3:
-                check_string = 'LC_ALL=C dnf repoquery -q --qf %{{EPOCH}}:%{{VERSION}}-%{{RELEASE}} --latest-limit=1 {}'.format(name)
+                check_string = 'LC_ALL=C dnf {} repoquery -q --qf %{{EPOCH}}:%{{VERSION}}-%{{RELEASE}} --latest-limit=1 {}'.format("--refresh" if tries > 0 else "", name)
                 try:
-                    inrepo_version = subprocess.check_output([mock_binary, '--shell', '-v', check_string]).decode('utf-8')
+                    inrepo_version = subprocess.check_output([mock_binary, '--shell', '-v', '--', check_string]).decode('utf-8')
                     print_log('repo version is : {}'.format(inrepo_version))
                     break
                 except subprocess.CalledProcessError as e:
                     print(e)
                     print('stdout: %s' % (e.stdout))
                     print('stderr: %s' % (e.stderr))
+                    print('inrepo_version: %s' % (inrepo_version))
                     print(e)
                     # This can happen while metaupdate is being updated, so
                     # let's try again
