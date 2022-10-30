@@ -286,13 +286,23 @@ def extra_tests(only_rpms):
             else:
                 epoch = 0
             evr = '{}:{}-{}'.format(epoch, version, release)
-            check_string = 'LC_ALL=C dnf repoquery -q --qf %{{EPOCH}}:%{{VERSION}}-%{{RELEASE}} --latest-limit=1 {}'.format(name)
-            try:
-                inrepo_version = subprocess.check_output([mock_binary, '--quiet', '--shell', '-v', check_string]).decode('utf-8')
-                print_log('repo version is : {}'.format(inrepo_version))
-            except subprocess.CalledProcessError as e:
-                print(e)
-                sys.exit(5)
+            tries = 0
+            while tries < 3:
+                check_string = 'LC_ALL=C dnf repoquery -q --qf %{{EPOCH}}:%{{VERSION}}-%{{RELEASE}} --latest-limit=1 {}'.format(name)
+                try:
+                    inrepo_version = subprocess.check_output([mock_binary, '--quiet', '--shell', '-v', check_string]).decode('utf-8')
+                    print_log('repo version is : {}'.format(inrepo_version))
+                    break
+                except subprocess.CalledProcessError as e:
+                    print(e)
+                    print('stdout: %s' % (cpe.stdout))
+                    print('stderr: %s' % (cpe.stderr))
+                    print(e)
+                    # This can happen while metaupdate is being updated, so
+                    # let's try again
+                    tries += 1
+                    if tries >= 3:
+                        sys.exit(5)
             # rpmdev-vercmp 0:7.4.0-1 0:7.4.0-1
             if inrepo_version:
                 print_log('repo version is: %s' % inrepo_version)
