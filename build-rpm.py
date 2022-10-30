@@ -295,14 +295,15 @@ def extra_tests(only_rpms):
                     break
                 except subprocess.CalledProcessError as e:
                     print(e)
-                    print('stdout: %s' % (cpe.stdout))
-                    print('stderr: %s' % (cpe.stderr))
+                    print('stdout: %s' % (e.stdout))
+                    print('stderr: %s' % (e.stderr))
                     print(e)
                     # This can happen while metaupdate is being updated, so
                     # let's try again
                     tries += 1
                     if tries >= 3:
                         sys.exit(5)
+                    time.sleep(5)
             # rpmdev-vercmp 0:7.4.0-1 0:7.4.0-1
             if inrepo_version:
                 print_log('repo version is: %s' % inrepo_version)
