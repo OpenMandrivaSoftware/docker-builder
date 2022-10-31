@@ -290,7 +290,7 @@ def extra_tests(only_rpms):
             while tries < 3:
                 check_string = 'LC_ALL=C.UTF-8 dnf {} repoquery -q --qf %{{EPOCH}}:%{{VERSION}}-%{{RELEASE}} --latest-limit=1 {}'.format("--refresh" if tries > 0 else "", name)
                 try:
-                    inrepo_version = subprocess.check_output([mock_binary, '--shell', '-v', '--', check_string], stderr=subprocess.PIPE).decode('utf-8')
+                    inrepo_version = subprocess.check_output([mock_binary, '--enable-network', '--shell', '-v', '--', check_string], stderr=subprocess.PIPE).decode('utf-8')
                     print_log('repo version is : {}'.format(inrepo_version))
                     break
                 except subprocess.CalledProcessError as e:
@@ -299,7 +299,16 @@ def extra_tests(only_rpms):
                     print('stdout: %s' % (e.stdout))
                     print('stderr: %s' % (e.stderr))
                     print(e)
-                    # This can happen while metaupdate is being updated, so
+                    # Let's see if it's a connection problem...
+                    try:
+                        ping = subprocess.check_output(['/usr/bin/ping', '-c1', '1.1.1.1'], stderr=subprocess.PIPE).decode('utf-8')
+                        print('Network seems to be up')
+                    except subprocess.CalledProcessError as cpe:
+                        print('Seems to be a connectivity problem, ping said:"')
+                        print('stdout: %s' % (cpe.stdout))
+                        print('stderr: %s' % (cpe.stderr))
+                        print(cpe)
+                    # This can happen while metadata is being updated, so
                     # let's try again
                     tries += 1
                     if tries >= 3:
