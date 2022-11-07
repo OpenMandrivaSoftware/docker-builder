@@ -18,6 +18,7 @@ import check_error
 import magic
 import gzip
 import struct
+import socket
 
 get_home = os.environ.get('HOME')
 package = os.environ.get('PACKAGE')
@@ -301,13 +302,13 @@ def extra_tests(only_rpms):
                     print(e)
                     # Let's see if it's a connection problem...
                     try:
-                        ping = subprocess.check_output(['/usr/bin/ping', '-c1', '1.1.1.1'], stderr=subprocess.PIPE).decode('utf-8')
+                        hostname = 'yandex.ru'
+                        host = socket.gethostbyname(hostname)
+                        s = socket.create_connection((host, 80), 2)
+                        s.close
                         print('Network seems to be up')
                     except subprocess.CalledProcessError as cpe:
-                        print('Seems to be a connectivity problem, ping said:"')
-                        print('stdout: %s' % (cpe.stdout))
-                        print('stderr: %s' % (cpe.stderr))
-                        print(cpe)
+                        print('Seems to be a connectivity problem:{}'.format(cpe))
                     # This can happen while metadata is being updated, so
                     # let's try again
                     tries += 1
