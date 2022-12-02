@@ -33,7 +33,8 @@ err_type = ['Segmentation fault',
             'function cannot return function type (.*)',
             'unknown type name (.*)', 'incomplete definition of type (.*)',
             'Problem encountered: Man pages cannot be built: (.*)',
-            'format string is not a string literal (.*)']
+            'format string is not a string literal (.*)',
+            'CMake Error at (.*)']
 
 
 def write_log(message, fail_log):
