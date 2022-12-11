@@ -66,6 +66,15 @@ rpm_packages = []
 src_rpm = []
 logfile = output_dir + '/' + 'test.' + time.strftime("%m-%d-%Y-%H-%M-%S") + '.log'
 
+def is_valid_hostname(hostname):
+    if hostname[-1] == ".":
+        hostname = hostname[:-1] # strip exactly one dot from the right, if present
+    if len(hostname) > 255:
+        return False
+    if re.match(r"[a-f0-9]{12}", hostname.split(".")[0]):
+        print("container hostname does not pass naming policy [{}]".format(hostname))
+        return False
+
 
 def print_log(message):
     try:
@@ -520,6 +529,8 @@ def cleanup_all():
 
 if __name__ == '__main__':
     cleanup_all()
+    if is_valid_hostname(socket.gethostname()) is False:
+        sys.exit(1)
     if rerun_tests == 'true':
         relaunch_tests()
     else:
