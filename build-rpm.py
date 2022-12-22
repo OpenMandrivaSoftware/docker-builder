@@ -74,6 +74,9 @@ def is_valid_hostname(hostname):
     if re.match(r"[a-f0-9]{12}", hostname.split(".")[0]):
         print("container hostname does not pass naming policy [{}]".format(hostname))
         return False
+    else:
+        print("hostname: {} linting passed".format(hostname))
+        return True
 
 
 def print_log(message):
