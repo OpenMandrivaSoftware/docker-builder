@@ -55,8 +55,8 @@ def git_work(pkg_name, arch, package_hash):
         return False
     if rolling_hash[0] == master_hash[0]:
         print('rolling branch already synced with master')
-        print('building anyway...')
-        abf_build(pkg_name, arch)
+        # print('building anyway...')
+        # abf_build(pkg_name, arch)
         return False
     elif rolling_hash[0] != master_hash[0]:
         for i in range(5):
