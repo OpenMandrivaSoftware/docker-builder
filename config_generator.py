@@ -79,7 +79,7 @@ def generate_config():
         print_conf("config_opts['legal_host_arches'] = ('i586', 'i686', 'x86_64')")
 
     print_conf("config_opts['root'] = '%s-%s'" % (platform_name, platform_arch))
-    print_conf("config_opts['chroot_setup_cmd'] = ('install', 'basesystem-build', 'dwz', 'dnf', 'magic-devel')")
+    print_conf("config_opts['chroot_setup_cmd'] = ('install', 'basesystem-build')")
     print_conf("config_opts['package_manager'] = 'dnf'")
     if platform_arch != 'e2kv4':
         if os.getenv('PACKAGE') and os.getenv('PACKAGE')[:4] == 'qt5-':
