@@ -9,9 +9,9 @@ common_pwd="$PWD"
 usage() {
 	cat >&2 <<EOF
 usage: $mkimg --rootfs=rootfs_path --version=openmandriva_version [--mirror=url]
-       $mkimg --rootfs=/tmp/rootfs --version=4.3 --arch=x86_64
-       $mkimg --rootfs=. --version=cooker --mirror=http://abf-downloads.openmandriva.org/cooker/repository/x86_64/main/release/
-       $mkimg --rootfs=. --version=cooker
+$mkimg --rootfs=/tmp/rootfs --version=4.3 --arch=x86_64
+$mkimg --rootfs=. --version=cooker --mirror=http://abf-downloads.openmandriva.org/cooker/repository/x86_64/main/release/
+$mkimg --rootfs=. --version=cooker
 EOF
 	exit 1
 }
@@ -48,12 +48,12 @@ if [ -z "${installversion}" ]; then
 		installversion="$(rpm --eval %distro_release)"
 	fi
 	if [ -z "${installversion}" ]; then
-		echo "Error: no version supplied and unable to detect host openmandriva version"
+		printf '%s\n' "Error: no version supplied and unable to detect host openmandriva version"
 		exit 1
 	fi
 fi
 
-[ -z "$arch" ] && arch="`uname -m`"
+[ -z "$arch" ] && arch="$(uname -m)"
 [ -z "$rootfsdir" ] && rootfsdir="$common_pwd/docker-brew-openmandriva/${installversion}"
 
 target=$(mktemp -d --tmpdir="$(realpath $(dirname $0))" $(basename $0).XXXXXX)
@@ -70,7 +70,7 @@ mknod -m 666 "$target"/dev/urandom c 1 9
 mknod -m 666 "$target"/dev/zero c 1 5
 
 errorCatch() {
-	echo "Error caught. Exiting"
+	printf '%s\n' "Error caught. Exiting"
 	rm -rf "${target}"
 	exit 1
 }
@@ -102,7 +102,7 @@ gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-OpenMandriva
 failovermethod=priority
 enabled=1
 EOF
-	echo "Repository config:" >/dev/stderr
+	printf '%s\n' "Repository config:" >/dev/stderr
 	cat ${target}/etc/yum.repos.d/openmandriva-${arch}.repo >/dev/stderr
 fi
 
@@ -127,7 +127,7 @@ install_chroot(){
 		install basesystem-minimal openmandriva-repos dnf locales locales-en ${systemd}
 
 	if [ $? != 0 ]; then
-		echo "Creating dnf chroot failed."
+		printf '%s\n' "Creating dnf chroot failed."
 		errorCatch
 	fi
 }
@@ -177,16 +177,16 @@ EOF
 
 if [ ! -z "${without_user}" ]; then
 	# Create user omv, password omv
-	echo 'omv:x:1001:1001::/home/omv:/bin/bash' >>"${target}"/etc/passwd
-	echo 'omv:$6$rG3bQ92hkTNubV1p$5qPB9FoXBhNcSE1FOklCoEDowveAgjSf2cHYVwCENZaWtgpFQaRRRN5Ihwd8nuaKMdA1R1XouOasJ7u5dbiGt0:17302:0:99999:7:::' >> "${target}"/etc/shadow
-	echo 'omv:x:1001:' >>"${target}"/etc/group
+	printf '%s\n' 'omv:x:1001:1001::/home/omv:/bin/bash' >>"${target}"/etc/passwd
+	printf '%s\n' 'omv:$6$rG3bQ92hkTNubV1p$5qPB9FoXBhNcSE1FOklCoEDowveAgjSf2cHYVwCENZaWtgpFQaRRRN5Ihwd8nuaKMdA1R1XouOasJ7u5dbiGt0:17302:0:99999:7:::' >> "${target}"/etc/shadow
+	printf '%s\n' 'omv:x:1001:' >>"${target}"/etc/group
 	sed -i -e 's,wheel:x:10:$,wheel:x:10:omv,' "${target}"/etc/group
 fi
 
 if [ ! -z "${passwd}" ]; then
 	ROOT_PASSWD="root"
-	echo "change password to ${ROOT_PASSWD}"
-	sudo chroot "${target}" /bin/bash -c "echo '${ROOT_PASSWD}' |passwd root --stdin"
+	printf '%s\n' "change password to ${ROOT_PASSWD}"
+	sudo chroot "${target}" /bin/bash -c "printf '%s\n' '${ROOT_PASSWD}' |passwd root --stdin"
 
 	cat << EOF > "${target}"/README.omv
 OpenMandriva $installversion distro
@@ -208,7 +208,7 @@ tar --numeric-owner -caf "${tarFile}" -c .
 pushd $common_pwd/docker-brew-openmandriva/$installversion/
 docker build --tag=openmandriva/$installversion:$arch --file Dockerfile .
 
-docker run -i -t --rm openmandriva/$installversion:$arch /bin/bash -c 'echo success'
+docker run -i -t --rm openmandriva/$installversion:$arch /bin/sh -c "printf '%s\n' success"
 docker push openmandriva/$installversion:$arch
 
 docker manifest create openmandriva/$installversion:latest \
