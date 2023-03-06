@@ -38,8 +38,34 @@ while true; do
 	esac
 done
 
+errorCatch() {
+	printf '%s\n' "Error caught. Exiting"
+	rm -rf "${target}"
+	exit 1
+}
+
+trap errorCatch ERR SIGHUP SIGINT SIGTERM
+
+[ ! -S /var/run/docker.sock ] && printf '%s\n' "The /var/run/docker.sock is missing. Check your docker installation and configuration. Exiting." && exit 1
+
+if [ -z $(command -v docker) ]; then
+	printf '%s\n' "Missing docker. Installing..."
+
+	dnf --refresh \
+	    --nogpgcheck \
+	    --setopt=install_weak_deps=False \
+	    --nodocs \
+	    --assumeyes \
+	    install docker
+
+	if [ $? != 0 ]; then
+	    printf '%s\n' "Installing docker failed."
+	    errorCatch
+	fi
+fi
+
 if [ -z "${installversion}" ]; then
-	# Attempt to match host version
+# Attempt to match host version
 	if grep -q Cooker /etc/os-release; then
 		installversion=cooker
 	elif grep -q Rolling /etc/os-release; then
@@ -56,7 +82,7 @@ fi
 [ -z "$arch" ] && arch="$(uname -m)"
 [ -z "$rootfsdir" ] && rootfsdir="$common_pwd/docker-brew-openmandriva/${installversion}"
 
-target=$(mktemp -d --tmpdir="$(realpath $(dirname $0))" $(basename $0).XXXXXX)
+target="$(mktemp -d --tmpdir=$(realpath $(dirname $0)) $(basename $0).XXXXXX)"
 mkdir -m 755 "$target"/dev
 mknod -m 600 "$target"/dev/console c 5 1
 mknod -m 600 "$target"/dev/initctl p
@@ -69,13 +95,6 @@ mknod -m 666 "$target"/dev/tty0 c 4 0
 mknod -m 666 "$target"/dev/urandom c 1 9
 mknod -m 666 "$target"/dev/zero c 1 5
 
-errorCatch() {
-	printf '%s\n' "Error caught. Exiting"
-	rm -rf "${target}"
-	exit 1
-}
-
-trap errorCatch ERR SIGHUP SIGINT SIGTERM
 
 if [ -n "${mirror}" ]; then
 	# If mirror provided, use it exclusively
@@ -201,11 +220,11 @@ else
 	tarFile="${rootfsdir}"/rootfs-"${installversion}".tar.xz
 fi
 
-pushd "${target}"
+cd "${target}"
 
 tar --numeric-owner -caf "${tarFile}" -c .
 [ "${rootfsdir}" = "$common_pwd/docker-brew-openmandriva/$installversion" ] || mv -f "${tarFile}" $common_pwd/docker-brew-openmandriva/$installversion/
-pushd $common_pwd/docker-brew-openmandriva/$installversion/
+cd $common_pwd/docker-brew-openmandriva/$installversion/
 docker build --tag=openmandriva/$installversion:$arch --file Dockerfile .
 
 docker run -i -t --rm openmandriva/$installversion:$arch /bin/sh -c "printf '%s\n' success"
@@ -237,5 +256,5 @@ if [ ! -z "${builder}" ]; then
 	docker manifest push openmandriva/builder:latest
 fi
 
-popd
+cd ..
 rm -rf "${target}"
