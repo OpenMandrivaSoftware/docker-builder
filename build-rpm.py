@@ -185,8 +185,8 @@ def clone_repo(git_repo, project_version):
     for i in range(tries):
         try:
             print('cloning [{}], branch: [{}] to [{}]'.format(git_repo, project_version, build_package))
-            subprocess.check_output(['/usr/bin/git', 'clone', git_repo, build_package])
-            subprocess.check_output(['git', 'checkout', project_version], cwd=build_package)
+            subprocess.check_output(['git', 'clone', git_repo, build_package], timeout=3600, env={'LC_ALL': 'C.UTF-8'})
+            subprocess.check_output(['git', 'checkout', project_version], cwd=build_package, timeout=3600, env={'LC_ALL': 'C.UTF-8'})
         except subprocess.CalledProcessError:
             if i < tries - 1:
                 time.sleep(5)
@@ -196,13 +196,14 @@ def clone_repo(git_repo, project_version):
                 sys.exit(1)
         break
     # generate commit_id
-    git_commit = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=build_package)
+    git_commit = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=build_package, timeout=3600, env={'LC_ALL': 'C.UTF-8'})
     print(git_commit.decode('utf-8'), file=open(get_home + '/commit_hash', "a"))
 
 
 def hash_file(rpm):
-    """"This function returns the SHA-1 hash
-    of the file passed into it"""
+#    This function returns the SHA-1 hash
+#    of the file passed into it
+
     # make a hash object
     h = hashlib.sha1()
     # open file for reading in binary mode
@@ -259,7 +260,7 @@ def container_data():
         full_list = []
         if not os.path.basename(pkg).endswith("src.rpm"):
             try:
-                dependencies = subprocess.check_output(['dnf', 'repoquery', '-q', '--latest-limit=1', '--qf', '%{NAME}', '--whatrequires', name])
+                dependencies = subprocess.check_output(['dnf', 'repoquery', '-q', '--latest-limit=1', '--qf', '%{NAME}', '--whatrequires', name], timeout=3600, env={'LC_ALL': 'C.UTF-8'})
                 full_list = dependencies.decode().split('\n')
             except subprocess.CalledProcessError:
                 print('some problem with dnf repoquery for %s' % name)
@@ -505,7 +506,7 @@ def cleanup_all():
     for dirs in ["/var/lib/mock/{}-{}".format(platform_name, platform_arch) + s for s in umount_dirs]:
       if os.path.exists(dirs):
         try:
-          subprocess.check_output(['sudo', 'umount', '-ql', dirs])
+          subprocess.check_output(['sudo', 'umount', '-ql', dirs], text=True)
         except subprocess.CalledProcessError as e:
           print(e.output)
           continue
