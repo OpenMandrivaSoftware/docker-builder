@@ -21,24 +21,25 @@ best=1\n"""
 
 conf = '/etc/mock/default.cfg'
 
-
 def print_conf(message):
     try:
         logFile = open(conf, 'a')
         logFile.write(message + '\n')
         logFile.close()
     except:
-        print("Can't write to log file: " + conf)
+        print("BUILDER: Can't write to log file: " + conf)
     # print(message)
 
 
 def generate_config():
+    print("BUILDER: Starting script: config_generator.py")
+
     if os.path.exists(conf):
         os.remove(conf)  # this deletes the file
 
     uname = os.getenv('UNAME')
     if not uname:
-        print("Environment variable: [%s] not set." % (uname))
+        print("BUILDER: Environment variable: [%s] not set." % (uname))
         sys.exit(1)
     email = os.getenv('EMAIL')
     platform_arch = os.getenv('PLATFORM_ARCH')
@@ -92,15 +93,16 @@ def generate_config():
         print_conf("config_opts['dnf_builddep_opts'] = ['--refresh', '--forcearch=%s']" % platform_arch)
     print_conf("config_opts['useradd'] = '/usr/sbin/useradd -o -m -u {{chrootuid}} -g {{chrootgid}} -d {{chroothome}} {{chrootuser}}'")
     print_conf("config_opts['releasever'] = '0'")
-    print_conf("config_opts['rpmbuild_networking'] = False")
+    print_conf("config_opts['rpmbuild_networking'] = True")
+    print_conf("config_opts['use_host_resolv'] = True")
     print_conf("config_opts['plugin_conf']['bind_mount_enable'] = True")
-    print_conf("config_opts['plugin_conf']['bind_mount_opts']['dirs'].append(('/etc/resolv.conf', '/etc/resolv.conf'))")
     print_conf("config_opts['package_manager_max_attempts'] = 3")
     print_conf("config_opts['package_manager_attempt_delay'] = 15")
-    print_conf("config_opts['rpmbuild_timeout'] = 86400")
+    print_conf("config_opts['rpmbuild_timeout'] = 36000")
     print_conf("config_opts['isolation'] = 'simple'")
     print_conf("config_opts['use_nspawn'] = False")
     #print_conf("config_opts['tar'] = 'bsdtar'")
+    print_conf("config_opts['opstimeout'] = 18000")
     print_conf("config_opts['use_bootstrap'] = False")
     print_conf("config_opts['basedir'] = '/var/lib/mock/'")
     print_conf("config_opts['cache_topdir'] = '/var/cache/mock/'")
@@ -108,6 +110,8 @@ def generate_config():
     print_conf("config_opts['dynamic_buildrequires'] = True")
     # https://github.com/rpm-software-management/mock/issues/661
     print_conf("config_opts['nosync_force'] = False")
+    print_conf("config_opts['ssl_ca_bundle_path'] = None")
+    print_conf("config_opts['ssl_extra_certs'] = None")
     # compress logs
     print_conf("config_opts['plugin_conf']['compress_logs_enable'] = True")
     print_conf("config_opts['plugin_conf']['compress_logs_opts']['command'] = '/usr/bin/gzip -9 --force'")
