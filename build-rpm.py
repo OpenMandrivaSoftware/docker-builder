@@ -391,7 +391,7 @@ def build_rpm():
     for i in range(tries):
         try:
             print("BUILDER: Starting to build SRPM.")
-            subprocess.check_output([mock_binary, '--update', '--quiet', '--configdir', mock_config, '--disable-plugin hw_info', '--buildsrpm', '--spec=' + build_package + '/' + spec_name[0], '--source=' + build_package, '--no-cleanup-after'] + extra_build_src_rpm_options + ['--resultdir=' + output_dir])
+            subprocess.check_output([mock_binary, '--update', '--quiet', '--configdir', mock_config, '--buildsrpm', '--spec=' + build_package + '/' + spec_name[0], '--source=' + build_package, '--no-cleanup-after'] + extra_build_src_rpm_options + ['--resultdir=' + output_dir])
         except subprocess.CalledProcessError as e:
             if i < tries - 1:
                 print("BUILDER: something went wrong with SRPM creation, usually it is bad metadata or missed sources in .abf.yml")

@@ -82,6 +82,7 @@ def generate_config():
     print_conf("config_opts['root'] = '%s-%s'" % (platform_name, platform_arch))
     print_conf("config_opts['chroot_setup_cmd'] = ('install', 'basesystem-build', 'dwz', 'dnf', 'magic-devel')")
     print_conf("config_opts['package_manager'] = 'dnf'")
+    print_conf("config_opts['plugin_conf']['hw_info_enable'] = False")
     if platform_arch != 'e2kv4':
         if os.getenv('PACKAGE') and os.getenv('PACKAGE')[:4] == 'qt5-':
             # We can't use nodocs with qt5-* packages because docs for
