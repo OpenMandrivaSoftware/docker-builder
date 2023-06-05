@@ -178,9 +178,8 @@ def clone_repo(git_repo, project_version):
     for i in range(tries):
         try:
             print("BUILDER: Git repository cloning [{}], branch: [{}] to [{}]".format(git_repo, project_version, build_package))
-            #subprocess.check_output(['git', 'clone', git_repo, build_package], timeout=3600, env={'LC_ALL': 'C.UTF-8'})
-            #subprocess.check_output(['git', 'checkout', project_version], cwd=build_package, timeout=3600, env={'LC_ALL': 'C.UTF-8'})
-            subprocess.check_output(['git', 'clone', '--depth', '1', '-b', project_version, git_repo, build_package], timeout=3600, env={'LC_ALL': 'C.UTF-8'})
+            subprocess.check_output(['git', 'clone', git_repo, build_package], timeout=3600, env={'LC_ALL': 'C.UTF-8'})
+            subprocess.check_output(['git', 'checkout', project_version], cwd=build_package, timeout=3600, env={'LC_ALL': 'C.UTF-8'})
         except subprocess.CalledProcessError:
             if i < tries - 1:
                 time.sleep(5)
