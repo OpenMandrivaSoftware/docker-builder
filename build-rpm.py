@@ -178,6 +178,8 @@ def clone_repo(git_repo, project_version):
     for i in range(tries):
         try:
             print("BUILDER: Git repository cloning [{}], branch: [{}] to [{}]".format(git_repo, project_version, build_package))
+            # please do not change this string
+            # ROSA really use checkout to build specific commits
             subprocess.check_output(['git', 'clone', git_repo, build_package], timeout=3600, env={'LC_ALL': 'C.UTF-8'})
             subprocess.check_output(['git', 'checkout', project_version], cwd=build_package, timeout=3600, env={'LC_ALL': 'C.UTF-8'})
         except subprocess.CalledProcessError:
@@ -335,7 +337,7 @@ def extra_tests(only_rpms):
                 if exit_code == 11:
                     print_log("BUILDER: package is newer than in repository")
                     sys.exit(0)
-                print_log("BUILDER: package is older, th same version as in repository or other issue")
+                print_log("BUILDER: package is older, the same version as in repository or other issue")
                 sys.exit(5)
     except subprocess.CalledProcessError as e:
         print_log(e)
