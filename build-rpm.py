@@ -299,7 +299,7 @@ def extra_tests(only_rpms):
                 check_string = 'LC_ALL=C.UTF-8 dnf {} repoquery -q --qf %{{EPOCH}}:%{{VERSION}}-%{{RELEASE}} --latest-limit=1 {}'.format("--refresh" if tries > 0 else "", rpm_name)
                 try:
                     print("BUILDER: getting RPM version from repository")
-                    inrepo_version = subprocess.check_output([mock_binary, '--enable-network', '--shell', '-q', '--', check_string], stderr=subprocess.PIPE ).decode('utf-8')
+                    inrepo_version = subprocess.check_output([mock_binary, '--enable-network', '--shell', '-v', '--', check_string], stderr=subprocess.PIPE ).decode('utf-8')
                     print_log("BUILDER: repository version of this package is : {}".format(inrepo_version))
                     break
                 except subprocess.CalledProcessError as e:
