@@ -270,6 +270,9 @@ def container_data():
 def extra_tests(only_rpms):
     # here only rpm packages, not debuginfo or debugsource
     skip_debuginfo = [s for s in only_rpms if "debuginfo" not in s or "debugsource" not in s or "src.rpm" not in s]
+    print(skip_debuginfo)
+    print(skip_debuginfo)
+    print(skip_debuginfo)
     # check_package
     try:
         print("BUILDER: test installing %s" % list(only_rpms))
