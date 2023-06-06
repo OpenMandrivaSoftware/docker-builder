@@ -296,6 +296,9 @@ def extra_tests(only_rpms):
             rpm_evr = '{}:{}-{}'.format(rpm_epoch, rpm_hdr['version'], rpm_hdr['release'])
             tries = 0
             while tries < 3:
+                print(rpm_name)
+                print(rpm_name)
+                print(rpm_name)
                 check_string = 'LC_ALL=C.UTF-8 dnf {} repoquery -q --qf %{{EPOCH}}:%{{VERSION}}-%{{RELEASE}} --latest-limit=1 {}'.format("--refresh" if tries > 0 else "", rpm_name)
                 try:
                     print("BUILDER: getting RPM version from repository")
