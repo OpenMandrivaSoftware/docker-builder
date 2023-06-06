@@ -269,10 +269,7 @@ def container_data():
 
 def extra_tests(only_rpms):
     # here only rpm packages, not debuginfo or debugsource
-    skip_debuginfo = [s for s in only_rpms if "debuginfo" not in s or "debugsource" not in s or "src.rpm" not in s]
-    print(skip_debuginfo)
-    print(skip_debuginfo)
-    print(skip_debuginfo)
+    skip_debuginfo = [s for s in only_rpms if "debuginfo" not in s and "debugsource" not in s and "src.rpm" not in s]
     # check_package
     try:
         print("BUILDER: test installing %s" % list(only_rpms))
@@ -299,9 +296,6 @@ def extra_tests(only_rpms):
             rpm_evr = '{}:{}-{}'.format(rpm_epoch, rpm_hdr['version'], rpm_hdr['release'])
             tries = 0
             while tries < 3:
-                print(rpm_name)
-                print(rpm_name)
-                print(rpm_name)
                 check_string = 'LC_ALL=C.UTF-8 dnf {} repoquery -q --qf %{{EPOCH}}:%{{VERSION}}-%{{RELEASE}} --latest-limit=1 {}'.format("--refresh" if tries > 0 else "", rpm_name)
                 try:
                     print("BUILDER: getting RPM version from repository")
