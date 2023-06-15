@@ -323,7 +323,7 @@ def extra_tests(only_rpms):
                         sys.exit(5)
                     time.sleep(5)
             # rpmdev-vercmp 0:7.4.0-1 0:7.4.0-1
-            inrepo_version = 0 if inrepo_version is None else inrepo_version
+            inrepo_version = 0 if not inrepo_version else inrepo_version
             print_log("BUILDER: repository package version is: %s" % inrepo_version)
 
             try:
