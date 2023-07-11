@@ -66,7 +66,7 @@ def generate_config():
         # use e2kv4 march option
         print_conf("config_opts['target_arch'] = '%s --without check'" % platform_arch)
         print_conf("config_opts['legal_host_arches'] = ('x86_64', 'e2k', 'e2kv4')")
-        if os.getenv('PACKAGE') and os.getenv('PACKAGE')[:4] == 'qt5-':
+        if os.getenv('PACKAGE') and (os.getenv('PACKAGE').startswith('qt5-') or os.getenv('PACKAGE').startswith('qt6-')):
             # We can't use nodocs with qt5-* packages because docs for
             # one package need to access docs for other packages to
             # crossreference them
@@ -84,7 +84,7 @@ def generate_config():
     print_conf("config_opts['package_manager'] = 'dnf'")
     print_conf("config_opts['plugin_conf']['hw_info_enable'] = False")
     if platform_arch != 'e2kv4':
-        if os.getenv('PACKAGE') and os.getenv('PACKAGE')[:4] == 'qt5-':
+        if os.getenv('PACKAGE') and (os.getenv('PACKAGE').startswith('qt5-') or os.getenv('PACKAGE').startswith('qt6-')):
             # We can't use nodocs with qt5-* packages because docs for
             # one package need to access docs for other packages to
             # crossreference them
