@@ -95,13 +95,20 @@ mknod -m 666 "$target"/dev/tty0 c 4 0
 mknod -m 666 "$target"/dev/urandom c 1 9
 mknod -m 666 "$target"/dev/zero c 1 5
 
+if [ "$installversion" = "cooker" -o "$installversion" = "rolling" ]; then
+	HAS_UPDATES=false
+else
+	HAS_UPDATES=true
+fi
 
 if [ -n "${mirror}" ]; then
 	# If mirror provided, use it exclusively
-	reposetup="--disablerepo=* --repofrompath=omvrel,$mirror/$installversion/repository/$arch/main/release/ --repofrompath=omvup,$mirror/$installversion/repository/$arch/main/updates/ --enablerepo=omvrel --enablerepo=omvup"
+	reposetup="--disablerepo=* --repofrompath=omvrel,$mirror/$installversion/repository/$arch/main/release/ --enablerepo=omvrel"
+	$HAS_UPDATES && reposetup="$reposetup --repofrompath=omvup,$mirror/$installversion/repository/$arch/main/updates/ --enablerepo=omvup"
 else
-	# If mirror is *not* provided, use mirrorlist
-	reposetup="--disablerepo=* --enablerepo=openmandriva-${arch} --enablerepo=updates-${arch}"
+	# If mirror is *not* provided, use abf-downloads
+	reposetup="--disablerepo=* --enablerepo=openmandriva-${arch}"
+	$HAS_UPDATES && reposetup="$reposetup --enablerepo=updates-${arch}"
 
 	mkdir -p ${target}/etc/yum.repos.d
 	cat >${target}/etc/yum.repos.d/openmandriva-${arch}.repo <<EOF
@@ -112,6 +119,9 @@ gpgcheck=1
 gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-OpenMandriva
 failovermethod=priority
 enabled=1
+EOF
+
+	$HAS_UPDATES && cat >>${target}/etc/yum.repos.d/openmandriva-${arch}.repo <<EOF
 
 [updates-$arch]
 name=OpenMandriva $installversion - $arch - Updates
