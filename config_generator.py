@@ -84,7 +84,7 @@ def generate_config():
     print_conf("config_opts['package_manager'] = 'dnf'")
     print_conf("config_opts['plugin_conf']['hw_info_enable'] = False")
     if platform_arch != 'e2kv4':
-        if os.getenv('PACKAGE') and os.getenv('PACKAGE').startswith(('qt5-', 'qt6-', 'qt-')):
+        if os.getenv('PACKAGE') and os.getenv('PACKAGE').startswith(('qt5-', 'qt6-', 'qt-', 'kf6-')):
             # We can't use nodocs with qt5-* packages because docs for
             # one package need to access docs for other packages to
             # crossreference them
@@ -99,9 +99,11 @@ def generate_config():
     print_conf("config_opts['plugin_conf']['bind_mount_enable'] = True")
     print_conf("config_opts['package_manager_max_attempts'] = 3")
     print_conf("config_opts['package_manager_attempt_delay'] = 15")
-    # We used to set this to 36000, but that's not sufficient for chromium with cfe
-    # We may want to revisit this if we get faster builders for all architectures
-    print_conf("config_opts['rpmbuild_timeout'] = 72000")
+    # chromium with CFE can take a lot longer than 36000 seconds (10 hours)...
+    if os.getenv('PACKAGE') and os.getenv('PACKAGE').startswith('chromium'):
+        print_conf("config_opts['rpmbuild_timeout'] = 72000")
+    else:
+        print_conf("config_opts['rpmbuild_timeout'] = 36000")
     print_conf("config_opts['isolation'] = 'simple'")
     print_conf("config_opts['use_nspawn'] = False")
     #print_conf("config_opts['tar'] = 'bsdtar'")
