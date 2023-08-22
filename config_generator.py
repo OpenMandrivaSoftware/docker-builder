@@ -99,7 +99,9 @@ def generate_config():
     print_conf("config_opts['plugin_conf']['bind_mount_enable'] = True")
     print_conf("config_opts['package_manager_max_attempts'] = 3")
     print_conf("config_opts['package_manager_attempt_delay'] = 15")
-    print_conf("config_opts['rpmbuild_timeout'] = 36000")
+    # We used to set this to 36000, but that's not sufficient for chromium with cfe
+    # We may want to revisit this if we get faster builders for all architectures
+    print_conf("config_opts['rpmbuild_timeout'] = 72000")
     print_conf("config_opts['isolation'] = 'simple'")
     print_conf("config_opts['use_nspawn'] = False")
     #print_conf("config_opts['tar'] = 'bsdtar'")
