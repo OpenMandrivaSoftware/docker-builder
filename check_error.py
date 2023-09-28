@@ -34,8 +34,22 @@ err_type = ['Segmentation fault',
             'unknown type name (.*)', 'incomplete definition of type (.*)',
             'Problem encountered: Man pages cannot be built: (.*)',
             'format string is not a string literal (.*)',
-            'CMake Error at (.*)']
+            'Failed to find required (.*) component (.*)',
+            'Package (.*), required by (.*), not found',
+            'CMake Error at (.*)',
+            'error: (.*)',
+            '(.*) Stop']
 
+# Common "errors" from chroot install scripts while inside a container...
+not_an_error = ['error: lua script failed:']
+
+def is_excluded(x):
+    excluded = False
+    for n in not_an_error:
+        if re.findall(('(' + n + ')').encode('utf-8'), x):
+            excluded = True
+            break
+    return excluded
 
 def write_log(message, fail_log):
     try:
@@ -67,26 +81,14 @@ def known_errors(logfile, fail_log):
             msgf = io.open(logfile, "r", encoding="utf-8")
             mm = mmap.mmap(msgf.fileno(), sz, access=mmap.ACCESS_READ)
             msgf.close()
+
         for pat in err_type:
-            error = re.search(pat.encode("utf-8"), mm)
-            if error:
-                print(error.group(0).decode('utf-8'))
-                write_log(error.group(0).decode('utf-8'), fail_log)
-                break
-            else:
-                common_pattern = 'error: (.*)'
-                error = re.search(common_pattern.encode("utf-8"), mm)
-                if error:
-                    print(error.group(0).decode('utf-8'))
-                    write_log(error.group(0).decode('utf-8'), fail_log)
-                    break
-                else:
-                    common_pattern = '(.*)Stop.'
-                    error = re.search(common_pattern.encode("utf-8"), mm)
-                    if error:
-                        print(error.group(0).decode('utf-8'))
-                        write_log(error.group(0).decode('utf-8'), fail_log)
-                        break
+            errors = re.findall(('(' + pat + ')').encode('utf-8'), mm)
+            for error in errors:
+                if not is_excluded(error[0]):
+                    print(error[0])
+                    write_log(str(error[0]), fail_log)
+
         mm.close()
 
 
