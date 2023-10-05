@@ -257,7 +257,7 @@ def container_data():
         full_list = []
         if not os.path.basename(pkg).endswith("src.rpm"):
             try:
-                dependencies = subprocess.check_output(['dnf', 'repoquery', '-q', '--latest-limit=1', '--qf', '%{NAME}', '--whatrequires', rpm_hdr['name']], timeout=3600, env={'LC_ALL': 'C.UTF-8'})
+                dependencies = subprocess.check_output(['dnf5', 'repoquery', '-q', '--latest-limit=1', '--qf', '%{NAME}', '--whatrequires', rpm_hdr['name']], timeout=3600, env={'LC_ALL': 'C.UTF-8'})
                 full_list = dependencies.decode().split('\n')
             except subprocess.CalledProcessError:
                 print("BUILDER: A problem occured when running dnf repoquery for %s" % name)
@@ -296,7 +296,7 @@ def extra_tests(only_rpms):
             rpm_evr = '{}:{}-{}'.format(rpm_epoch, rpm_hdr['version'], rpm_hdr['release'])
             tries = 0
             while tries < 3:
-                check_string = 'LC_ALL=C.UTF-8 dnf {} repoquery -q --qf %{{EPOCH}}:%{{VERSION}}-%{{RELEASE}} --latest-limit=1 {}'.format("--refresh" if tries > 0 else "", rpm_name)
+                check_string = 'LC_ALL=C.UTF-8 dnf5 {} repoquery -q --qf %{{EPOCH}}:%{{VERSION}}-%{{RELEASE}} --latest-limit=1 {}'.format("--refresh" if tries > 0 else "", rpm_name)
                 try:
                     print("BUILDER: getting RPM version from repository")
                     inrepo_version = subprocess.check_output([mock_binary, '--enable-network', '--shell', '-v', '--', check_string], stderr=subprocess.PIPE ).decode('utf-8')
@@ -500,25 +500,13 @@ def cleanup_all():
           continue
 
     remove_if_exist('/etc/rpm/platform')
-#    remove_if_exist('/etc/mock/default.cfg')
-    # dirs
-#    remove_if_exist('/var/lib/mock/')
     remove_if_exist('/var/lib/mock/{}-{}/result/'.format(platform_name, platform_arch))
     remove_if_exist('/var/lib/mock/{}-{}/root/builddir/'.format(platform_name, platform_arch))
-    # probably need to drop it and point in mock
-#    remove_if_exist('/var/cache/mock/')
-#    remove_if_exist('/var/cache/dnf/')
     # /home/omv/package_name
     remove_if_exist(build_package)
     remove_if_exist(get_home + '/build_fail_reason.log')
     remove_if_exist(get_home + '/commit_hash')
     remove_if_exist(output_dir)
-#    try:
-#        subprocess.check_output(['/usr/bin/sudo', 'dnf', 'clean', 'all'])
-#        print("BUILDER: dnf metadata cleaned")
-#    except subprocess.CalledProcessError as e:
-#        print(e.output)
-#        pass
 
 
 if __name__ == '__main__':

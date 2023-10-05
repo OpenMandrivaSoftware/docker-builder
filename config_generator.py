@@ -74,25 +74,39 @@ def generate_config():
         else:
             print_conf("config_opts['dnf_common_opts'] = ['--refresh', '--disableplugin=local', '--setopt=deltarpm=False', '--setopt=install_weak_deps=False', '--setopt=tsflags=nodocs', '--forcearch=e2k']")
         print_conf("config_opts['dnf_builddep_opts'] = ['--refresh', '--forcearch=e2k']")
+    else:
+        if os.getenv('PACKAGE') and os.getenv('PACKAGE').startswith(('qt5-', 'qt6-', 'qt-', 'kf6-')):
+            # We can't use nodocs with qt5-* packages because docs for
+            # one package need to access docs for other packages to
+            # crossreference them
+            print_conf("config_opts['dnf_common_opts'] = ['--refresh', '--disableplugin=local', '--setopt=deltarpm=False', '--setopt=install_weak_deps=False', '--forcearch=%s']" % platform_arch)
+            print_conf("config_opts['dnf5_common_opts'] = ['--refresh', '--setopt=deltarpm=False', '--setopt=install_weak_deps=False', '--no-gpgchecks']")
+        else:
+            print_conf("config_opts['dnf_common_opts'] = ['-refresh', '--disableplugin=local', '--setopt=deltarpm=False', '--setopt=install_weak_deps=False', '--setopt=tsflags=nodocs', '--forcearch=%s']" % platform_arch)
+            print_conf("config_opts['dnf5_common_opts'] = ['--refresh', '--setopt=deltarpm=False', '--setopt=install_weak_deps=False', '--no-gpgchecks', '--no-docs' ]")
+        print_conf("config_opts['dnf_builddep_opts'] = ['--refresh', '--forcearch=%s']" % platform_arch)
+
     accepted_arches = {'x86_64', 'i686', 'i586'}
     if platform_arch in accepted_arches:
         print_conf("config_opts['target_arch'] = '%s'" % platform_arch)
         print_conf("config_opts['legal_host_arches'] = ('i586', 'i686', 'x86_64')")
 
     print_conf("config_opts['root'] = '%s-%s'" % (platform_name, platform_arch))
-    print_conf("config_opts['chroot_setup_cmd'] = ('install', 'basesystem-build', 'dwz', 'dnf', 'magic-devel')")
-    print_conf("config_opts['package_manager'] = 'dnf'")
+    print_conf("config_opts['chroot_setup_cmd'] = ['--refresh', 'install', 'basesystem-build', 'dwz', 'magic-devel', '--forcearch=%s']" % platform_arch)
+# use dnf5 on cooker as a default package manager
+    if platform_name != "cooker":
+        print_conf("config_opts['package_manager'] = 'dnf'")
+    else:
+        print_conf("config_opts['package_manager'] = 'dnf5'")
+
+    print_conf("config_opts['dnf5_command'] = '/usr/bin/dnf5'")
+    print_conf("config_opts['system_dnf5_command'] = '/usr/bin/dnf5'")
+    print_conf("config_opts['dnf5_install_command'] = 'install dnf5'")
+    print_conf("config_opts['dnf5_disable_plugins'] = []")
+    # No --allowerasing with remove, per
+    # https://github.com/rpm-software-management/dnf5/issues/729
+    print_conf("config_opts['dnf5_avoid_opts'] = {'remove': ['--allowerasing']}")
     print_conf("config_opts['plugin_conf']['hw_info_enable'] = False")
-    if platform_arch != 'e2kv4':
-        if os.getenv('PACKAGE') and os.getenv('PACKAGE').startswith(('qt5-', 'qt6-', 'qt-', 'kf6-')):
-            # We can't use nodocs with qt5-* packages because docs for
-            # one package need to access docs for other packages to
-            # crossreference them
-            print_conf("config_opts['dnf_common_opts'] = ['--refresh', '--disableplugin=local', '--setopt=deltarpm=False', '--setopt=install_weak_deps=False', '--forcearch=%s']" % platform_arch)
-        else:
-            print_conf("config_opts['dnf_common_opts'] = ['--refresh', '--disableplugin=local', '--setopt=deltarpm=False', '--setopt=install_weak_deps=False', '--setopt=tsflags=nodocs', '--forcearch=%s']" % platform_arch)
-        print_conf("config_opts['dnf_builddep_opts'] = ['--refresh', '--forcearch=%s']" % platform_arch)
-    print_conf("config_opts['useradd'] = '/usr/sbin/useradd -o -m -u {{chrootuid}} -g {{chrootgid}} -d {{chroothome}} {{chrootuser}}'")
     print_conf("config_opts['releasever'] = '0'")
     print_conf("config_opts['rpmbuild_networking'] = True")
     print_conf("config_opts['use_host_resolv'] = True")
@@ -106,7 +120,7 @@ def generate_config():
         print_conf("config_opts['rpmbuild_timeout'] = 36000")
     print_conf("config_opts['isolation'] = 'simple'")
     print_conf("config_opts['use_nspawn'] = False")
-    #print_conf("config_opts['tar'] = 'bsdtar'")
+#    print_conf("config_opts['tar'] = 'bsdtar'")
     print_conf("config_opts['opstimeout'] = 18000")
     print_conf("config_opts['use_bootstrap'] = False")
     print_conf("config_opts['basedir'] = '/var/lib/mock/'")
