@@ -38,6 +38,7 @@ err_type = ['Segmentation fault',
             'Package (.*), required by (.*), not found',
             'CMake Error at (.*)',
             'error: (.*)',
+            "Couldn't find include (.*)",
             '(.*) Stop']
 
 # Common "errors" from chroot install scripts while inside a container...
