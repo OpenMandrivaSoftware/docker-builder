@@ -113,9 +113,13 @@ def download_hash(hashsum, pkg_name=''):
 def remove_changelog(spec):
     if os.path.isfile(spec):
         try:
-            subprocess.check_output(['sed', '-i', '/%changelog/,$d', spec])
-        except subprocess.CalledProcessError as e:
-            print(e.output)
+            with open(spec, 'r+') as f:
+                content = f.read()
+                f.seek(0)
+                f.truncate()
+                f.write(content.split('%changelog')[0])
+        except Exception as e:
+            print(f"Error deleting changelog: {e}")
             pass
 
 def validate_spec(path):
