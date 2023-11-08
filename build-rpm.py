@@ -122,17 +122,18 @@ def remove_changelog(spec):
         print("* {} ROSA Build Platform (ABF) <support@rosalinux.ru>".format(time_string), file=spec_file)
         print("- Собрано специалистами ООО \"НТЦ ИТ РОСА\" с использованием сборочной среды ABF", file=spec_file)
 
-
 def generate_changelog(specfile):
-    git_log_command = 'git log --pretty="tformat:* %cd %an <%ae> (%h)%n- %s%b%n"'
+    git_log_command = 'git log --pretty="tformat:* %cd %an <%ae> - %h%n- %s%b%n"'
     git_log = subprocess.check_output(git_log_command, shell=True, cwd=build_package).decode('utf-8')
 
     git_log_lines = git_log.split('\n')
     modified_log_lines = []
 
     for line in git_log_lines:
+        line = re.sub(r'\d{2}:\d{2}:\d{2}', '', line)
+        line = re.sub(r'[+-]\d{4}', '', line)
         if "Automatic import for version" in line:
-            modified_log_lines.append("initial commit message")
+            modified_log_lines.append("- initial commit message")
         else:
             modified_log_lines.append(line)
 
