@@ -124,7 +124,7 @@ def remove_changelog(spec):
 
 
 def generate_changelog(specfile):
-    git_log_command = 'git log --pretty="tformat:* %cd %an <%ae> (%h)%n- %s%b%n"'
+    git_log_command = 'git log --pretty="tformat:* %cd %an <%ae> %n- %s%b%n" --date=format:"%a %b %e %Y"'
     git_log = subprocess.check_output(git_log_command, shell=True, cwd=build_package).decode('utf-8')
 
     git_log_lines = git_log.split('\n')
