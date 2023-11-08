@@ -123,6 +123,33 @@ def remove_changelog(spec):
         print("- Собрано специалистами ООО \"НТЦ ИТ РОСА\" с использованием сборочной среды ABF", file=spec_file)
 
 
+def generate_changelog(specfile):
+    git_log_command = 'git log --pretty="tformat:* %cd %an <%ae> (%h)%n- %s%b%n"'
+    git_log = subprocess.check_output(git_log_command, shell=True, cwd=build_package).decode('utf-8')
+
+    git_log_lines = git_log.split('\n')
+    modified_log_lines = []
+
+    for line in git_log_lines:
+        if "Automatic import for version" in line:
+            modified_log_lines.append("initial commit message")
+        else:
+            modified_log_lines.append(line)
+
+    modified_git_log = '\n'.join(modified_log_lines)
+    changelog = "%changelog\n\n" + modified_git_log
+
+    with open(specfile, 'r') as file:
+        content = file.read()
+
+    if "%changelog" in content:
+        content = content.replace("%changelog", changelog)
+    else:
+        content += "\n" + changelog
+
+    with open(specfile, 'w') as file:
+        file.write(content)
+
 def validate_spec(path):
     spec = [f for f in os.listdir(path) if f.endswith('.spec')]
     if len(spec) > 1:
@@ -137,6 +164,7 @@ def validate_spec(path):
         print('single spec in repo, check passed')
         print("cleanup %changelog entries")
         remove_changelog(path + '/' + spec[0])
+        generate_changelog(path + '/' + spec[0])
 
 
 def download_yml(yaml_file):
