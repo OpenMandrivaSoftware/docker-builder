@@ -115,13 +115,6 @@ def remove_changelog(spec):
             if "%changelog" in line:
                 flag = 1
                 break
-    time_string = time.strftime("%a %b %d %Y")
-    with open(spec, "a") as spec_file:
-        if flag == 0:
-            print("\n%changelog", file=spec_file)
-        print("* {} ROSA Build Platform (ABF) <support@rosalinux.ru>".format(time_string), file=spec_file)
-        print("- Собрано специалистами ООО \"НТЦ ИТ РОСА\" с использованием сборочной среды ABF", file=spec_file)
-
 
 def generate_changelog(specfile):
     changelog_command = '/usr/bin/rpmautospec generate-changelog'
