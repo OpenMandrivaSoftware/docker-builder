@@ -124,15 +124,15 @@ def remove_changelog(spec):
 
 
 def generate_changelog(specfile):
-    git_log_command = 'git log --pretty="tformat:* %cd %an <%ae> %n- %s%b%n" --date=format:"%a %b %e %Y"'
-    git_log = subprocess.check_output(git_log_command, shell=True, cwd=build_package).decode('utf-8')
+    changelog_command = '/usr/bin/rpmautospec generate-changelog'
+    git_log = subprocess.check_output(changelog_command, shell=True, cwd=build_package).decode('utf-8')
 
     git_log_lines = git_log.split('\n')
     modified_log_lines = []
 
     for line in git_log_lines:
         if "Automatic import for version" in line:
-            modified_log_lines.append("initial commit message")
+            modified_log_lines.append("- initial commit message")
         else:
             modified_log_lines.append(line)
 
