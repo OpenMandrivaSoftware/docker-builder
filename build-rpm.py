@@ -117,8 +117,8 @@ def remove_changelog(spec):
                 break
 
 def generate_changelog(specfile):
-    changelog_command = '/usr/bin/rpmautospec generate-changelog'
-    git_log = subprocess.check_output(changelog_command, shell=True, cwd=build_package).decode('utf-8')
+    git_log_command = 'git log --pretty="tformat:* %cd %an <%ae> %h %n- %s%b%n" --date=format:"%a %b %e %Y"'
+    git_log = subprocess.check_output(git_log_command, shell=True, cwd=build_package).decode('utf-8')
 
     git_log_lines = git_log.split('\n')
     modified_log_lines = []
