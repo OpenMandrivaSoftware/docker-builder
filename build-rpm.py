@@ -124,7 +124,7 @@ def generate_changelog(specfile):
     modified_log_lines = []
 
     for line in git_log_lines:
-        if "Automatic import for version" in line:
+        if "Automatic import for version" or "Imported from SRPM" in line:
             modified_log_lines.append("- initial commit message")
         else:
             modified_log_lines.append(line)
