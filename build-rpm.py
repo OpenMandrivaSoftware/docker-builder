@@ -116,32 +116,52 @@ def remove_changelog(spec):
                 flag = 1
                 break
 
+
 def generate_changelog(specfile):
     git_log_command = 'git log --pretty="tformat:* %cd %an <%ae> %h %n- %s%b%n" --date=format:"%a %b %e %Y"'
-    git_log = subprocess.check_output(git_log_command, shell=True, cwd=build_package).decode('utf-8')
+    git_log = subprocess.check_output(git_log_command, shell=True).decode('utf-8')
 
     git_log_lines = git_log.split('\n')
     modified_log_lines = []
+    current_commit = None
 
     for line in git_log_lines:
-        if "Automatic import for version" or "Imported from SRPM" in line:
-            modified_log_lines.append("- initial commit message")
+        if line.startswith('*'):
+            if current_commit:
+                modified_log_lines.append(current_commit)
+            current_commit = line
         else:
-            modified_log_lines.append(line)
+            current_commit += '\n ' + line
+
+    if current_commit:
+        modified_log_lines.append(current_commit)
 
     modified_git_log = '\n'.join(modified_log_lines)
     changelog = "%changelog\n\n" + modified_git_log
+
+    # Check for specific strings and replace the whole line
+    modified_changelog_lines = []
+    for line in changelog.split('\n'):
+        if "Automatic import for version" in line:
+            modified_changelog_lines.append("- initial commit message")
+        elif "Imported from SRPM" in line:
+            modified_changelog_lines.append("- initial commit message")
+        else:
+            modified_changelog_lines.append(line)
+
+    modified_changelog = '\n'.join(modified_changelog_lines)
 
     with open(specfile, 'r') as file:
         content = file.read()
 
     if "%changelog" in content:
-        content = content.replace("%changelog", changelog)
+        content = content.replace("%changelog", modified_changelog)
     else:
-        content += "\n" + changelog
+        content += "\n" + modified_changelog
 
     with open(specfile, 'w') as file:
         file.write(content)
+
 
 def validate_spec(path):
     spec = [f for f in os.listdir(path) if f.endswith('.spec')]
