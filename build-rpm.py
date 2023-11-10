@@ -104,17 +104,15 @@ def download_hash(hashsum, pkg_name=''):
 
 def remove_changelog(spec):
     if os.path.isfile(spec):
-        try:
-            subprocess.check_output(['sed', '-i', '/^%changelog/q', spec])
-        except subprocess.CalledProcessError as e:
-            print(e.output)
-            pass
-    flag = 0
-    with open(spec, "r") as spec_file:
-        for line in spec_file:
-            if "%changelog" in line:
-                flag = 1
-                break
+        with open(spec, "r") as spec_file:
+            lines = spec_file.readlines()
+
+        with open(spec, "w") as spec_file:
+            for line in lines:
+                print(line)
+                if line.startswith("%changelog"):
+                    break
+                spec_file.write(line)
 
 
 def generate_changelog(specfile):
