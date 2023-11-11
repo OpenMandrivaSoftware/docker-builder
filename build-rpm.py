@@ -109,7 +109,6 @@ def remove_changelog(spec):
 
         with open(spec, "w") as spec_file:
             for line in lines:
-                print(line)
                 if line.startswith("%changelog"):
                     break
                 spec_file.write(line)
@@ -152,7 +151,7 @@ def generate_changelog(specfile):
     with open(specfile, 'r') as file:
         content = file.read()
 
-    if "%changelog" in content:
+    if content.startswith("%changelog"):
         content = content.replace("%changelog", modified_changelog)
     else:
         content += "\n" + modified_changelog
