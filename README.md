@@ -64,13 +64,15 @@ sudo dnf install -y mock git coreutils curl sudo rpmdevtools python-yaml
 !!!DO NOT RUN IT OUT OF CONTAINER!!!
 
 
-PACKAGE=htop GIT_REPO=git://github.com/OpenMandrivaAssociation/htop.git \
+PACKAGE=htop \
+GIT_REPO=git://github.com/OpenMandrivaAssociation/htop.git \
+PROJECT_VERSION=master \
 USE_EXTRA_TESTS=true PLATFORM_ARCH=x86_64 PLATFORM_NAME=cooker \
 UNAME=fdrt EMAIL=fdrt@fdrt.com USE_MOCK_CACHE= EXTRA_CFG_OPTIONS= \
 REPO_NAMES='cooker_main_release cooker_main_updates' \
 REPO_URL='http://abf-downloads.openmandriva.org/cooker/repository/x86_64/main/release \
-http://abf-downloads.openmandriva.org/cooker/repository/x86_64/main/updates'\
-PROJECT_VERSION=master FILE_STORE_ADDR=https://file-store.openmandriva.org/ \
+http://abf-downloads.openmandriva.org/cooker/repository/x86_64/main/updates' \
+FILE_STORE_ADDR=https://file-store.openmandriva.org/ \
 /usr/bin/python build-rpm.py
 ```
 ## How to remove stopped containers

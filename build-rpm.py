@@ -20,6 +20,12 @@ import gzip
 import struct
 import socket
 
+MANDATORY_ENV_VARS = ['HOME', 'PACKAGE', 'GIT_REPO', 'FILE_STORE_ADDR', 'PLATFORM_ARCH', 'PLATFORM_NAME', 'PROJECT_VERSION']
+
+for var in MANDATORY_ENV_VARS:
+    if var not in os.environ:
+        raise EnvironmentError("Failed because '{}' is not set in environment.".format(var))
+
 get_home = os.environ.get('HOME')
 package = os.environ.get('PACKAGE')
 git_repo = os.environ.get('GIT_REPO')
@@ -63,10 +69,10 @@ def is_valid_hostname(hostname):
     if len(hostname) > 255:
         return False
     if re.match(r"[a-f0-9]{12}", hostname.split(".")[0]):
-        print("BUILDER: container hostname does not pass naming policy [{}]".format(hostname))
+        print("BUILDER: Container hostname does not pass naming policy [{}]".format(hostname))
         return False
     else:
-        print("BUILDER: hostname: {} linting passed".format(hostname))
+        print("BUILDER: Hostname: {} linting passed".format(hostname))
         return True
 
 
@@ -86,14 +92,11 @@ def get_size(filename):
 
 
 def download_hash(hashsum, pkg_name=''):
-    fstore_json_url = '{}/api/v1/file_stores.json?hash={}'.format(
-        file_store_base, hashsum)
-    fstore_file_url = '{}/api/v1/file_stores/{}'.format(
-        file_store_base, hashsum)
+    fstore_json_url = '{}/api/v1/file_stores.json?hash={}'.format(file_store_base, hashsum)
+    fstore_file_url = '{}/api/v1/file_stores/{}'.format(file_store_base, hashsum)
     resp = requests.get(fstore_json_url)
     if resp.status_code == 404:
-        print("BUILDER: requested file [{}] not found".format(
-            fstore_json_url))
+        print("BUILDER: Requested file [{}] to download from ABF was not found".format(fstore_json_url))
     if resp.status_code == 200:
         # this code responsible for fetching names from abf
         # we not using it because of in names with +, + replaces with _
@@ -113,25 +116,43 @@ def download_hash(hashsum, pkg_name=''):
 def remove_changelog(spec):
     if os.path.isfile(spec):
         try:
-            subprocess.check_output(['sed', '-i', '/%changelog/,$d', spec])
+            subprocess.run(['sed', '-i', '/%changelog/,$d', spec], check=True)
         except subprocess.CalledProcessError as e:
             print(e.output)
             pass
 
+
 def validate_spec(path):
-    spec = [f for f in os.listdir(path) if f.endswith('.spec')]
-    if len(spec) > 1:
-        print("BUILDER: found more than 1 RPM spec file in %s" % path)
+    spec_fn = [f for f in os.listdir(path) if f.endswith('.spec')]
+    print("BUILDER: Validating RPM spec files found in %s" % path)
+
+    if len(spec_fn) > 1:
+        print("BUILDER: Found more than 1 RPM spec file in %s" % path)
         sys.exit(1)
-    elif len(spec) == 0:
-        print("BUILDER: no RPM spec file found.")
+    elif len(spec_fn) == 0:
+        print("BUILDER: No RPM spec file found in %s"  % path)
         sys.exit(1)
     else:
-        print("BUILDER: RPM spec file name is %s" % spec[0])
-        spec_name.append(spec[0])
-        print("BUILDER: single RPM spec file in build directory, check passed")
-        # print("cleanup %changelog entries")
-        # remove_changelog(path + '/' + spec[0])
+        print("BUILDER: RPM spec file name is %s" % spec_fn[0])
+        try:
+            build_spec = rpm.spec(path + '/' + spec_fn[0])
+            rpm.reloadConfig()
+        except ValueError:
+            print("BUILDER: Failed to open: %s, not a valid spec file." % spec_fn[0])
+            sys.exit(1)
+
+    if (platform_arch in set(build_spec.sourceHeader[rpm.RPMTAG_EXCLUDEARCH]) and (len(set(build_spec.sourceHeader[rpm.RPMTAG_EXCLUDEARCH])) > 0)):
+       print("BUILDER: Architecture is excluded in RPM spec file (ExcludeArch tag). Exiting build.")
+       sys.exit(6)
+
+    if (platform_arch not in set(build_spec.sourceHeader[rpm.RPMTAG_EXCLUSIVEARCH]) and (len(set(build_spec.sourceHeader[rpm.RPMTAG_EXCLUSIVEARCH])) > 0)):
+       print("BUILDER: Architecture is not included in RPM spec file (ExclusiveArch tag). Exiting build.")
+       sys.exit(6)
+
+    spec_name.append(spec_fn[0])
+    print("BUILDER: Single RPM spec file in build directory, checks passed.")
+    # print("cleanup %changelog entries")
+    # remove_changelog(path + '/' + spec[0])
 
 
 def download_yml(yaml_file):
@@ -145,7 +166,7 @@ def download_yml(yaml_file):
             print("BUILDER: WARNING: .abf.yml contains no or empty sources section")
         else:
             for key, value in data['sources'].items():
-                print("BUILDER: downloading source %s" % key)
+                print("BUILDER: Downloading source %s" % key)
                 download_hash(value, key)
     else:
         print("BUILDER: .abf.yml not found")
@@ -158,15 +179,15 @@ def remove_if_exist(path):
     if os.path.exists(path):
         if os.path.isdir(path):
             try:
-                subprocess.check_output(['/usr/bin/sudo', '-E', 'rm', '-rf', path])
-                print("BUILDER: removed %s" % path)
+                subprocess.run(['/usr/bin/sudo', '-E', 'rm', '-rf', path], check=True)
+                print("BUILDER: Removed %s" % path)
             except subprocess.CalledProcessError as e:
                 print(e.output)
                 return
         if os.path.isfile(path):
             try:
-                subprocess.check_output(['/usr/bin/sudo', '-E', 'rm', '-f', path])
-                print("BUILDER: removed %s" % path)
+                subprocess.run(['/usr/bin/sudo', '-E', 'rm', '-f', path], check=True)
+                print("BUILDER: Removed %s" % path)
             except subprocess.CalledProcessError as e:
                 print(e.output)
                 return
@@ -180,19 +201,19 @@ def clone_repo(git_repo, project_version):
             print("BUILDER: Git repository cloning [{}], branch: [{}] to [{}]".format(git_repo, project_version, build_package))
             # please do not change this string
             # ROSA really use checkout to build specific commits
-            subprocess.check_output(['git', 'clone', git_repo, build_package], timeout=3600, env={'LC_ALL': 'C.UTF-8'})
-            subprocess.check_output(['git', 'checkout', project_version], cwd=build_package, timeout=3600, env={'LC_ALL': 'C.UTF-8'})
+            subprocess.run(['git', 'clone', git_repo, build_package], timeout=3600, env={'LC_ALL': 'C.UTF-8'}, check=True)
+            subprocess.run(['git', 'checkout', project_version], cwd=build_package, env={'LC_ALL': 'C.UTF-8'}, check=True)
         except subprocess.CalledProcessError:
             if i < tries - 1:
                 time.sleep(5)
                 continue
             else:
-                print("BUILDER: can not checkout the repository %s" % git_repo)
+                print("BUILDER: Can not checkout the repository %s" % git_repo)
                 sys.exit(1)
         break
     # generate commit_id
-    git_commit = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=build_package, timeout=3600, env={'LC_ALL': 'C.UTF-8'})
-    print(git_commit.decode('utf-8'), file=open(get_home + '/commit_hash', "a"))
+    f = open(get_home + '/commit_hash', "a")
+    git_commit = subprocess.run(['git', 'rev-parse', 'HEAD'], cwd=build_package, timeout=3600, env={'LC_ALL': 'C.UTF-8'}, stdout=f)
 
 
 def hash_file(rpm):
@@ -212,33 +233,13 @@ def hash_file(rpm):
     # return the hex representation of digest
     return h.hexdigest()
 
+
 def readRpmHeader(ts, filename):
     """ Read an rpm header. """
     fd = os.open(filename, os.O_RDONLY)
     h = ts.hdrFromFdno(fd)
     os.close(fd)
     return h
-
-def validate_exclusive(srpm):
-    """ Validate SRPM for ExcludeArch and/or ExclusiveArch. """
-    rpm_ts = rpm.TransactionSet()
-    rpm_ts.setVSFlags(~(rpm.RPMVSF_NEEDPAYLOAD))
-    rpm_hdr = readRpmHeader(rpm_ts, srpm)
-    if rpm_hdr['excludearch']:
-        for a in rpm_hdr['excludearch']:
-            if a == platform_arch:
-                print("BUILDER: Architecture is excluded in RPM spec file (ExcludeArch tag)")
-                sys.exit(6)
-    if rpm_hdr['exclusivearch']:
-        linted_arch = []
-        for excl_arch in rpm_hdr['exclusivearch']:
-            linted_arch.append(excl_arch)
-        if platform_arch in linted_arch:
-            print("BUILDER: ExclusiveArch header passed for %s" % platform_arch)
-        else:
-            print("BUILDER: ExclusiveArch test failed. Check RPM spec file for ExclusiveArch tag")
-            sys.exit(6)
-
 
 def container_data():
     """ Create container data for ABF, based on on RPM files. """
@@ -257,7 +258,7 @@ def container_data():
         full_list = []
         if not os.path.basename(pkg).endswith("src.rpm"):
             try:
-                dependencies = subprocess.check_output(['dnf5', 'repoquery', '-q', '--latest-limit=1', '--qf', '%{NAME}', '--whatrequires', rpm_hdr['name']], timeout=3600, env={'LC_ALL': 'C.UTF-8'})
+                dependencies = subprocess.run(['dnf5', 'repoquery', '-q', '--latest-limit=1', '--qf', '%{NAME}', '--whatrequires', rpm_hdr['name']], timeout=3600, env={'LC_ALL': 'C.UTF-8'}, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout
                 full_list = dependencies.decode().split('\n')
             except subprocess.CalledProcessError:
                 print("BUILDER: A problem occured when running dnf repoquery for %s" % name)
@@ -272,13 +273,13 @@ def extra_tests(only_rpms):
     skip_debuginfo = [s for s in only_rpms if "debuginfo" not in s and "debugsource" not in s and "src.rpm" not in s]
     # check_package
     try:
-        print("BUILDER: test installing %s" % list(only_rpms))
-        subprocess.check_call([mock_binary, '--init', '--quiet', '--configdir', mock_config, '--install'] + list(skip_debuginfo))
+        print("BUILDER: Test installing %s" % list(only_rpms))
+        subprocess.run([mock_binary, '--init', '--quiet', '--configdir', mock_config, '--install'] + list(skip_debuginfo), check=True)
         shutil.copy('/var/lib/mock/{}-{}/result/root.log'.format(platform_name, platform_arch), logfile)
-        print("BUILDER: all tested packages successfully installed")
-    except subprocess.CalledProcessError as cpe:
-        print("BUILDER: %s failed with exit status %u" % (cpe.cmd, cpe.returncode))
-        print("BUILDER: Extra tests stderr: %s" % (cpe.stderr))
+        print("BUILDER: All tested packages successfully installed")
+    except subprocess.CalledProcessError as e:
+        print("BUILDER: %s failed with exit status %u" % (e.cmd, e.returncode))
+        print("BUILDER: Extra tests stderr: %s" % (e.stderr))
         shutil.copy('/var/lib/mock/{}-{}/result/root.log'.format(platform_name, platform_arch), logfile)
         # tests failed
         sys.exit(5)
@@ -293,20 +294,20 @@ def extra_tests(only_rpms):
                 rpm_epoch = rpm_hdr['epoch']
             else:
                 rpm_epoch = 0
+
             rpm_evr = '{}:{}-{}'.format(rpm_epoch, rpm_hdr['version'], rpm_hdr['release'])
             tries = 0
             while tries < 3:
-                check_string = 'LC_ALL=C.UTF-8 dnf5 {} repoquery -q --qf %{{EPOCH}}:%{{VERSION}}-%{{RELEASE}} --latest-limit=1 {}'.format("--refresh" if tries > 0 else "", rpm_name)
+                print("BUILDER: Getting RPM version from repository")
                 try:
-                    print("BUILDER: getting RPM version from repository")
-                    inrepo_version = subprocess.check_output([mock_binary, '--enable-network', '--shell', '-v', '--', check_string], stderr=subprocess.PIPE ).decode('utf-8')
-                    print_log("BUILDER: repository version of this package is : {}".format(inrepo_version))
+                    inrepo_version = subprocess.run(['dnf5', *(['--refresh'] if tries > 0  else []), 'repoquery', '-q', '--qf', '%{EPOCH}:%{VERSION}-%{RELEASE}', '--latest-limit=1', rpm_name], env={'LC_ALL': 'C.UTF-8'}, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True, text=True).stdout
+                    print_log("BUILDER: Repository version of this package is : {}".format(inrepo_version))
                     break
                 except subprocess.CalledProcessError as e:
                     print(e)
                     print("BUILDER: {} returned with exit code {}".format(e.cmd, e.returncode))
-                    print("BUILDER: getting RPM version stdout: %s" % (e.stdout))
-                    print("BUILDER: getting RPM version stderr: %s" % (e.stderr))
+                    print("BUILDER: Getting RPM version stdout: %s" % (e.stdout))
+                    print("BUILDER: Getting RPM version stderr: %s" % (e.stderr))
                     # Let's see if it's a connection problem...
                     try:
                         hostname = 'google.com'
@@ -314,8 +315,8 @@ def extra_tests(only_rpms):
                         s = socket.create_connection((host, 80), 2)
                         s.close
                         print("BUILDER: Network seems to be up")
-                    except subprocess.CalledProcessError as cpe:
-                        print("BUILDER: Seems to be a connectivity problem:{}".format(cpe))
+                    except subprocess.CalledProcessError as e:
+                        print("BUILDER: Seems to be a connectivity problem:{}".format(e))
                     # This can happen while metadata is being updated, so
                     # let's try again
                     tries += 1
@@ -324,24 +325,24 @@ def extra_tests(only_rpms):
                     time.sleep(5)
             # rpmdev-vercmp 0:7.4.0-1 0:7.4.0-1
             inrepo_version = 0 if not inrepo_version else inrepo_version
-            print_log("BUILDER: repository package version is: %s" % inrepo_version)
+            print_log("BUILDER: Repository package version is: %s" % inrepo_version)
 
             try:
-                print_log("BUILDER: running rpmdev-vercmp %s %s" % (rpm_evr, str(inrepo_version)))
-                a = subprocess.check_call(['rpmdev-vercmp', rpm_evr, str(inrepo_version)])
+                print_log("BUILDER: Running rpmdev-vercmp %s %s" % (rpm_evr, str(inrepo_version)))
+                a = subprocess.run(['rpmdev-vercmp', rpm_evr, str(inrepo_version)], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True).stdout
                 if a == 0:
                     print_log("BUILDER: Package {} is either the same, older, or another problem. Extra tests failed".format(rpm_name))
                     sys.exit(5)
             except subprocess.CalledProcessError as e:
                 exit_code = e.returncode
                 if exit_code == 11:
-                    print_log("BUILDER: package is newer than in repository")
+                    print_log("BUILDER: Package is newer than in repository")
                     sys.exit(0)
-                print_log("BUILDER: package is older, the same version as in repository or other issue")
+                print_log("BUILDER: Package is older, the same version as in repository or other issue")
                 sys.exit(5)
     except subprocess.CalledProcessError as e:
         print_log(e)
-        print_log("BUILDER: failed to compare package versions with repository")
+        print_log("BUILDER: Failed to compare package versions with repository")
         sys.exit(5)
 
 
@@ -349,11 +350,11 @@ def save_build_root():
     if save_buildroot == 'true':
         saveroot = '/var/lib/mock/{}-{}/root/'.format(platform_name, platform_arch)
         try:
-            subprocess.check_output(['sudo', 'tar', '-czf', output_dir + '/buildroot.tar.gz', saveroot])
-            print_log("BUILDER: build root contents was saved to buildroot.tar.gz")
+            subprocess.run(['sudo', 'tar', '-czf', output_dir + '/buildroot.tar.gz', saveroot], check=True)
+            print_log("BUILDER: Build root contents was saved to buildroot.tar.gz")
         except subprocess.CalledProcessError as e:
             print_log(e)
-            print_log("BUILDER: failed to create buildroot.tar.gz")
+            print_log("BUILDER: Failed to create buildroot.tar.gz")
 
 
 def relaunch_tests():
@@ -364,7 +365,7 @@ def relaunch_tests():
     clone_repo(git_repo, project_version)
     packages = os.getenv('PACKAGES')
     for package in packages.split():
-        print("BUILDER: downloading package {} for testing".format(package))
+        print("BUILDER: Downloading package {} for testing".format(package))
         # download packages to /home/omv/pkg_name/
         download_hash(package)
         # build package is /home/omv/pkg_name
@@ -393,10 +394,10 @@ def build_rpm():
     for i in range(tries):
         try:
             print("BUILDER: Starting to build SRPM.")
-            subprocess.check_output([mock_binary, '--update', '--quiet', '--configdir', mock_config, '--buildsrpm', '--spec=' + build_package + '/' + spec_name[0], '--source=' + build_package, '--no-cleanup-after'] + extra_build_src_rpm_options + ['--resultdir=' + output_dir])
+            subprocess.run([mock_binary, '--update', '--quiet', '--configdir', mock_config, '--buildsrpm', '--spec=' + build_package + '/' + spec_name[0], '--source=' + build_package, '--no-cleanup-after'] + extra_build_src_rpm_options + ['--resultdir=' + output_dir], check=True)
         except subprocess.CalledProcessError as e:
             if i < tries - 1:
-                print("BUILDER: something went wrong with SRPM creation, usually it is bad metadata or missed sources in .abf.yml")
+                print("BUILDER: Something went wrong with SRPM creation, usually it is bad metadata or missed sources in .abf.yml")
                 # remove cache dir
                 remove_if_exist('/var/cache/mock/{}-{}/dnf_cache/'.format(platform_name, platform_arch))
                 continue
@@ -409,15 +410,11 @@ def build_rpm():
         for srpm in f:
             if '.src.rpm' in srpm:
                 src_rpm.append(output_dir + '/' + srpm)
-    print("BUILDER: created SRPM is %s" % src_rpm[0])
-    # validate src.rpm here
-    validate_exclusive(src_rpm[0])
-    # for exclusive_arches
+    print("BUILDER: Created SRPM is %s" % src_rpm[0])
     for i in range(tries):
         try:
-            print("BUILDER: building RPM")
-            subprocess.check_output([mock_binary, '-v', '--update', '--configdir', mock_config, '--rebuild', src_rpm[0],
-                    '--no-cleanup-after', '--no-clean'] + extra_build_rpm_options + ['--resultdir=' + output_dir])
+            print("BUILDER: Building RPM")
+            subprocess.run([mock_binary, '-v', '--update', '--configdir', mock_config, '--rebuild', src_rpm[0], '--no-cleanup-after', '--no-clean'] + extra_build_rpm_options + ['--resultdir=' + output_dir], check=True)
         except subprocess.CalledProcessError as e:
             # check here that problem not related to metadata
             print(e)
@@ -448,7 +445,7 @@ def build_rpm():
                 if error:
                     # print(error.group().decode())
                     if i < tries - 1:
-                        print("BUILDER: problems with metadata in repository, restarting build in 60 seconds")
+                        print("BUILDER: Problems with metadata in repository, restarting build in 60 seconds")
                         # remove cache dir
                         remove_if_exist('/var/cache/mock/{}-{}/dnf_cache/'.format(platform_name, platform_arch))
                         time.sleep(60)
@@ -456,7 +453,7 @@ def build_rpm():
                     if i == tries - 1:
                         raise
                 else:
-                    print("BUILDER: building RPM failed")
+                    print("BUILDER: Building RPM failed")
                     # /usr/bin/python /mdv/check_error.py --file "${OUTPUT_FOLDER}"/root.log >> ~/build_fail_reason.log
                     # add here check_error.py
                     check_error.known_errors(root_log, get_home + '/build_fail_reason.log')
@@ -494,7 +491,7 @@ def cleanup_all():
     for dirs in ["/var/lib/mock/{}-{}".format(platform_name, platform_arch) + s for s in umount_dirs]:
       if os.path.exists(dirs):
         try:
-          subprocess.check_output(['sudo', 'umount', '-ql', dirs], text=True)
+          subprocess.run(['sudo', 'umount', '-ql', dirs], text=True, check=True)
         except subprocess.CalledProcessError as e:
           print(e.output)
           continue
