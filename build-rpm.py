@@ -371,12 +371,11 @@ def relaunch_tests():
         # build package is /home/omv/pkg_name
     for r, d, f in os.walk(build_package):
         for rpm_pkg in f:
+            if '.src.rpm' in rpm_pkg:
+                src_rpm.append(build_package + '/' + rpm_pkg)
             if rpm_pkg.endswith('.rpm'):
                 rpm_packages.append(build_package + '/' + rpm_pkg)
-    for r, d, f in os.walk(build_package):
-        for srpm in f:
-            if '.src.rpm' in srpm:
-                src_rpm.append(build_package + '/' + srpm)
+
     # exclude src.rpm
     only_rpms = set(rpm_packages) - set(src_rpm)
     extra_tests(only_rpms)
@@ -387,43 +386,22 @@ def build_rpm():
     tries = 5
     # pattern for retry
     pattern_for_retry = '(.*)(Failed to download|Error downloading)(.*)'
+
     if not os.environ.get('MOCK_CACHE'):
         # /var/cache/mock/cooker-x86_64/root_cache/
-        print("BUILDER: MOCK_CACHE is none, than need to clear platform cache")
+        print("BUILDER: MOCK_CACHE is none, than need to clear platform cache.")
         remove_if_exist('/var/cache/mock/{}-{}/root_cache/'.format(platform_name, platform_arch))
     for i in range(tries):
         try:
-            print("BUILDER: Starting to build SRPM.")
-            subprocess.run([mock_binary, '--update', '--quiet', '--configdir', mock_config, '--buildsrpm', '--spec=' + build_package + '/' + spec_name[0], '--source=' + build_package, '--no-cleanup-after'] + extra_build_src_rpm_options + ['--resultdir=' + output_dir], check=True)
+            print("BUILDER: Starting to build SRPM and RPMs.")
+            subprocess.run([mock_binary, '-v', '--no-cleanup-after', '--no-clean', '--configdir', mock_config, '--spec=' + build_package + '/' + spec_name[0], '--source=' + build_package] + extra_build_src_rpm_options + ['--resultdir=' + output_dir], check=True)
         except subprocess.CalledProcessError as e:
-            if i < tries - 1:
-                print("BUILDER: Something went wrong with SRPM creation, usually it is bad metadata or missed sources in .abf.yml")
-                # remove cache dir
-                remove_if_exist('/var/cache/mock/{}-{}/dnf_cache/'.format(platform_name, platform_arch))
-                continue
-            if i == tries - 1:
-                print(e)
-                raise
-        break
-
-    for r, d, f in os.walk(output_dir):
-        for srpm in f:
-            if '.src.rpm' in srpm:
-                src_rpm.append(output_dir + '/' + srpm)
-    print("BUILDER: Created SRPM is %s" % src_rpm[0])
-    for i in range(tries):
-        try:
-            print("BUILDER: Building RPM")
-            subprocess.run([mock_binary, '-v', '--update', '--configdir', mock_config, '--rebuild', src_rpm[0], '--no-cleanup-after', '--no-clean'] + extra_build_rpm_options + ['--resultdir=' + output_dir], check=True)
-        except subprocess.CalledProcessError as e:
-            # check here that problem not related to metadata
             print(e)
             if os.path.exists(root_log) and os.path.getsize(root_log) > 0:
                 sz = os.path.getsize(root_log)
                 if magic.detect_from_filename(root_log).mime_type == 'application/gzip':
                     handle = open(root_log, "r")
-                    # let's mmap piece of memory
-                    # as we unpacked gzip
+                    # let's mmap piece of memory as we unpacked gzip
                     tmp_mm = mmap.mmap(handle.fileno(), sz, access=mmap.ACCESS_READ)
                     real_sz = struct.unpack("@I", tmp_mm[-4:])[0]
                     mm = mmap.mmap(-1, real_sz, prot=mmap.PROT_READ | mmap.PROT_WRITE)
@@ -445,7 +423,7 @@ def build_rpm():
                 if error:
                     # print(error.group().decode())
                     if i < tries - 1:
-                        print("BUILDER: Problems with metadata in repository, restarting build in 60 seconds")
+                        print("BUILDER: Something went wrong with SRPM and RPMs creation, usually it is bad metadata or missed sources in .abf.yml")
                         # remove cache dir
                         remove_if_exist('/var/cache/mock/{}-{}/dnf_cache/'.format(platform_name, platform_arch))
                         time.sleep(60)
@@ -453,7 +431,7 @@ def build_rpm():
                     if i == tries - 1:
                         raise
                 else:
-                    print("BUILDER: Building RPM failed")
+                    print("BUILDER: Building SRPM and RPM failed.")
                     # /usr/bin/python /mdv/check_error.py --file "${OUTPUT_FOLDER}"/root.log >> ~/build_fail_reason.log
                     # add here check_error.py
                     check_error.known_errors(root_log, get_home + '/build_fail_reason.log')
@@ -464,18 +442,21 @@ def build_rpm():
             else:
                 sys.exit(1)
         break
+
     for r, d, f in os.walk(output_dir):
-        for rpm_pkg in f:
-            if rpm_pkg.endswith('.rpm'):
-                rpm_packages.append(output_dir + '/' + rpm_pkg)
-    # rpm packages
-    print(rpm_packages)
+        for rpm_pkgs in f:
+            if '.src.rpm' in rpm_pkgs:
+                src_rpm.append(output_dir + '/' + rpm_pkgs)
+            if rpm_pkgs.endswith('.rpm'):
+                rpm_packages.append(output_dir + '/' + rpm_pkgs)
+
+# List rpm packages
+    print("BUILDER: List of build packages:? %s" % rpm_packages)
     container_data()
     save_build_root()
     if use_extra_tests == 'true':
         only_rpms = set(rpm_packages) - set(src_rpm)
         extra_tests(only_rpms)
-
 
 def cleanup_all():
     print("BUILDER: Cleaning up the environment")
