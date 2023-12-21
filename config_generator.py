@@ -114,7 +114,7 @@ def generate_config():
     print_conf("config_opts['package_manager_max_attempts'] = 3")
     print_conf("config_opts['package_manager_attempt_delay'] = 15")
     # chromium with CFE can take a lot longer than 36000 seconds (10 hours)...
-    if os.getenv('PACKAGE') and os.getenv('PACKAGE').startswith(('chromium', 'llvm')):
+    if os.getenv('PACKAGE') and os.getenv('PACKAGE').startswith(('chromium', 'llvm', 'nodejs', 'gcc')):
         print_conf("config_opts['rpmbuild_timeout'] = 72000")
     else:
         print_conf("config_opts['rpmbuild_timeout'] = 36000")

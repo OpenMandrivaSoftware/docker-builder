@@ -115,6 +115,18 @@ def download_from_fstore(file_hash, file_name=None):
             print(f"BUILDER: Error: Unable to download file {fstore_json_url}. Status code: {response.status_code}")
 
 
+def remove_changelog(spec):
+    if os.path.isfile(spec):
+        try:
+            with open(spec, 'r+') as f:
+                content = f.read()
+                f.seek(0)
+                f.truncate()
+                f.write(content.split('%changelog')[0])
+        except Exception as e:
+            print(f"Error deleting changelog: {e}")
+            pass
+
 def validate_spec(path):
     spec_fn = [f for f in os.listdir(path) if f.endswith('.spec')]
     print(f"BUILDER: Validating RPM spec files found in {path}")
