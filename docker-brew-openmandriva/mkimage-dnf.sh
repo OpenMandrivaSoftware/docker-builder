@@ -240,9 +240,10 @@ docker build --tag=openmandriva/$installversion:$arch --file Dockerfile .
 docker run -i -t --rm openmandriva/$installversion:$arch /bin/sh -c "printf '%s\n' success"
 docker push openmandriva/$installversion:$arch
 
+docker manifest rm openmandriva/$installversion:latest || :
 docker manifest create openmandriva/$installversion:latest \
-	--amend openmandriva/$installversion:x86_64 \
-	--amend openmandriva/$installversion:aarch64
+	openmandriva/$installversion:x86_64 \
+	openmandriva/$installversion:aarch64
 docker manifest annotate openmandriva/$installversion:latest openmandriva/$installversion:x86_64 --os linux --arch amd64
 docker manifest annotate openmandriva/$installversion:latest openmandriva/$installversion:aarch64 --os linux --arch arm64
 docker manifest push openmandriva/$installversion:latest
@@ -258,9 +259,10 @@ if [ ! -z "${builder}" ]; then
 	docker push openmandriva/builder:$arch
 	git checkout Dockerfile.builder
 
+	docker manifest rm openmandriva/builder:latest || :
 	docker manifest create openmandriva/builder:latest \
-		--amend openmandriva/builder:x86_64 \
-		--amend openmandriva/builder:aarch64
+		openmandriva/builder:x86_64 \
+		openmandriva/builder:aarch64
 	docker manifest annotate openmandriva/builder:latest openmandriva/builder:x86_64 --os linux --arch amd64
 	docker manifest annotate openmandriva/builder:latest openmandriva/builder:aarch64 --os linux --arch arm64
 	docker manifest push openmandriva/builder:latest
