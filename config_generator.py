@@ -3,6 +3,7 @@ import time
 from stat import *
 import os
 import sys
+
 common_string = """
 config_opts['yum.conf'] = \"\"\"
 [main]
@@ -152,6 +153,7 @@ def generate_config():
 
     print_conf("config_opts['dist'] = '%s'" % platform_name)
     print_conf("config_opts['macros']['%%packager'] = '%s <%s>'" % (uname, email))
+    print_conf("config_opts['hostname'] = '%s'" % os.uname()[1])
     print_conf("config_opts['macros']['%_topdir'] = '%s/build' % config_opts['chroothome']")
     print_conf("config_opts['macros']['%_rpmfilename'] = '%%{NAME}-%%{VERSION}-%%{RELEASE}-%%{DISTTAG}.%%{ARCH}.rpm'")
     print_conf("config_opts['macros']['%cross_compiling'] = '0' # ABF should generally be considered native builds")
