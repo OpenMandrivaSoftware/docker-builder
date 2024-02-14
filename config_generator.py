@@ -94,7 +94,7 @@ def generate_config():
         print_conf("config_opts['dnf_builddep_opts'] = ['--refresh', '--forcearch=%s']" % platform_arch)
     print_conf("config_opts['useradd'] = '/usr/sbin/useradd -o -m -u {{chrootuid}} -g {{chrootgid}} -d {{chroothome}} {{chrootuser}}'")
     print_conf("config_opts['releasever'] = '0'")
-    print_conf("config_opts['rpmbuild_networking'] = True")
+    print_conf("config_opts['rpmbuild_networking'] = False")
     print_conf("config_opts['use_host_resolv'] = True")
     print_conf("config_opts['plugin_conf']['bind_mount_enable'] = True")
     print_conf("config_opts['package_manager_max_attempts'] = 3")
