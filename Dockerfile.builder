@@ -5,7 +5,7 @@ ENV RARCH x86_64
 RUN dnf --nogpgcheck --refresh --assumeyes --nodocs --setopt=install_weak_deps=False upgrade \
  && rm -f /etc/localtime \
  && ln -s /usr/share/zoneinfo/UTC /etc/localtime \
- && dnf --nogpgcheck --assumeyes --setopt=install_weak_deps=False --nodocs install mock git coreutils curl sudo builder-c procps-ng tar locales-en \
+ && dnf --nogpgcheck --assumeyes --setopt=install_weak_deps=False --nodocs install mock git coreutils curl sudo builder-c 'dnf-command(builddep)' 'dnf5-command(builddep)' procps-ng tar locales-en \
  findutils util-linux wget rpmdevtools sed grep xz gnupg hostname python-yaml nosync python-magic \
  && sed -i -e "s/Defaults    requiretty.*/ #Defaults    requiretty/g" /etc/sudoers \
  && echo "%mock ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers \
