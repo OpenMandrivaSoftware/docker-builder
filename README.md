@@ -7,11 +7,17 @@ It is designed to streamline the process of creating OpenMandriva official Docke
 ## Features
 
 Docker Image Building: Scripts for creating minimal and ABF (Automated Build Farm) Docker images for OpenMandriva.
+
 Process Monitoring: A utility script to monitor and kill stalled processes, specifically targeting ldd.
+
 Error Checking: A script to scan log files for known error patterns and log them for review.
+
 Automated Build Requests: Scripts to automate the process of requesting build IDs, performing Git operations, and managing package builds.
+
 RPM Package Building: A comprehensive script for building RPM packages, including environment setup, source downloading, spec file validation, and cleanup.
+
 Configuration Generation: Generates configuration options for building packages, adjusting for specific package requirements and system resources.
+
 Raspberry Pi Disk Preparation: A script for preparing a disk image for Raspberry Pi 3, including filesystem creation and package repository setup.
 
 ## Quickstart
