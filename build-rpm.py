@@ -271,16 +271,15 @@ def container_data():
                 full_list = dependencies.decode().split('\n')
             except subprocess.CalledProcessError:
                 print("BUILDER: A problem occured when running dnf repoquery for %s" % pkg)
-        package_info = {
-            'name': rpm_hdr['name'],
-            'version': rpm_hdr['version'],
-            'release': rpm_hdr['release'],
-            'size': get_size(pkg),
-            'epoch': epoch,
-            'fullname': pkg.split('/')[-1],
-            'sha1': shasum(pkg),
-            'dependent_packages': ' '.join(full_list)
-        }
+        package_info = dict([('name', rpm_hdr['name']), 
+                             ('version', rpm_hdr['version']),
+                             ('release', rpm_hdr['release']),
+                             ('size', get_size(pkg)),
+                             ('epoch', epoch),
+                             ('fullname', pkg.split('/')[-1]),
+                             ('sha1', shasum),
+                             ('dependent_packages', ' '.join(full_list))])
+
         multikeys.append(package_info)
     with open(c_data, 'w') as out_json:
         json.dump(multikeys, out_json, sort_keys=True, separators=(',', ':'))
