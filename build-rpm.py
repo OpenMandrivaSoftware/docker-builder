@@ -252,7 +252,11 @@ def container_data():
     multikeys = []
 #    rpm_packages = ['/home/fdrt/output/libinput10-1.13.2-1-omv4000.i686.rpm']
     for pkg in rpm_packages:
-        # Do not check src.srm
+        # ignore src.rpm for e2k
+        # MCST request
+        if pkg.endswith('.src.rpm') and platform_arch in ['e2kv4', 'e2kv5', 'e2kv6']:
+            print("BUILDER: Skipping src.rpm for architecture: {}".format(platform_arch))
+            continue
         rpm_hdr = readRpmHeader(rpm_ts, pkg)
         if rpm_hdr['epoch']:
             epoch = rpm_hdr['epoch']
@@ -267,7 +271,16 @@ def container_data():
                 full_list = dependencies.decode().split('\n')
             except subprocess.CalledProcessError:
                 print("BUILDER: A problem occured when running dnf repoquery for %s" % pkg)
-        package_info = dict([('name', rpm_hdr['name']), ('version', rpm_hdr['version']), ('release', rpm_hdr['release']), ('size', get_size(pkg)), ('epoch', epoch), ('fullname', pkg.split('/')[-1]), ('sha1', shasum), ('dependent_packages', ' '.join(full_list))])
+        package_info = {
+            'name': rpm_hdr['name'],
+            'version': rpm_hdr['version'],
+            'release': rpm_hdr['release'],
+            'size': get_size(pkg),
+            'epoch': epoch,
+            'fullname': pkg.split('/')[-1],
+            'sha1': shasum(pkg),
+            'dependent_packages': ' '.join(full_list)
+        }
         multikeys.append(package_info)
     with open(c_data, 'w') as out_json:
         json.dump(multikeys, out_json, sort_keys=True, separators=(',', ':'))
@@ -541,7 +554,3 @@ if __name__ == '__main__':
         validate_spec(build_package)
         download_yml(build_package + '/' + '.abf.yml')
         build_rpm()
-        # remove src.rpm for e2k
-        # MCST request
-        if platform_arch in ['e2kv4', 'e2kv5', 'e2kv6']:
-            remove_if_exist(src_rpm[0])
