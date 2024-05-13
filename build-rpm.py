@@ -1,24 +1,26 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-import os
-import shutil
-import subprocess
-import yaml
-import requests
-import json
-import sys
-import time
-import rpm
+import gzip
 import hashlib
 import io
+import json
 import mmap
+import os
 import re
-import config_generator
-import check_error
-import magic
-import gzip
-import struct
+import shutil
 import socket
+import struct
+import subprocess
+import sys
+import time
+
+import magic
+import requests
+import yaml
+
+import check_error
+import config_generator
+import rpm
 
 get_home = os.environ.get('HOME')
 package = os.environ.get('PACKAGE')
@@ -264,7 +266,7 @@ def container_data():
                 dependencies = subprocess.check_output(['dnf', 'repoquery', '-q', '--latest-limit=1', '--qf', '%{NAME}', '--whatrequires', rpm_hdr['name']], timeout=3600, env={'LC_ALL': 'C.UTF-8'})
                 full_list = dependencies.decode().split('\n')
             except subprocess.CalledProcessError:
-                print("BUILDER: A problem occured when running dnf repoquery for %s" % name)
+                print("BUILDER: A problem occured when running dnf repoquery for %s" % pkg)
         package_info = dict([('name', rpm_hdr['name']), ('version', rpm_hdr['version']), ('release', rpm_hdr['release']), ('size', get_size(pkg)), ('epoch', epoch), ('fullname', pkg.split('/')[-1]), ('sha1', shasum), ('dependent_packages', ' '.join(full_list))])
         multikeys.append(package_info)
     with open(c_data, 'w') as out_json:
