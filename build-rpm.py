@@ -479,6 +479,11 @@ def build_rpm():
                 rpm_packages.append(output_dir + '/' + rpm_pkg)
     # rpm packages
     print(rpm_packages)
+    # remove src.rpm for e2k
+    # MCST request
+    if platform_arch in ['e2kv4', 'e2kv5', 'e2kv6']:
+        remove_if_exist(src_rpm[0])
+
     container_data()
     save_build_root()
     if use_extra_tests == 'true':
