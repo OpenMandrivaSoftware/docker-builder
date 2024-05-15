@@ -107,7 +107,7 @@ def generate_config():
     # and offload targets.
     if os.getenv('PACKAGE') and os.getenv('PACKAGE').startswith(('gcc')):
         print_conf("config_opts['rpmbuild_timeout'] = 144000")
-    elif os.getenv('PACKAGE') and os.getenv('PACKAGE').startswith(('chromium', 'llvm', 'nodejs', 'qt6-qtwebengine')):
+    elif os.getenv('PACKAGE') and os.getenv('PACKAGE').startswith(('chromium', 'llvm', 'nodejs', 'qt6-qtwebengine', 'rust')):
         print_conf("config_opts['rpmbuild_timeout'] = 72000")
     else:
         print_conf("config_opts['rpmbuild_timeout'] = 36000")
