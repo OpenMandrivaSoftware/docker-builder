@@ -250,12 +250,13 @@ def container_data():
     """ Create container data for ABF, based on on RPM files. """
     rpm_ts = rpm.TransactionSet()
     multikeys = []
+    specific_packages = ['glibc_mcst', 'lcc-kit', 'kernel_mcst', 'binutils_mcst']
 #    rpm_packages = ['/home/fdrt/output/libinput10-1.13.2-1-omv4000.i686.rpm']
     for pkg in rpm_packages:
         # ignore src.rpm for e2k
         # MCST request
-        if pkg.endswith('.src.rpm') and platform_arch in ['e2kv4', 'e2kv5', 'e2kv6']:
-            print("BUILDER: Skipping src.rpm for architecture: {}".format(platform_arch))
+        if pkg.endswith('.src.rpm') and platform_arch in ['e2kv4', 'e2kv5', 'e2kv6'] and any(pkg_name in pkg for pkg_name in specific_packages):
+            print("BUILDER: Skipping src.rpm for architecture: {} and package: {}".format(platform_arch, os.path.basename(pkg)))
             continue
         rpm_hdr = readRpmHeader(rpm_ts, pkg)
         if rpm_hdr['epoch']:
