@@ -129,6 +129,7 @@ def validate_spec(path):
         # generate changelogs
         allowed_platforms = ['rosa2023.1', 'rosa2024.1']
         if platform_arch in allowed_platforms:
+            print("BUILDER: generate %changelog entry")
             changelog.generate_changelog(path + '/' + spec[0], build_package)
 
 
