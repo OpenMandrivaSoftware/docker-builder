@@ -17,10 +17,12 @@ import time
 import magic
 import requests
 import yaml
+import rpm
 
+# custom modules
 import check_error
 import config_generator
-import rpm
+import changelog
 
 get_home = os.environ.get('HOME')
 package = os.environ.get('PACKAGE')
@@ -112,18 +114,6 @@ def download_hash(hashsum, pkg_name=''):
                     f.write(chunk)
 
 
-def remove_changelog(spec):
-    if os.path.isfile(spec):
-        try:
-            with open(spec, 'r+') as f:
-                content = f.read()
-                f.seek(0)
-                f.truncate()
-                f.write(content.split('%changelog')[0])
-        except Exception as e:
-            print(f"Error deleting changelog: {e}")
-            pass
-
 def validate_spec(path):
     spec = [f for f in os.listdir(path) if f.endswith('.spec')]
     if len(spec) > 1:
@@ -136,8 +126,10 @@ def validate_spec(path):
         print("BUILDER: RPM spec file name is %s" % spec[0])
         spec_name.append(spec[0])
         print("BUILDER: single RPM spec file in build directory, check passed")
-        # print("cleanup %changelog entries")
-        # remove_changelog(path + '/' + spec[0])
+        # generate changelogs
+        allowed_platforms = ['rosa2023.1', 'rosa2024.1']
+        if platform_arch in allowed_platforms:
+            changelog.generate_changelog(path + '/' + spec[0], build_package)
 
 
 def download_yml(yaml_file):
