@@ -46,7 +46,7 @@ platform_name = os.environ.get('PLATFORM_NAME')
 rerun_tests = os.environ.get('RERUN_TESTS')
 use_extra_tests = os.environ.get("USE_EXTRA_TESTS")
 save_buildroot = os.environ.get('SAVE_BUILDROOT')
-#print(os.environ.keys())
+print(os.environ.keys())
 
 # static
 # /home/omv/output
