@@ -46,7 +46,7 @@ platform_name = os.environ.get('PLATFORM_NAME')
 rerun_tests = os.environ.get('RERUN_TESTS')
 use_extra_tests = os.environ.get("USE_EXTRA_TESTS")
 save_buildroot = os.environ.get('SAVE_BUILDROOT')
-print(os.environ.keys())
+#print(os.environ.keys())
 
 # static
 # /home/omv/output
@@ -311,7 +311,7 @@ def extra_tests(only_rpms):
                 check_string = 'LC_ALL=C.UTF-8 dnf {} repoquery -q --qf %{{EPOCH}}:%{{VERSION}}-%{{RELEASE}} --latest-limit=1 {}'.format("--refresh" if tries > 0 else "", rpm_name)
                 try:
                     print("BUILDER: getting RPM version from repository")
-                    inrepo_version = subprocess.check_output([mock_binary, '--enable-network', '--shell', '-v', '--', check_string], stderr=subprocess.PIPE ).decode('utf-8')
+                    inrepo_version = subprocess.check_output([mock_binary, '--enable-network', '--shell', '-v 1', '--', check_string], stderr=subprocess.PIPE ).decode('utf-8')
                     print_log("BUILDER: repository version of this package is : {}".format(inrepo_version))
                     break
                 except subprocess.CalledProcessError as e:
@@ -428,7 +428,7 @@ def build_rpm():
     for i in range(tries):
         try:
             print("BUILDER: building RPM")
-            subprocess.check_output([mock_binary, '-v', '--update', '--configdir', mock_config, '--rebuild', src_rpm[0],
+            subprocess.check_output([mock_binary, '-v 1', '--update', '--configdir', mock_config, '--rebuild', src_rpm[0],
                     '--no-cleanup-after', '--no-clean'] + extra_build_rpm_options + ['--resultdir=' + output_dir])
         except subprocess.CalledProcessError as e:
             # check here that problem not related to metadata
