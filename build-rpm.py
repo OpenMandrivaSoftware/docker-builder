@@ -339,7 +339,7 @@ def extra_tests():
             # obtain version of pkg name version from repository
             check_string = 'LC_ALL=C dnf repoquery -q --qf %{{EPOCH}}:%{{VERSION}}-%{{RELEASE}} --latest-limit=1 {}'.format(name)
             try:
-                inrepo_version = subprocess.check_output([mock_binary, '--quiet', '--shell', '-v 1', check_string]).decode('utf-8')
+                inrepo_version = subprocess.check_output([mock_binary, '--quiet', '--shell', '-v', '1', check_string]).decode('utf-8')
                 print_log('repo version is : {}'.format(inrepo_version))
             except subprocess.CalledProcessError as e:
                 print(e)
@@ -452,10 +452,10 @@ def build_rpm():
     for i in range(tries):
         try:
             if os.environ.get("EXTRA_BUILD_RPM_OPTIONS") == '':
-                subprocess.check_call([mock_binary, '-v 1', '--update', '--configdir', mock_config, '--rebuild',
+                subprocess.check_call([mock_binary, '-v', '1', '--update', '--configdir', mock_config, '--rebuild',
                                        src_rpm[0], '--no-cleanup-after', '--no-clean', '--resultdir=' + output_dir])
             else:
-                subprocess.check_output([mock_binary, '-v 1', '--update', '--configdir', mock_config, '--rebuild', src_rpm[0],
+                subprocess.check_output([mock_binary, '-v', '1', '--update', '--configdir', mock_config, '--rebuild', src_rpm[0],
                     '--no-cleanup-after', '--no-clean'] + extra_build_rpm_options.split(' ') + ['--resultdir=' + output_dir])
         except subprocess.CalledProcessError as e:
             # check here that problem not related to metadata
