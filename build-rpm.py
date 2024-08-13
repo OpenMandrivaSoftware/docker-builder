@@ -27,6 +27,7 @@ import changelog
 get_home = os.environ.get('HOME')
 package = os.environ.get('PACKAGE')
 git_repo = os.environ.get('GIT_REPO')
+
 # FIXME workaround for https://github.com/OpenMandrivaSoftware/rosa-build/issues/161
 if git_repo[0:17] == 'git://github.com/':
     git_repo='https://github.com/' + git_repo[17:]
@@ -533,11 +534,21 @@ def cleanup_all():
 #        print(e.output)
 #        pass
 
+def install_stripper():
+  stripformatter_location = os.path.join(os.path.realpath(os.path.dirname(__file__)), 'stripformatter')
+  for path in sys.path[1:-1]:
+    if path == '' or not os.path.isdir(path):
+      continue
+
+    subprocess.check_output(['/usr/bin/sudo', 'cp', '-r', stripformatter_location, path])
+    shutil.copy(os.path.join(stripformatter_location, 'logging.ini'), '/etc/mock')
+    break
 
 if __name__ == '__main__':
     print("BUILDER: Starting script: build-rpm.py")
     print("BUILDER: Re-running tests? %s" % rerun_tests)
     cleanup_all()
+    install_stripper()
     if is_valid_hostname(socket.gethostname()) is False:
         sys.exit(1)
     if rerun_tests is not None:
