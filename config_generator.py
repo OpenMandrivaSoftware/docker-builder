@@ -64,6 +64,9 @@ def generate_config():
     if platform_arch == "znver1":
         print_conf("config_opts['target_arch'] = '%s'" % platform_arch)
         print_conf("config_opts['legal_host_arches'] = ('x86_64', 'znver1')")
+    if platform_arch == "loongarch64":
+        print_conf("config_opts['target_arch'] = '%s'" % platform_arch)
+        print_conf("config_opts['legal_host_arches'] = ('loongarch64')")
     if platform_arch == "e2kv4":
         # use e2kv4 march option
         print_conf("config_opts['target_arch'] = '%s --without check'" % platform_arch)
