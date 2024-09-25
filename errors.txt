@@ -1,0 +1,36 @@
+Segmentation fault
+A fatal error has been detected by the Java Runtime Environment
+error:(.*)field(.*)has incomplete type
+error:(.*)conflicting types for
+No rule to make target (.*)
+failed to allocate (.*) bytes for output file: Cannot allocate memory
+cp: cannot stat (.*):(.*)
+can't find file to patch at input line (.*)
+No matching package to install: (.*)
+package (.*) requires (.*) but none of the providers can be installed$
+unable to execute command: (.*)
+(.*) is a protected member of (.*)
+undefined reference to (.*)
+no matching function for call to (.*)
+bytecode stream in file (.*) generated with (.*)
+Could not find a configuration file for package (.*)
+variable has incomplete type (.*)
+File must begin with (.*)
+Bad source: (.*)
+File not found: (.*)
+Installed \(but unpackaged\) file\(s\) found
+cannot find -l(.*)
+implicit declaration of function (.*)
+'(.*)' file not found
+use of undeclared identifier (.*)
+function cannot return function type (.*)
+unknown type name (.*)
+incomplete definition of type (.*)
+Problem encountered: Man pages cannot be built: (.*)
+format string is not a string literal (.*)
+Failed to find required (.*) component (.*)
+Package (.*), required by (.*), not found
+CMake Error at (.*)
+error:(.*)
+Couldn't find include (.*)
+(.*) Stop
