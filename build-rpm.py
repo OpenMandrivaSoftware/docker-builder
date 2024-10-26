@@ -30,7 +30,7 @@ git_repo = os.environ.get('GIT_REPO')
 
 # FIXME workaround for https://github.com/OpenMandrivaSoftware/rosa-build/issues/161
 if git_repo[0:17] == 'git://github.com/':
-    git_repo='https://github.com/' + git_repo[17:]
+    git_repo = 'https://github.com/' + git_repo[17:]
 
 file_store_base = os.environ.get('FILE_STORE_ADDR')
 build_package = get_home + '/' + package
@@ -47,7 +47,7 @@ platform_name = os.environ.get('PLATFORM_NAME')
 rerun_tests = os.environ.get('RERUN_TESTS')
 use_extra_tests = os.environ.get("USE_EXTRA_TESTS")
 save_buildroot = os.environ.get('SAVE_BUILDROOT')
-#print(os.environ.keys())
+# print(os.environ.keys())
 
 # static
 # /home/omv/output
@@ -196,8 +196,8 @@ def clone_repo(git_repo, project_version):
 
 
 def hash_file(rpm):
-#    This function returns the SHA-1 hash
-#    of the file passed into it
+    # This function returns the SHA-1 hash
+    # of the file passed into it
 
     # make a hash object
     h = hashlib.sha1()
@@ -212,12 +212,14 @@ def hash_file(rpm):
     # return the hex representation of digest
     return h.hexdigest()
 
+
 def readRpmHeader(ts, filename):
     """ Read an rpm header. """
     fd = os.open(filename, os.O_RDONLY)
     h = ts.hdrFromFdno(fd)
     os.close(fd)
     return h
+
 
 def validate_exclusive(srpm):
     """ Validate SRPM for ExcludeArch and/or ExclusiveArch. """
@@ -266,7 +268,7 @@ def container_data():
                 full_list = dependencies.decode().split('\n')
             except subprocess.CalledProcessError:
                 print("BUILDER: A problem occured when running dnf repoquery for %s" % pkg)
-        package_info = dict([('name', rpm_hdr['name']), 
+        package_info = dict([('name', rpm_hdr['name']),
                              ('version', rpm_hdr['version']),
                              ('release', rpm_hdr['release']),
                              ('size', get_size(pkg)),
@@ -312,7 +314,7 @@ def extra_tests(only_rpms):
                 check_string = 'LC_ALL=C.UTF-8 dnf {} repoquery -q --qf %{{EPOCH}}:%{{VERSION}}-%{{RELEASE}} --latest-limit=1 {}'.format("--refresh" if tries > 0 else "", rpm_name)
                 try:
                     print("BUILDER: getting RPM version from repository")
-                    inrepo_version = subprocess.check_output([mock_binary, '--enable-network', '--shell', '-v', '--', check_string], stderr=subprocess.PIPE ).decode('utf-8')
+                    inrepo_version = subprocess.check_output([mock_binary, '--enable-network', '--shell', '-v', '--', check_string], stderr=subprocess.PIPE).decode('utf-8')
                     print_log("BUILDER: repository version of this package is : {}".format(inrepo_version))
                     break
                 except subprocess.CalledProcessError as e:
@@ -506,12 +508,12 @@ def cleanup_all():
     # clean not umounted dirs by mock
     umount_dirs = ["/root/var/cache/dnf", "/root/var/cache/yum", "/root/proc", "/root/sys", "/root/dev/pts", "/root/dev/shm"]
     for dirs in ["/var/lib/mock/{}-{}".format(platform_name, platform_arch) + s for s in umount_dirs]:
-      if os.path.exists(dirs):
-        try:
-          subprocess.check_output(['sudo', 'umount', '-ql', dirs], text=True)
-        except subprocess.CalledProcessError as e:
-          print(e.output)
-          continue
+        if os.path.exists(dirs):
+            try:
+                subprocess.check_output(['sudo', 'umount', '-ql', dirs], text=True)
+            except subprocess.CalledProcessError as e:
+                print(e.output)
+                continue
 
     remove_if_exist('/etc/rpm/platform')
 #    remove_if_exist('/etc/mock/default.cfg')
@@ -534,15 +536,16 @@ def cleanup_all():
 #        print(e.output)
 #        pass
 
-def install_stripper():
-  stripformatter_location = os.path.join(os.path.realpath(os.path.dirname(__file__)), 'stripformatter')
-  for path in sys.path[1:-1]:
-    if path == '' or not os.path.isdir(path):
-      continue
 
-    subprocess.check_output(['/usr/bin/sudo', 'cp', '-r', stripformatter_location, path])
-    shutil.copy(os.path.join(stripformatter_location, 'logging.ini'), '/etc/mock')
-    break
+def install_stripper():
+    stripformatter_location = os.path.join(os.path.realpath(os.path.dirname(__file__)), 'stripformatter')
+    for path in sys.path[1:-1]:
+        if path == '' or not os.path.isdir(path):
+            continue
+        subprocess.check_output(['/usr/bin/sudo', 'cp', '-r', stripformatter_location, path])
+        shutil.copy(os.path.join(stripformatter_location, 'logging.ini'), '/etc/mock')
+        break
+
 
 if __name__ == '__main__':
     print("BUILDER: Starting script: build-rpm.py")
