@@ -8,8 +8,8 @@ class StripFormatter(Formatter):
         def format(self, *args, **kwargs):
                 fmt = super().format(*args, **kwargs)
 
-                if 'dnf.conf' in fmt:
-                  return '[SENSIBLE INFORMATION]'
+#                if 'dnf.conf' in fmt:
+#                  return '[SENSIBLE INFORMATION]'
 
                 return fmt
 
