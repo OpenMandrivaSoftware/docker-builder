@@ -98,8 +98,8 @@ def generate_config():
 
     print_conf("config_opts['root'] = '%s-%s'" % (platform_name, platform_arch))
     print_conf("config_opts['chroot_setup_cmd'] = ['--refresh', 'install', 'basesystem-build', 'dwz', 'magic-devel', '--forcearch=%s']" % platform_arch)
-# use dnf5 on cooker as a default package manager
-    if platform_name != "cooker":
+    # Keep using dnf4 on 6.0, everything else is moving on
+    if platform_name == "6.0":
         print_conf("config_opts['package_manager'] = 'dnf'")
     else:
         print_conf("config_opts['package_manager'] = 'dnf5'")
