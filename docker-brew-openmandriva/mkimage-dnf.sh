@@ -153,7 +153,7 @@ install_chroot(){
 		--releasever="${installversion}" \
 		--setopt=install_weak_deps=False \
 		--nodocs --assumeyes \
-		install basesystem-minimal openmandriva-repos dnf locales locales-en ${systemd}
+		install basesystem-minimal openmandriva-repos dnf dnf5 locales locales-en ${systemd}
 
 	if [ $? != 0 ]; then
 		printf '%s\n' "Creating dnf chroot failed."
