@@ -87,7 +87,7 @@ def generate_config():
             print_conf("config_opts['dnf_common_opts'] = ['--refresh', '--disableplugin=local', '--setopt=deltarpm=False', '--setopt=install_weak_deps=False', '--forcearch=%s']" % platform_arch)
             print_conf("config_opts['dnf5_common_opts'] = ['--refresh', '--setopt=deltarpm=False', '--setopt=install_weak_deps=False', '--no-gpgchecks']")
         else:
-            print_conf("config_opts['dnf_common_opts'] = ['-refresh', '--disableplugin=local', '--setopt=deltarpm=False', '--setopt=install_weak_deps=False', '--setopt=tsflags=nodocs', '--forcearch=%s']" % platform_arch)
+            print_conf("config_opts['dnf_common_opts'] = ['--refresh', '--disableplugin=local', '--setopt=deltarpm=False', '--setopt=install_weak_deps=False', '--setopt=tsflags=nodocs', '--forcearch=%s']" % platform_arch)
             print_conf("config_opts['dnf5_common_opts'] = ['--refresh', '--setopt=deltarpm=False', '--setopt=install_weak_deps=False', '--no-gpgchecks', '--no-docs' ]")
         print_conf("config_opts['dnf_builddep_opts'] = ['--refresh', '--forcearch=%s']" % platform_arch)
 
