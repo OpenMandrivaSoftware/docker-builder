@@ -97,7 +97,7 @@ def generate_config():
         print_conf("config_opts['legal_host_arches'] = ('i586', 'i686', 'x86_64')")
 
     print_conf("config_opts['root'] = '%s-%s'" % (platform_name, platform_arch))
-    print_conf("config_opts['chroot_setup_cmd'] = ['--refresh', 'install', 'basesystem-build', 'dwz', 'magic-devel', '--forcearch=%s']" % platform_arch)
+    print_conf("config_opts['chroot_setup_cmd'] = ['--refresh', 'install', 'basesystem-build', 'dnf', 'dwz', 'magic-devel', '--forcearch=%s']" % platform_arch)
     # Keep using dnf4 on 6.0, everything else is moving on
     if platform_name == "6.0":
         print_conf("config_opts['package_manager'] = 'dnf'")
