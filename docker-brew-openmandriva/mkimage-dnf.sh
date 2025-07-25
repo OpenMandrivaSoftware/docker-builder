@@ -16,27 +16,40 @@ EOF
 	exit 1
 }
 
-optTemp=$(getopt --options '+d,v:,m:,a:,s,b,U,p,h,+x' --longoptions 'rootfs:,version:,mirror:,arch:,with-systemd,with-builder,without-user,with-passwd,help,extra-package:' --name mkimage-dnf -- "$@")
+optTemp=$(getopt --options '+d,c:,P,v:,m:,a:,s,b,U,p,h,+x' --longoptions 'rootfs:,container-cmd:,publish,version:,mirror:,arch:,with-systemd,with-builder,without-user,with-passwd,help,extra-package:' --name mkimage-dnf -- "$@")
 eval set -- "$optTemp"
 unset optTemp
 
 extra_packages=""
 
 while true; do
-	case "$1" in
-	-d|--rootfs) rootfsdir=$2 ; shift 2 ;;
-	-v|--version) installversion="$2" ; shift 2 ;;
-	-m|--mirror) mirror="$2" ; shift 2 ;;
-	-a|--arch) arch="$2" ; shift 2 ;;
-	-s|--with-systemd) systemd=systemd ; shift ;;
-	-b|--with-builder) builder=true ; shift ;;
-	-p|--with-passwd) passwd=true ; shift ;;
-	-U|--without-user) without_user=true ; shift ;;
-	-h|--help) usage ;;
-	-x|--extra-package) extra_packages="$extra_packages $2" ; shift 2 ;;
-	--) shift ; break ;;
-	esac
+    case "$1" in
+        -c|--container-cmd) container_cmd="$2"; shift 2 ;;
+        -d|--rootfs) rootfsdir="$2"; shift 2 ;;
+        -v|--version) installversion="$2"; shift 2 ;;
+        -m|--mirror) mirror="$2"; shift 2 ;;
+        -a|--arch) arch="$2"; shift 2 ;;
+        -s|--with-systemd) systemd=systemd; shift ;;
+        -b|--with-builder) builder=true; shift ;;
+        -p|--with-passwd) passwd=true; shift ;;
+        -P|--publish) publish=true; shift ;;
+        -U|--without-user) without_user=true; shift ;;
+        -h|--help) usage ;;
+        -x|--extra-package) extra_packages="$extra_packages $2"; shift 2 ;;
+        --) shift; break ;;  # <-- This is KEY to stop the loop at end of options
+        *) echo "Unknown option: $1" ; exit 1 ;;
+    esac
 done
+
+if [ -z $container_cmd ]; then
+	printf '%s\n' "No container command specified, defaulting to docker."
+	container_cmd="docker"
+fi
+
+if [ -z $rootfsdir ]; then
+	printf '%s\n' "No root filesystem directory specified, defaulting to /tmp."
+	rootfsdir="/tmp"
+fi
 
 errorCatch() {
 	printf '%s\n' "Error caught. Exiting"
@@ -46,20 +59,22 @@ errorCatch() {
 
 trap errorCatch ERR SIGHUP SIGINT SIGTERM
 
-[ ! -S /var/run/docker.sock ] && printf '%s\n' "The /var/run/docker.sock is missing. Check your docker installation and configuration. Exiting." && exit 1
+if [ ${container_cmd} == "docker" ]; then
+	[ ! -S /var/run/docker.sock ] && printf '%s\n' "The /var/run/docker.sock is missing. Check your docker installation and configuration. Exiting." && exit 1
+fi
 
-if [ -z $(command -v docker) ]; then
-	printf '%s\n' "Missing docker. Installing..."
+if [ -z $(command -v ${container_cmd}) ]; then
+	printf '%s\n' "Missing ${container_cmd}. Installing..."
 
 	dnf --refresh \
 	    --nogpgcheck \
 	    --setopt=install_weak_deps=False \
 	    --nodocs \
 	    --assumeyes \
-	    install docker
+	    install ${container_cmd}
 
 	if [ $? != 0 ]; then
-	    printf '%s\n' "Installing docker failed."
+	    printf '%s\n' "Installing ${container_cmd} failed."
 	    errorCatch
 	fi
 fi
@@ -80,7 +95,7 @@ if [ -z "${installversion}" ]; then
 fi
 
 [ -z "$arch" ] && arch="$(uname -m)"
-[ -z "$rootfsdir" ] && rootfsdir="$common_pwd/docker-brew-openmandriva/${installversion}"
+[ -z "$rootfsdir" ] && rootfsdir="$common_pwd/docker-brew-openmandriva/images"
 
 target="$(mktemp -d --tmpdir=$(realpath $(dirname $0)) $(basename $0).XXXXXX)"
 mkdir -m 755 "$target"/dev
@@ -233,20 +248,24 @@ fi
 cd "${target}"
 
 tar --numeric-owner -caf "${tarFile}" -c .
-[ "${rootfsdir}" = "$common_pwd/docker-brew-openmandriva/$installversion" ] || mv -f "${tarFile}" $common_pwd/docker-brew-openmandriva/$installversion/
-cd $common_pwd/docker-brew-openmandriva/$installversion/
-docker build --tag=openmandriva/$installversion:$arch --file Dockerfile .
+[ "${rootfsdir}" = "$common_pwd/docker-brew-openmandriva/images" ] || mv -f "${tarFile}" "$common_pwd/docker-brew-openmandriva/images/"
+cd $common_pwd/docker-brew-openmandriva/images/
+${container_cmd} build --tag=openmandriva/$installversion:$arch --build-arg INSTALL_VERSION=${installversion} --file Dockerfile .
 
-docker run -i -t --rm openmandriva/$installversion:$arch /bin/sh -c "printf '%s\n' success"
-docker push openmandriva/$installversion:$arch
+${container_cmd} run -i -t --rm openmandriva/$installversion:$arch /bin/sh -c "printf '%s\n' success"
 
-docker manifest rm openmandriva/$installversion:latest || :
-docker manifest create openmandriva/$installversion:latest \
-	openmandriva/$installversion:x86_64 \
-	openmandriva/$installversion:aarch64
-docker manifest annotate openmandriva/$installversion:latest openmandriva/$installversion:x86_64 --os linux --arch amd64
-docker manifest annotate openmandriva/$installversion:latest openmandriva/$installversion:aarch64 --os linux --arch arm64
-docker manifest push openmandriva/$installversion:latest
+if [ ! -z "${publish}" ]; then
+	printf '%s\n' "Publishing image, exiting."
+	${container_cmd} push openmandriva/$installversion:$arch
+
+	${container_cmd} manifest rm openmandriva/$installversion:latest || :
+	${container_cmd} manifest create openmandriva/$installversion:latest \
+		openmandriva/$installversion:x86_64 \
+		openmandriva/$installversion:aarch64
+	${container_cmd} manifest annotate openmandriva/$installversion:latest openmandriva/$installversion:x86_64 --os linux --arch amd64
+	${container_cmd} manifest annotate openmandriva/$installversion:latest openmandriva/$installversion:aarch64 --os linux --arch arm64
+	${container_cmd} manifest push openmandriva/$installversion:latest
+fi
 
 if [ ! -z "${builder}" ]; then
 	cd $common_pwd
@@ -255,18 +274,19 @@ if [ ! -z "${builder}" ]; then
 	elif [ "${arch}" = 'aarch64' ]; then
 		sed -i -e "s/ARCH_REL=.*/ARCH_REL=aarch64/g" Dockerfile.builder
 	fi
-	docker build --tag=openmandriva/builder:$arch --file Dockerfile.builder .
-	docker push openmandriva/builder:$arch
+	${container_cmd} build --tag=openmandriva/builder:$arch --file Dockerfile.builder .
+	${container_cmd} push openmandriva/builder:$arch
 	git checkout Dockerfile.builder
 
-	docker manifest rm openmandriva/builder:latest || :
-	docker manifest create openmandriva/builder:latest \
+	${container_cmd} manifest rm openmandriva/builder:latest || :
+	${container_cmd} manifest create openmandriva/builder:latest \
 		openmandriva/builder:x86_64 \
 		openmandriva/builder:aarch64
-	docker manifest annotate openmandriva/builder:latest openmandriva/builder:x86_64 --os linux --arch amd64
-	docker manifest annotate openmandriva/builder:latest openmandriva/builder:aarch64 --os linux --arch arm64
-	docker manifest push openmandriva/builder:latest
+	${container_cmd} manifest annotate openmandriva/builder:latest openmandriva/builder:x86_64 --os linux --arch amd64
+	${container_cmd} manifest annotate openmandriva/builder:latest openmandriva/builder:aarch64 --os linux --arch arm64
+	${container_cmd} manifest push openmandriva/builder:latest
 fi
 
 cd ..
 rm -rf "${target}"
+rm -rf "$common_pwd/docker-brew-openmandriva/images/rootfs-"${installversion}".tar.xz"
