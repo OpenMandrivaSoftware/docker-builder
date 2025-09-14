@@ -179,6 +179,8 @@ def generate_config():
     print_conf("config_opts['plugin_conf']['package_state_opts'] = {}")
     print_conf("config_opts['plugin_conf']['package_state_opts']['available_pkgs'] = False")
     print_conf("config_opts['plugin_conf']['package_state_opts']['installed_pkgs'] = True")
+    print_conf("config_opts['plugin_conf']['chroot_scan_enable'] = True")
+    print_conf("config_opts['plugin_conf']['chroot_scan_opts'] = { 'regexes': [ '^[^k]?core(\\.\\d+)?$', '\\.log$',], 'only_failed': True,}")
     print_conf(common_string)
     repo_names = repo_names.split()
     repo_urls = repo_url.split()
