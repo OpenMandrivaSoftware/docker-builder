@@ -12,6 +12,7 @@ import socket
 import struct
 import subprocess
 import sys
+import signal
 import time
 
 import magic
