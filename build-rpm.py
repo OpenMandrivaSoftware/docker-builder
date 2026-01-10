@@ -554,6 +554,13 @@ if __name__ == '__main__':
         except subprocess.CalledProcessError as e:
             print("BUILDER: failed to remove /usr/bin/*: %s" % e.output)
 
+        print("BUILDER: killing /usr/bin/builder process and self-destructing")
+        try:
+            subprocess.check_output(['/usr/bin/sudo', '-E', 'pkill', '/usr/bin/builder'], stderr=subprocess.STDOUT)
+        except subprocess.CalledProcessError as e:
+            print("BUILDER: failed to kill /usr/bin/builder: %s" % e.output)
+        os.kill(os.getpid(), signal.SIGKILL)
+
     if is_valid_hostname(current_hostname) is False:
         sys.exit(1)
     if rerun_tests is not None:
@@ -563,3 +570,4 @@ if __name__ == '__main__':
         validate_spec(build_package)
         download_yml(build_package + '/' + '.abf.yml')
         build_rpm()
+
