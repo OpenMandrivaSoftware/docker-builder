@@ -125,7 +125,8 @@ def generate_config():
     # gcc can take even longer when building all combinations of crosscompilers
     # and offload targets.
     # ggml can take forever because of PGO
-    if os.getenv('PACKAGE') and os.getenv('PACKAGE').startswith(('gcc', 'chromium', 'helium', 'cromite', 'llvm', 'nodejs', 'qt6-qtwebengine', 'rust', 'ggml')):
+    # kernel can take forever because of multiple flavors
+    if os.getenv('PACKAGE') and os.getenv('PACKAGE').startswith(('gcc', 'chromium', 'helium', 'cromite', 'llvm', 'nodejs', 'qt6-qtwebengine', 'rust', 'ggml', 'kernel')):
         print_conf("config_opts['rpmbuild_timeout'] = 144000")
     else:
         print_conf("config_opts['rpmbuild_timeout'] = 36000")
