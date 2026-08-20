@@ -126,7 +126,7 @@ def generate_config():
     # and offload targets.
     # ggml can take forever because of PGO
     # kernel can take forever because of multiple flavors
-    if os.getenv('PACKAGE') and os.getenv('PACKAGE').startswith(('gcc', 'chromium', 'helium', 'cromite', 'llvm', 'nodejs', 'qt6-qtwebengine', 'rust', 'ggml', 'kernel')):
+    if os.getenv('PACKAGE') and os.getenv('PACKAGE').startswith(('gcc', 'chromium', 'helium', 'cromite', 'llvm', 'nodejs', 'qt6-qtwebengine', 'rust', 'ggml', 'kernel', 'hipblaslt')):
         print_conf("config_opts['rpmbuild_timeout'] = 144000")
     else:
         print_conf("config_opts['rpmbuild_timeout'] = 36000")
@@ -151,7 +151,7 @@ def generate_config():
     # because it's simply inefficient code), require LOADS of space for
     # the BUILD and BUILDROOT directories - causing them to fail even
     # on a rather generous tmpfs
-    huge_packages = ['gcc', 'llvm', 'glibc', 'chromium', 'helium', 'cromite', 'qt6-qtwebengine', 'rust']
+    huge_packages = ['gcc', 'llvm', 'glibc', 'chromium', 'helium', 'cromite', 'qt6-qtwebengine', 'rust', 'hipblaslt']
     # enable tmpfs for builder with 64gb+
     # only if save_buildroot is false and the package isn't blacklisted
     if save_buildroot != 'true' and not os.getenv('PACKAGE') in huge_packages:
