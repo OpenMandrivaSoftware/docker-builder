@@ -126,7 +126,7 @@ def generate_config():
     # and offload targets.
     # ggml can take forever because of PGO
     # kernel can take forever because of multiple flavors
-    if os.getenv('PACKAGE') and os.getenv('PACKAGE').startswith(('gcc', 'chromium', 'helium', 'cromite', 'llvm', 'nodejs', 'qt6-qtwebengine', 'rust', 'ggml', 'kernel', 'hipblaslt', 'python-torch')):
+    if os.getenv('PACKAGE') and os.getenv('PACKAGE').startswith(('gcc', 'chromium', 'helium', 'cromite', 'llvm', 'nodejs', 'qt6-qtwebengine', 'rust', 'ggml', 'kernel', 'hipblaslt', 'python-torch', 'python-xformers')):
         print_conf("config_opts['rpmbuild_timeout'] = 144000")
     else:
         print_conf("config_opts['rpmbuild_timeout'] = 36000")
