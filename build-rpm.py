@@ -283,24 +283,161 @@ def container_data():
         json.dump(multikeys, out_json, sort_keys=True, separators=(',', ':'))
 
 
-def extra_tests(only_rpms):
-    # here only rpm packages, not debuginfo or debugsource
-    skip_debuginfo = [s for s in only_rpms if "debuginfo" not in s and "debugsource" not in s and "src.rpm" not in s]
-    # check_package
+# Sides that file-conflict on purpose. Each entry is (side_a, side_b);
+# a side lists our package names and/or the repo packages they pull.
+# Extra tests still install each side; just not in the same dnf transaction.
+# Add new known cases here.
+EXCLUSIVE_SIDES = (
+    (frozenset(('nginx', 'php-nginx')),
+     frozenset(('apache-base', 'apache-mod_php'))),
+    (frozenset(('wordpress-nginx',)),
+     frozenset(('wordpress-apache',))),
+    (frozenset(('llvm-libgomp',)),
+     frozenset(('gcc-libgomp',))),
+)
+
+CONFLICT_RES = (
+    re.compile(r'conflicts between attempted installs of (\S+) and (\S+)'),
+    re.compile(r'from install of (\S+) conflicts with file from package (\S+)'),
+    re.compile(r'package (\S+) conflicts with (\S+)'),
+)
+
+
+def nevra_name(nevra):
+    """Best-effort %{NAME} from a dnf NEVRA token (epoch:name-ver-rel.arch)."""
+    token = nevra.strip().rstrip(',')
+    if not token:
+        return token
+    if ':' in token.split('-', 1)[0]:
+        token = token.split(':', 1)[1]
+    if token.endswith('.rpm'):
+        token = token[:-4]
+    noarch = token.rsplit('.', 1)[0]
+    m = re.match(r'(.+)-[^-]+-[^-]+$', noarch)
+    return m.group(1) if m else noarch
+
+
+def parse_install_conflicts(log_path):
+    """Return set of frozensets of conflicting %{NAME}s from a mock/dnf log."""
+    pairs = set()
     try:
-        print("BUILDER: test installing %s" % list(only_rpms))
-        subprocess.check_call([mock_binary, '--init', '--quiet', '--configdir', mock_config, '--install'] + list(skip_debuginfo))
-        shutil.copy('/var/lib/mock/{}-{}/result/root.log'.format(platform_name, platform_arch), logfile)
-        print("BUILDER: all tested packages successfully installed")
+        with open(log_path, 'r', errors='replace') as fh:
+            text = fh.read()
+    except IOError:
+        return pairs
+    for cre in CONFLICT_RES:
+        for a, b in cre.findall(text):
+            na, nb = nevra_name(a), nevra_name(b)
+            if na and nb and na != nb:
+                pairs.add(frozenset((na, nb)))
+    return pairs
+
+
+def rpm_require_names(hdr):
+    reqs = hdr[rpm.RPMTAG_REQUIRENAME] or []
+    return set(reqs)
+
+
+def pkgs_related_to(rpm_paths, ts, target_names):
+    """Our RPM paths whose name is in target_names, or that Require one of them."""
+    related = []
+    for path in rpm_paths:
+        hdr = readRpmHeader(ts, path)
+        name = hdr['name']
+        if name in target_names:
+            related.append(path)
+            continue
+        if rpm_require_names(hdr) & target_names:
+            related.append(path)
+    return related
+
+
+def mock_root_log():
+    return '/var/lib/mock/{}-{}/result/root.log'.format(platform_name, platform_arch)
+
+
+def extra_test_install(rpm_paths, allow_erasing=False):
+    """Fresh mock --init, then install rpm_paths. Returns after copying root.log."""
+    print_log("BUILDER: extra tests install (%d pkgs%s)" % (
+        len(rpm_paths), ', --allowerasing' if allow_erasing else ''))
+    subprocess.check_call([mock_binary, '--init', '--quiet', '--configdir', mock_config])
+    if allow_erasing:
+        cmd = [mock_binary, '--configdir', mock_config, '--dnf-cmd',
+               'install', '-y', '--allowerasing'] + list(rpm_paths)
+    else:
+        cmd = [mock_binary, '--quiet', '--configdir', mock_config, '--install'] + list(rpm_paths)
+    try:
+        subprocess.check_call(cmd)
+        shutil.copy(mock_root_log(), logfile)
+        return True
     except subprocess.CalledProcessError as cpe:
         print("BUILDER: %s failed with exit status %u" % (cpe.cmd, cpe.returncode))
         print("BUILDER: Extra tests stderr: %s" % (cpe.stderr))
-        shutil.copy('/var/lib/mock/{}-{}/result/root.log'.format(platform_name, platform_arch), logfile)
-        # tests failed
-        sys.exit(5)
+        try:
+            shutil.copy(mock_root_log(), logfile)
+        except IOError:
+            pass
+        return False
+
+
+def extra_tests(only_rpms):
+    # here only rpm packages, not debuginfo or debugsource
+    skip_debuginfo = [s for s in only_rpms if "debuginfo" not in s and "debugsource" not in s and "src.rpm" not in s]
+    rpm_ts = rpm.TransactionSet()
+    our_names = set()
+    for path in skip_debuginfo:
+        our_names.add(readRpmHeader(rpm_ts, path)['name'])
+
+    print("BUILDER: test installing %s" % list(skip_debuginfo))
+    if extra_test_install(skip_debuginfo):
+        print("BUILDER: all tested packages successfully installed")
+    else:
+        conflicts = parse_install_conflicts(logfile)
+        involved = set().union(*conflicts) if conflicts else set()
+        print_log("BUILDER: extra tests install conflict(s): %s" % (
+            [sorted(p) for p in conflicts] if conflicts else 'unparsed'))
+        universe = involved | our_names
+        known = []
+        for side_a, side_b in EXCLUSIVE_SIDES:
+            if (side_a & universe) and (side_b & universe):
+                known.append((side_a, side_b))
+            elif not conflicts and ((side_a & our_names) or (side_b & our_names)):
+                # dnf did not spell the pair, but this build ships one side
+                known.append((side_a, side_b))
+        if not known:
+            print_log("BUILDER: extra tests failed with an unknown install conflict")
+            sys.exit(5)
+
+        # Split so the two sides of each known pair never share a transaction.
+        sets = [list(skip_debuginfo)]
+        for side_a, side_b in known:
+            print_log("BUILDER: extra tests: known exclusive pair %s vs %s, installing sides separately" %
+                      (sorted(side_a), sorted(side_b)))
+            next_sets = []
+            for s in sets:
+                rel_a = set(pkgs_related_to(s, rpm_ts, side_a))
+                rel_b = set(pkgs_related_to(s, rpm_ts, side_b))
+                if rel_a and rel_b:
+                    next_sets.append([p for p in s if p not in rel_b])
+                    next_sets.append([p for p in s if p not in rel_a])
+                else:
+                    next_sets.append(s)
+            sets = next_sets
+
+        for s in sets:
+            names_in_set = set(readRpmHeader(rpm_ts, p)['name'] for p in s)
+            # Peer lives in the chroot/repo, not in this build (llvm-libgomp vs gcc-libgomp)
+            allow = False
+            for side_a, side_b in known:
+                if ((side_a & names_in_set) and (side_b - our_names)) or \
+                   ((side_b & names_in_set) and (side_a - our_names)):
+                    allow = True
+            if not extra_test_install(s, allow_erasing=allow):
+                print_log("BUILDER: extra tests failed even after splitting exclusive packages")
+                sys.exit(5)
+        print("BUILDER: all tested packages successfully installed (exclusive pairs split)")
     # stage2
     # check versions
-    rpm_ts = rpm.TransactionSet()
     try:
         for pkg in skip_debuginfo:
             rpm_hdr = readRpmHeader(rpm_ts, pkg)
