@@ -184,6 +184,20 @@ def generate_config():
     repo_urls = repo_url.split()
     repo_conf = dict(zip(repo_names, repo_urls))
     print_conf("\n".join("[{}]\nname={}\nbaseurl={}{}\ngpgcheck=0\nenabled=1\n".format(k, k, k[:0], v) for k, v in repo_conf.items()))
+    # Temporary Python 3.15 bootstrap. basesystem-build requires rpmlint, and
+    # rpmlint 2.10.0-1 needs python(abi) = 3.14. Dummy rpmlint 2.10.0-2 is
+    # published for znver1 only until the other arches rebuild it. Builders
+    # that can reach this LAN repo use the dummy; everyone else skips it.
+    # Remove this once rpmlint 2.10.0-2 is in every cooker arch repository.
+    try:
+        import urllib.request
+        probe = urllib.request.urlopen(
+            "http://10.64.65.50:8765/repodata/repomd.xml", timeout=2)
+        probe.close()
+    except Exception:
+        pass
+    else:
+        print_conf("[py315_dummy]\nname=py315_dummy\nbaseurl=http://10.64.65.50:8765\ngpgcheck=0\nenabled=1\nmetadata_expire=0\n")
     print_conf('"""')
     # it's a hack to modify time of /etc/mock/default.cfg
     # to prevent root cache recreation
